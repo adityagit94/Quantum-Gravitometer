@@ -1,0 +1,27 @@
+output:
+  runs_dir: runs
+  name: real_ifo_template
+
+bench:
+  type: real
+
+bench_real_ifo:
+  csv_path: data/raw/real_ifo_template.csv
+  delimiter: ","
+  has_header: true
+  wavelength_m: 1.55e-6
+  # sample_rate_hz is optional when the CSV contains a `t` column.
+  # sample_rate_hz: 1000
+
+algorithms:
+  improved:
+    offset_tracking_alpha: 0.01
+    phase_smooth_window: 21
+
+stats:
+  psd_method: welch
+  welch_nperseg: 256
+  welch_noverlap: 128
+  metrics_backend: allantools
+  allan_data_type: freq
+  compare_allan_backends: true
