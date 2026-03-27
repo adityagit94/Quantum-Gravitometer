@@ -1,0 +1,58 @@
+output:
+  runs_dir: runs
+  name: example_aisim_phase_scan
+
+bench:
+  type: virtual
+
+bench_virtual_ifo:
+  wavelength_m: 1.55e-6
+  sample_rate_hz: 2000
+  duration_s: 5.0
+  displacement_sines:
+    - amplitude_m: 4.0e-9
+      freq_hz: 3.0
+      phase_rad: 0.0
+    - amplitude_m: 2.0e-9
+      freq_hz: 21.0
+      phase_rad: 1.2
+  measurement_noise_std: 0.03
+  amplitude: 1.0
+  dc_offset: 0.2
+  offset_drift_std_per_s: 0.04
+  amplitude_drift_std_per_s: 0.01
+  seed: 7
+
+algorithms:
+  improved:
+    offset_tracking_alpha: 0.003
+    phase_smooth_window: 21
+
+stats:
+  metrics_backend: auto
+  allan_data_type: freq
+  psd_method: welch
+  welch_nperseg: 512
+  welch_noverlap: 256
+  compare_allan_backends: true
+  comparison_backend: custom
+
+simulation:
+  enabled: true
+  backend: aisim
+  model: mach_zehnder_phase_scan
+  n_atoms: 600
+  seed: 1
+  tau_pi_half_s: 2.3e-5
+  interferometer_time_s: 2.60e-1
+  n_phase_points: 61
+  phase_min_rad: 0.0
+  phase_max_rad: 6.283185307179586
+  detector_time_s: 7.78e-1
+  detector_radius_m: 5.0e-3
+  beam_radius_m: 1.475e-2
+  center_rabi_freq_hz: 12500
+  wavelength_m: 7.8e-7
+  cloud_radius_m: 3.0e-3
+  temp_xy_K: 2.5e-6
+  temp_z_K: 1.0e-7

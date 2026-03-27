@@ -1,0 +1,23 @@
+output:
+  runs_dir: runs
+  name: example_real_gravity
+
+bench:
+  type: real_gravity
+
+bench_real_gravity:
+  source_path: data/raw/sg_sample
+  station_code: ap046
+  segment_strategy: longest_contiguous
+
+stats:
+  metrics_backend: auto
+  allan_data_type: freq
+  psd_method: welch
+  welch_nperseg: 128
+  welch_noverlap: 64
+  compare_allan_backends: true
+  comparison_backend: custom
+
+simulation:
+  enabled: false

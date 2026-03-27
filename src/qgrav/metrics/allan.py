@@ -1,0 +1,174 @@
+from __future__ import annotations
+
+from functools import lru_cache
+import logging
+from typing import Literal
+
+import numpy as np
+
+AllanBackend = Literal["auto", "custom", "allantools"]
+AllanDataType = Literal["freq", "phase"]
+
+logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=1)
+def _import_allantools_module():
+    """Import AllanTools.
+
+    In this repository a vendored copy is installed as a top-level ``allantools`` package,
+    so this works offline in editable installs while remaining compatible with an external
+    AllanTools installation.
+    """
+    try:
+        import allantools as at  # type: ignore
+        return at
+    except Exception:
+        logger.exception("Failed to import AllanTools")
+        return None
+
+
+def available_allan_backends() -> list[str]:
+    backends = ["custom"]
+    if _import_allantools_module() is not None:
+        backends.append("allantools")
+    return backends
+
+
+def _validate_inputs(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -> tuple[np.ndarray, float, np.ndarray]:
+    x = np.asarray(x, dtype=np.float64)
+    if x.ndim != 1:
+        raise ValueError("Allan deviation input must be 1D.")
+    n = len(x)
+    if n < 10:
+        raise ValueError("Need at least 10 samples.")
+    if float(sample_rate_hz) <= 0:
+        raise ValueError("sample_rate_hz must be positive.")
+
+    taus_s = np.asarray(taus_s, dtype=np.float64)
+    if taus_s.ndim != 1 or len(taus_s) == 0:
+        raise ValueError("taus_s must be a non-empty 1D array.")
+    if not np.all(np.isfinite(taus_s)) or np.any(taus_s <= 0):
+        raise ValueError("taus_s must contain only positive finite values.")
+    return x, float(sample_rate_hz), taus_s
+
+
+def _custom_oadev_freq(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -> dict[str, np.ndarray]:
+    """Custom overlapping Allan deviation for directly sampled measurement values.
+
+    This matches AllanTools ``oadev(..., data_type='freq')``. In AllanTools terminology,
+    ``freq`` means the sampled series represents the measured quantity directly (for this
+    project: displacement estimates), not literal oscillator frequency.
+    """
+    tau0 = 1.0 / sample_rate_hz
+    ms = np.maximum(1, np.rint(taus_s / tau0).astype(int))
+    taus_actual: list[float] = []
+    adev: list[float] = []
+
+    csum = np.concatenate([[0.0], np.cumsum(x, dtype=np.float64)])
+    n = len(x)
+    for m in ms:
+        if 2 * m > n:
+            continue
+        # Overlapping block means, length n-m+1
+        means = (csum[m:] - csum[:-m]) / float(m)
+        diffs = means[m:] - means[:-m]
+        if len(diffs) == 0:
+            continue
+        taus_actual.append(m * tau0)
+        adev.append(float(np.sqrt(0.5 * np.mean(diffs**2))))
+
+    return {"taus_s": np.asarray(taus_actual, dtype=np.float64), "adev": np.asarray(adev, dtype=np.float64)}
+
+
+def _custom_oadev_phase(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -> dict[str, np.ndarray]:
+    """Custom overlapping Allan deviation for phase-like time-series data.
+
+    This matches AllanTools ``oadev(..., data_type='phase')``.
+    """
+    tau0 = 1.0 / sample_rate_hz
+    ms = np.maximum(1, np.rint(taus_s / tau0).astype(int))
+    taus_actual: list[float] = []
+    adev: list[float] = []
+
+    n = len(x)
+    for m in ms:
+        if 2 * m >= n:
+            continue
+        d2 = x[2 * m:] - 2.0 * x[m:-m] + x[:-2 * m]
+        if len(d2) == 0:
+            continue
+        taus_actual.append(m * tau0)
+        adev.append(float(np.sqrt(np.mean(d2**2) / (2.0 * (m * tau0) ** 2))))
+
+    return {"taus_s": np.asarray(taus_actual, dtype=np.float64), "adev": np.asarray(adev, dtype=np.float64)}
+
+
+def _resolve_backend(backend: AllanBackend) -> str:
+    backend = str(backend).strip().lower()  # type: ignore[assignment]
+    if backend not in {"auto", "custom", "allantools"}:
+        raise ValueError("backend must be one of: auto, custom, allantools.")
+    if backend == "auto":
+        return "allantools" if _import_allantools_module() is not None else "custom"
+    if backend == "allantools" and _import_allantools_module() is None:
+        raise RuntimeError(
+            "AllanTools backend requested but unavailable. Install AllanTools or use the vendored copy with SciPy installed."
+        )
+    return backend
+
+
+def allan_deviation_overlapping(
+    x: np.ndarray,
+    sample_rate_hz: float,
+    taus_s: np.ndarray,
+    *,
+    backend: AllanBackend = "auto",
+    data_type: AllanDataType = "freq",
+) -> dict[str, np.ndarray | str]:
+    """Compute overlapping Allan deviation using the requested backend.
+
+    Parameters
+    ----------
+    x:
+        Input 1D time series.
+    sample_rate_hz:
+        Sampling rate in Hz.
+    taus_s:
+        Array of tau values in seconds.
+    backend:
+        ``auto`` (prefer AllanTools if available), ``custom``, or ``allantools``.
+    data_type:
+        AllanTools-style data interpretation:
+        - ``freq`` for directly sampled measurement values (recommended for this project)
+        - ``phase`` for phase-like integrated series
+    """
+    x, sample_rate_hz, taus_s = _validate_inputs(x, sample_rate_hz, taus_s)
+    data_type = str(data_type).strip().lower()  # type: ignore[assignment]
+    if data_type not in {"freq", "phase"}:
+        raise ValueError("data_type must be either 'freq' or 'phase'.")
+
+    resolved_backend = _resolve_backend(backend)
+    if resolved_backend == "allantools":
+        at = _import_allantools_module()
+        if at is None:  # pragma: no cover - guarded above
+            raise RuntimeError("AllanTools import unexpectedly failed.")
+        taus2, ad, _, _ = at.oadev(x, rate=sample_rate_hz, data_type=data_type, taus=taus_s)
+        taus2 = np.asarray(taus2, dtype=np.float64)
+        ad = np.asarray(ad, dtype=np.float64)
+        valid = np.isfinite(taus2) & np.isfinite(ad)
+        return {
+            "taus_s": taus2[valid],
+            "adev": ad[valid],
+            "backend": resolved_backend,
+            "data_type": data_type,
+        }
+
+    if data_type == "phase":
+        out = _custom_oadev_phase(x, sample_rate_hz, taus_s)
+    else:
+        out = _custom_oadev_freq(x, sample_rate_hz, taus_s)
+    return {
+        **out,
+        "backend": resolved_backend,
+        "data_type": data_type,
+    }

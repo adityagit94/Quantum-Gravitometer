@@ -1,0 +1,26 @@
+output:
+  runs_dir: runs
+  name: my_real_gravity_run
+
+bench:
+  type: real_gravity
+
+bench_real_gravity:
+  # Can be a directory of .ggp files, a .zip archive of .ggp files, a single .ggp file, or a converted CSV.
+  source_path: /absolute/path/to/Global superconducting gravimeter observation residual dataset.zip
+  station_code: ap046
+  segment_strategy: longest_contiguous
+  # metadata_path is optional when SG station.txt sits next to the data or inside the zip.
+  # metadata_path: /absolute/path/to/SG station.txt
+
+stats:
+  metrics_backend: auto
+  allan_data_type: freq
+  psd_method: welch
+  welch_nperseg: 256
+  welch_noverlap: 128
+  compare_allan_backends: true
+  comparison_backend: custom
+
+simulation:
+  enabled: false
