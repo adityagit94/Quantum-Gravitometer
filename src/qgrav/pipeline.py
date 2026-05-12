@@ -301,12 +301,31 @@ def _make_ifo_plots(
     adev_i: dict[str, Any],
     have_simulation: bool,
 ) -> dict[str, Any]:
-    plt.figure(); plt.plot(t, I, label="I_meas"); plt.plot(t, Q, label="Q_meas"); plt.xlabel("time (s)"); plt.ylabel("channel (a.u.)"); plt.legend(); raw_path = paths.plots_dir / "raw_channels.png"; plt.tight_layout(); plt.savefig(raw_path, dpi=160); plt.close()
-    plt.figure();
+    plt.figure()
+    plt.plot(t, I, label="I_meas")
+    plt.plot(t, Q, label="Q_meas")
+    plt.xlabel("time (s)")
+    plt.ylabel("channel (a.u.)")
+    plt.legend()
+    raw_path = paths.plots_dir / "raw_channels.png"
+    plt.tight_layout()
+    plt.savefig(raw_path, dpi=160)
+    plt.close()
+
+    plt.figure()
     if x_true is not None:
         plt.plot(t, x_true, label="x_true")
-    plt.plot(t, x_b, label="x_hat_baseline", alpha=0.85); plt.plot(t, x_i, label="x_hat_improved", alpha=0.85); plt.xlabel("time (s)"); plt.ylabel("displacement (m)"); plt.legend(); disp_path = paths.plots_dir / "displacement.png"; plt.tight_layout(); plt.savefig(disp_path, dpi=160); plt.close()
-    plt.figure();
+    plt.plot(t, x_b, label="x_hat_baseline", alpha=0.85)
+    plt.plot(t, x_i, label="x_hat_improved", alpha=0.85)
+    plt.xlabel("time (s)")
+    plt.ylabel("displacement (m)")
+    plt.legend()
+    disp_path = paths.plots_dir / "displacement.png"
+    plt.tight_layout()
+    plt.savefig(disp_path, dpi=160)
+    plt.close()
+
+    plt.figure()
     if x_true is not None:
         psd_true = compute_psd(x_true, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
         plt.loglog(psd_true["f_hz"][1:], psd_true["psd"][1:], label="PSD truth")
@@ -314,18 +333,41 @@ def _make_ifo_plots(
     psd_i = compute_psd(x_i, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
     plt.loglog(psd_b["f_hz"][1:], psd_b["psd"][1:], label="PSD baseline", alpha=0.85)
     plt.loglog(psd_i["f_hz"][1:], psd_i["psd"][1:], label="PSD improved", alpha=0.85)
-    plt.xlabel("frequency (Hz)"); plt.ylabel("PSD (m^2/Hz)"); plt.legend(); psd_path = paths.plots_dir / "psd.png"; plt.tight_layout(); plt.savefig(psd_path, dpi=160); plt.close()
-    plt.figure();
+    plt.xlabel("frequency (Hz)")
+    plt.ylabel("PSD (m^2/Hz)")
+    plt.legend()
+    psd_path = paths.plots_dir / "psd.png"
+    plt.tight_layout()
+    plt.savefig(psd_path, dpi=160)
+    plt.close()
+
+    plt.figure()
     if adev_true is not None and len(np.asarray(adev_true["adev"])):
         plt.loglog(np.asarray(adev_true["taus_s"]), np.asarray(adev_true["adev"]), label="ADEV truth")
     if len(np.asarray(adev_b["adev"])):
         plt.loglog(np.asarray(adev_b["taus_s"]), np.asarray(adev_b["adev"]), label="ADEV baseline", alpha=0.85)
     if len(np.asarray(adev_i["adev"])):
         plt.loglog(np.asarray(adev_i["taus_s"]), np.asarray(adev_i["adev"]), label="ADEV improved", alpha=0.85)
-    plt.xlabel("tau (s)"); plt.ylabel("Allan deviation"); plt.legend(); allan_path = paths.plots_dir / "allan.png"; plt.tight_layout(); plt.savefig(allan_path, dpi=160); plt.close()
+    plt.xlabel("tau (s)")
+    plt.ylabel("Allan deviation")
+    plt.legend()
+    allan_path = paths.plots_dir / "allan.png"
+    plt.tight_layout()
+    plt.savefig(allan_path, dpi=160)
+    plt.close()
+
     err_path = None
     if x_true is not None:
-        plt.figure(); plt.hist(x_b - x_true, bins=40, alpha=0.7, label="baseline error"); plt.hist(x_i - x_true, bins=40, alpha=0.7, label="improved error"); plt.xlabel("error (m)"); plt.ylabel("count"); plt.legend(); err_path = paths.plots_dir / "error_hist.png"; plt.tight_layout(); plt.savefig(err_path, dpi=160); plt.close()
+        plt.figure()
+        plt.hist(x_b - x_true, bins=40, alpha=0.7, label="baseline error")
+        plt.hist(x_i - x_true, bins=40, alpha=0.7, label="improved error")
+        plt.xlabel("error (m)")
+        plt.ylabel("count")
+        plt.legend()
+        err_path = paths.plots_dir / "error_hist.png"
+        plt.tight_layout()
+        plt.savefig(err_path, dpi=160)
+        plt.close()
     sim_plots = _make_simulation_plots(paths, {"simulation": metrics.get("simulation")}) if have_simulation else []
     return {
         "raw": str(raw_path.relative_to(paths.run_dir)),
@@ -351,11 +393,46 @@ def _make_real_gravity_plots(
     adev: dict[str, Any],
     have_simulation: bool,
 ) -> dict[str, Any]:
-    plt.figure(figsize=(10, 4.6)); plt.plot(t_full / 86400.0, x_full, linewidth=0.8); plt.xlabel("days from record start"); plt.ylabel("gravity residual"); plt.title("Gravity residual time series"); raw_path = paths.plots_dir / "gravity_series.png"; plt.tight_layout(); plt.savefig(raw_path, dpi=160); plt.close()
-    plt.figure(figsize=(10, 4.6)); plt.hist(x, bins=50, alpha=0.85); plt.xlabel("gravity residual"); plt.ylabel("count"); plt.title("Gravity residual histogram (analysis segment)"); hist_path = paths.plots_dir / "gravity_hist.png"; plt.tight_layout(); plt.savefig(hist_path, dpi=160); plt.close()
+    plt.figure(figsize=(10, 4.6))
+    plt.plot(t_full / 86400.0, x_full, linewidth=0.8)
+    plt.xlabel("days from record start")
+    plt.ylabel("gravity residual")
+    plt.title("Gravity residual time series")
+    raw_path = paths.plots_dir / "gravity_series.png"
+    plt.tight_layout()
+    plt.savefig(raw_path, dpi=160)
+    plt.close()
+
+    plt.figure(figsize=(10, 4.6))
+    plt.hist(x, bins=50, alpha=0.85)
+    plt.xlabel("gravity residual")
+    plt.ylabel("count")
+    plt.title("Gravity residual histogram (analysis segment)")
+    hist_path = paths.plots_dir / "gravity_hist.png"
+    plt.tight_layout()
+    plt.savefig(hist_path, dpi=160)
+    plt.close()
+
     psd = compute_psd(x, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
-    plt.figure(figsize=(10, 4.6)); plt.loglog(psd["f_hz"][1:], psd["psd"][1:]); plt.xlabel("frequency (Hz)"); plt.ylabel("PSD"); plt.title("Gravity residual PSD"); psd_path = paths.plots_dir / "gravity_psd.png"; plt.tight_layout(); plt.savefig(psd_path, dpi=160); plt.close()
-    plt.figure(figsize=(10, 4.6)); plt.loglog(np.asarray(adev["taus_s"]), np.asarray(adev["adev"])); plt.xlabel("tau (s)"); plt.ylabel("Allan deviation"); plt.title("Gravity residual Allan deviation"); allan_path = paths.plots_dir / "gravity_allan.png"; plt.tight_layout(); plt.savefig(allan_path, dpi=160); plt.close()
+    plt.figure(figsize=(10, 4.6))
+    plt.loglog(psd["f_hz"][1:], psd["psd"][1:])
+    plt.xlabel("frequency (Hz)")
+    plt.ylabel("PSD")
+    plt.title("Gravity residual PSD")
+    psd_path = paths.plots_dir / "gravity_psd.png"
+    plt.tight_layout()
+    plt.savefig(psd_path, dpi=160)
+    plt.close()
+
+    plt.figure(figsize=(10, 4.6))
+    plt.loglog(np.asarray(adev["taus_s"]), np.asarray(adev["adev"]))
+    plt.xlabel("tau (s)")
+    plt.ylabel("Allan deviation")
+    plt.title("Gravity residual Allan deviation")
+    allan_path = paths.plots_dir / "gravity_allan.png"
+    plt.tight_layout()
+    plt.savefig(allan_path, dpi=160)
+    plt.close()
     sim_plots = _make_simulation_plots(paths, {"simulation": metrics.get("simulation")}) if have_simulation else []
     return {
         "raw": str(raw_path.relative_to(paths.run_dir)),
