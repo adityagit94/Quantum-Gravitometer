@@ -101,7 +101,7 @@ class QGravApp:
         self._browser_data: dict[str, Any] | None = None
         self._run_in_progress = False
         self._last_temp_config_path: Path | None = None
-        self._temp_config_paths: list = []
+        self._temp_config_paths: list[Path] = []
 
         self._configure_style()
         self._build()

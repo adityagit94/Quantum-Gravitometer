@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,8 @@ import numpy as np
 
 from qgrav.metrics import compute_psd
 from qgrav.metrics.allan import identify_noise_type
+
+logger = logging.getLogger(__name__)
 
 
 def _annotate_noise_type(ax: Any, taus: np.ndarray, adev: np.ndarray) -> None:
@@ -33,7 +36,7 @@ def _annotate_noise_type(ax: Any, taus: np.ndarray, adev: np.ndarray) -> None:
                 va="bottom",
             )
     except Exception:
-        pass
+        logger.debug("Noise type annotation failed", exc_info=True)
 
 
 def load_run_bundle(run_dir: Path) -> dict[str, Any]:

@@ -111,4 +111,24 @@ def test_match_taus_with_float_perturbation():
     assert len(i1) == 4
     assert len(i2) == 4
     np.testing.assert_array_equal(i1, [0, 1, 2, 3])
-    np.testing.assert_array_equal(i2, [0, 1, 2, 3])
+    np.testing.assert_array_equal(sorted(i2), [0, 1, 2, 3])
+
+
+def test_match_taus_no_duplicate_targets():
+    """Each taus2 element should be matched at most once."""
+    from qgrav.pipeline import _match_taus
+    t1 = np.array([1.0, 1.0 + 1e-15])  # two nearly identical source values
+    t2 = np.array([1.0])  # one target
+    i1, i2 = _match_taus(t1, t2)
+    # Only one of t1[0] or t1[1] should match t2[0], not both
+    assert len(i1) == 1
+    assert len(i2) == 1
+    assert i2[0] == 0
+
+
+def test_match_taus_empty():
+    from qgrav.pipeline import _match_taus
+    i1, i2 = _match_taus(np.array([]), np.array([1.0]))
+    assert len(i1) == 0
+    i1, i2 = _match_taus(np.array([1.0]), np.array([]))
+    assert len(i1) == 0

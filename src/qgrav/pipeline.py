@@ -90,14 +90,38 @@ def _match_taus(taus1: np.ndarray, taus2: np.ndarray, rtol: float = 1e-9):
     """Match tau values between two arrays using relative tolerance.
 
     Returns (indices_in_taus1, indices_in_taus2) for matched pairs.
+    Each element in taus2 is matched at most once (first-come-first-served).
+    Uses sorted search for O(n log n) performance.
     """
+    taus1 = np.asarray(taus1, dtype=np.float64)
+    taus2 = np.asarray(taus2, dtype=np.float64)
+    if len(taus1) == 0 or len(taus2) == 0:
+        return np.array([], dtype=int), np.array([], dtype=int)
+
+    order2 = np.argsort(taus2)
+    sorted2 = taus2[order2]
+    used = np.zeros(len(taus2), dtype=bool)
     idx1, idx2 = [], []
+
     for i, t1 in enumerate(taus1):
-        for j, t2 in enumerate(taus2):
-            if abs(t1 - t2) <= rtol * max(abs(t1), abs(t2), 1e-30):
-                idx1.append(i)
-                idx2.append(j)
-                break
+        pos = np.searchsorted(sorted2, t1)
+        best_j = -1
+        best_diff = np.inf
+        for candidate in (pos - 1, pos):
+            if 0 <= candidate < len(sorted2):
+                orig_j = int(order2[candidate])
+                if used[orig_j]:
+                    continue
+                diff = abs(t1 - sorted2[candidate])
+                thr = rtol * max(abs(t1), abs(sorted2[candidate]), 1e-30)
+                if diff <= thr and diff < best_diff:
+                    best_diff = diff
+                    best_j = orig_j
+        if best_j >= 0:
+            used[best_j] = True
+            idx1.append(i)
+            idx2.append(best_j)
+
     return np.array(idx1, dtype=int), np.array(idx2, dtype=int)
 
 
@@ -275,8 +299,10 @@ def _write_summary(path: Path, metrics: dict[str, Any]) -> None:
     if "noise_identification_baseline" in metrics:
         ni_b = metrics["noise_identification_baseline"]
         ni_i = metrics["noise_identification_improved"]
-        lines.append(f"- Baseline noise type: `{ni_b.get('noise_type', 'unknown')}` (slope={ni_b.get('slope', 'N/A'):.3f})")
-        lines.append(f"- Improved noise type: `{ni_i.get('noise_type', 'unknown')}` (slope={ni_i.get('slope', 'N/A'):.3f})")
+        _slope_b = ni_b.get("slope", float("nan"))
+        _slope_i = ni_i.get("slope", float("nan"))
+        lines.append(f"- Baseline noise type: `{ni_b.get('noise_type', 'unknown')}` (slope={float(_slope_b):.3f})")
+        lines.append(f"- Improved noise type: `{ni_i.get('noise_type', 'unknown')}` (slope={float(_slope_i):.3f})")
     if "allan_minimum" in metrics:
         am = metrics["allan_minimum"]
         lines.append(f"- Allan minimum: `{am.get('min_adev', 'N/A')}` at tau=`{am.get('min_tau_s', 'N/A')}` s")
@@ -735,7 +761,6 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
         ifo_cfg = cfg.get("interferometer", {}) if isinstance(cfg.get("interferometer", {}), dict) else {}
         metrics["systematics"] = systematics_summary(
             interferometer_time_s=float(ifo_cfg.get("interferometer_time_s", 0.260)),
-            k_eff_rad_per_m=float(ifo_cfg.get("k_eff_rad_per_m", 1.6e7)),
         )
     except Exception:
         logger.debug("Systematics computation skipped", exc_info=True)
