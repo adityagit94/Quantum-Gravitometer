@@ -99,12 +99,14 @@ def load_real_ifo_csv(
         Q = _ensure_array(Q)
         x_true = None if x_true is None else _ensure_array(x_true)
 
+    n_raw = len(t)
     mask = np.isfinite(t) & np.isfinite(I) & np.isfinite(Q)
     if x_true is not None:
         mask &= np.isfinite(x_true)
     t, I, Q = t[mask], I[mask], Q[mask]
     if x_true is not None:
         x_true = x_true[mask]
+    dropped_count = n_raw - int(np.sum(mask))
 
     if np.asarray(t).size == 0:
         raise ValueError("No valid finite rows remain after CSV parsing.")
@@ -119,7 +121,7 @@ def load_real_ifo_csv(
     elif sample_rate_hz is not None:
         inferred_fs = float(sample_rate_hz)
 
-    out = {"t": t, "I_meas": I, "Q_meas": Q}
+    out = {"t": t, "I_meas": I, "Q_meas": Q, "dropped_rows": dropped_count}
     if x_true is not None:
         out["x_true"] = x_true
     if inferred_fs is not None:
