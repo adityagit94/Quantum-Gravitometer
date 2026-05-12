@@ -259,7 +259,11 @@ def _unit_validation(values: np.ndarray, declared_units: str | None = None) -> l
     warnings: list[str] = []
     if declared_units:
         normalized = declared_units.strip().lower()
-        known = {'ugal', 'µgal', 'm/s^2', 'ms^-2', 'nm/s^2', 'gravity residual (dataset units)'}
+        known = {
+            'ugal', 'µgal', 'm/s^2', 'ms^-2', 'nm/s^2',
+            'nm/s**2', 'nm s-2', 'nanometers/second**2', 'nm/s2',
+            'gravity residual (dataset units)',
+        }
         if normalized not in known:
             warnings.append(f'Unrecognized declared units: {declared_units}')
     finite = np.asarray(values, dtype=np.float64)
