@@ -21,6 +21,7 @@ from .pulse_sequence import (
     vibration_amplitude_axis,
 )
 from .readout_models import clip_probabilities, port_differential_summary
+from .systematics import systematics_summary
 
 __all__ = [
     'AtomSourceConfig',
@@ -44,5 +45,6 @@ __all__ = [
     'port_differential_summary',
     'source_summary_rows',
     'vibration_amplitude_axis',
+    'systematics_summary',
     'vibration_phase_rad',
 ]

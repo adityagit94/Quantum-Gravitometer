@@ -97,3 +97,30 @@ def test_sensitivity_rejects_bad_inputs():
         shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 0.0)
     with pytest.raises(ValueError):
         shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 1.5)
+
+
+def test_gravity_gradient_positive():
+    from qgrav.physics.systematics import gravity_gradient_shift_m_s2
+    shift = gravity_gradient_shift_m_s2()
+    assert shift > 0.0
+    # With larger drop height, shift should increase
+    shift2 = gravity_gradient_shift_m_s2(drop_height_m=1.0)
+    assert shift2 > shift
+
+
+def test_coriolis_zero_at_pole():
+    from qgrav.physics.systematics import coriolis_shift_m_s2
+    shift = coriolis_shift_m_s2(latitude_deg=90.0, horizontal_velocity_m_s=1e-3)
+    assert shift < 1e-15  # cos(90°) ≈ 0
+
+
+def test_systematics_summary_keys():
+    from qgrav.physics.systematics import systematics_summary
+    result = systematics_summary()
+    assert "gravity_gradient" in result
+    assert "coriolis" in result
+    assert "total_systematic_m_s2" in result
+    assert "total_systematic_ugal" in result
+    assert result["gravity_gradient"]["value_m_s2"] > 0
+    assert result["coriolis"]["value_m_s2"] > 0
+    assert result["total_systematic_ugal"] == result["total_systematic_m_s2"] * 1e8
