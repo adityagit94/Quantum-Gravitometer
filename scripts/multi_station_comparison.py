@@ -8,10 +8,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -70,7 +73,7 @@ def main() -> None:
             if len(result["adev"]) > 0:
                 station_adev_mins.append((sd["code"], float(np.min(result["adev"]))))
         except Exception:
-            pass
+            logger.warning("Allan deviation failed for %s", sd["code"], exc_info=True)
     ax_adev.set_xlabel("Tau (s)")
     ax_adev.set_ylabel("Allan Deviation")
     ax_adev.set_title("Overlapping Allan Deviation")
@@ -88,7 +91,7 @@ def main() -> None:
             psd_result = compute_psd(values, sr, method="welch")
             ax_psd.semilogy(psd_result["f_hz"], psd_result["psd"], label=sd["code"], linewidth=0.8)
         except Exception:
-            pass
+            logger.warning("PSD computation failed for %s", sd["code"], exc_info=True)
     ax_psd.set_xlabel("Frequency (Hz)")
     ax_psd.set_ylabel("PSD")
     ax_psd.set_title("Power Spectral Density")

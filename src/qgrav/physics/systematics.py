@@ -21,7 +21,11 @@ def gravity_gradient_shift_m_s2(
     delta_g ~ gamma * (h + 0.5 * g * T^2) where gamma is the vertical
     gradient (free-air ~ 3.086e-6 /s^2/m), h is initial cloud height,
     and 0.5*g*T^2 is the free-fall distance during interrogation.
+
+    Raises :class:`ValueError` if ``interferometer_time_s`` is negative.
     """
+    if interferometer_time_s < 0:
+        raise ValueError("interferometer_time_s must be non-negative")
     g_approx = 9.81
     effective_drop = abs(drop_height_m) + 0.5 * g_approx * interferometer_time_s**2
     return abs(gradient_per_m) * effective_drop
