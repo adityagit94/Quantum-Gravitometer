@@ -35,16 +35,19 @@ def coriolis_shift_m_s2(
 
     Order-of-magnitude estimate. Not included in AISim simulation.
 
-    delta_g = 2 * Omega_earth * v_horizontal * cos(latitude)
+    delta_g = 2 * Omega_earth * v_horizontal * |cos(latitude)|
+
+    Latitude is clamped to [-90, 90]. The absolute value of cos(latitude)
+    is used so the result is always a non-negative magnitude.
     """
     omega_earth = 7.2921e-5  # rad/s
-    lat_rad = np.radians(latitude_deg)
-    return 2.0 * omega_earth * abs(horizontal_velocity_m_s) * np.cos(lat_rad)
+    lat_clamped = float(np.clip(latitude_deg, -90.0, 90.0))
+    lat_rad = np.radians(lat_clamped)
+    return 2.0 * omega_earth * abs(horizontal_velocity_m_s) * abs(float(np.cos(lat_rad)))
 
 
 def systematics_summary(
     interferometer_time_s: float = 0.260,
-    k_eff_rad_per_m: float = 1.6e7,
     gradient_per_m: float = 3.086e-6,
     drop_height_m: float = 0.0,
     latitude_deg: float = 45.0,

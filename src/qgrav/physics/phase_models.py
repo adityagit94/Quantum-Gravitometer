@@ -69,6 +69,10 @@ def shot_noise_sensitivity_m_s2_per_sqrt_hz(
         raise ValueError("contrast must be in (0, 1]")
     if interferometer_time_s <= 0:
         raise ValueError("interferometer_time_s must be positive")
+    if k_eff_rad_per_m <= 0:
+        raise ValueError("k_eff_rad_per_m must be positive")
+    if cycle_time_s <= 0:
+        raise ValueError("cycle_time_s must be positive")
     T = float(interferometer_time_s)
     k = float(k_eff_rad_per_m)
     C = float(contrast)

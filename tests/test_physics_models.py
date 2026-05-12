@@ -97,6 +97,16 @@ def test_sensitivity_rejects_bad_inputs():
         shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 0.0)
     with pytest.raises(ValueError):
         shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 1.5)
+    # k_eff must be positive
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(0.0, 0.26, 100, 1.0)
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(-1.6e7, 0.26, 100, 1.0)
+    # cycle_time must be positive
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 1.0, 0.0)
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 1.0, -1.0)
 
 
 def test_gravity_gradient_positive():
@@ -112,6 +122,14 @@ def test_coriolis_zero_at_pole():
     from qgrav.physics.systematics import coriolis_shift_m_s2
     shift = coriolis_shift_m_s2(latitude_deg=90.0, horizontal_velocity_m_s=1e-3)
     assert shift < 1e-15  # cos(90°) ≈ 0
+
+
+def test_coriolis_always_non_negative():
+    from qgrav.physics.systematics import coriolis_shift_m_s2
+    # Even for out-of-range latitude, result must be >= 0
+    for lat in (-100.0, -90.0, 0.0, 45.0, 90.0, 91.0, 180.0):
+        shift = coriolis_shift_m_s2(latitude_deg=lat, horizontal_velocity_m_s=1e-3)
+        assert shift >= 0.0, f"Negative Coriolis shift at lat={lat}: {shift}"
 
 
 def test_systematics_summary_keys():
