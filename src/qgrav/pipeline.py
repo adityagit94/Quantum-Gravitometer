@@ -266,6 +266,20 @@ def _write_summary(path: Path, metrics: dict[str, Any]) -> None:
             f"- Baseline time correlation: `{base['time_corr']}`",
             f"- Improved time correlation: `{imp['time_corr']}`",
         ])
+    if "noise_identification" in metrics:
+        ni = metrics["noise_identification"]
+        lines.append(f"- Dominant noise type: `{ni.get('noise_type', 'unknown')}`")
+        slope_val = ni.get("slope")
+        if slope_val is not None and np.isfinite(slope_val):
+            lines.append(f"- ADEV slope: `{slope_val:.3f}`")
+    if "noise_identification_baseline" in metrics:
+        ni_b = metrics["noise_identification_baseline"]
+        ni_i = metrics["noise_identification_improved"]
+        lines.append(f"- Baseline noise type: `{ni_b.get('noise_type', 'unknown')}` (slope={ni_b.get('slope', 'N/A'):.3f})")
+        lines.append(f"- Improved noise type: `{ni_i.get('noise_type', 'unknown')}` (slope={ni_i.get('slope', 'N/A'):.3f})")
+    if "allan_minimum" in metrics:
+        am = metrics["allan_minimum"]
+        lines.append(f"- Allan minimum: `{am.get('min_adev', 'N/A')}` at tau=`{am.get('min_tau_s', 'N/A')}` s")
     if "allan_improvement_percent_mean" in metrics:
         lines.append(f"- Mean Allan improvement: `{metrics['allan_improvement_percent_mean']}` %")
     if "simulation" in metrics:
@@ -482,6 +496,13 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
     taus = _logspace_taus(duration_s=float(t[-1] - t[0]) if len(t) > 1 else 1.0, sample_rate_hz=fs)
 
     adev = allan_deviation_overlapping(x, fs, taus, backend=metrics_backend, data_type=allan_data_type)
+
+    from qgrav.metrics.allan import identify_noise_type, allan_minimum
+    _adev_arr = np.asarray(adev["adev"])
+    _taus_arr = np.asarray(adev["taus_s"])
+    noise_id = identify_noise_type(_taus_arr, _adev_arr)
+    adev_min = allan_minimum(_taus_arr, _adev_arr)
+
     metrics: dict[str, Any] = {
         "bench_type": "real_gravity",
         "have_truth": False,
@@ -511,6 +532,8 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
         "analysis_segment": data.get("analysis_segment", {}),
         "unit_warnings": data.get("unit_warnings", []),
         "dropped_rows": int(data.get("dropped_rows", 0)),
+        "noise_identification": noise_id,
+        "allan_minimum": adev_min,
         "notes": [
             "This run uses real gravimetry time-series data rather than interferometer I/Q channels.",
             "PSD and Allan deviation are computed on the selected analysis segment of the gravity residual series.",
@@ -618,6 +641,12 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     adev_b = allan_deviation_overlapping(x_b, fs, taus, backend=metrics_backend, data_type=allan_data_type)
     adev_i = allan_deviation_overlapping(x_i, fs, taus, backend=metrics_backend, data_type=allan_data_type)
 
+    from qgrav.metrics.allan import identify_noise_type, allan_minimum
+    _ni_b = identify_noise_type(np.asarray(adev_b["taus_s"]), np.asarray(adev_b["adev"]))
+    _ni_i = identify_noise_type(np.asarray(adev_i["taus_s"]), np.asarray(adev_i["adev"]))
+    _am_b = allan_minimum(np.asarray(adev_b["taus_s"]), np.asarray(adev_b["adev"]))
+    _am_i = allan_minimum(np.asarray(adev_i["taus_s"]), np.asarray(adev_i["adev"]))
+
     metrics: dict[str, Any] = {
         "bench_type": bench_type,
         "have_truth": have_truth,
@@ -628,6 +657,10 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
         "welch_noverlap": noverlap,
         "allan_backend_used": str(adev_i["backend"]),
         "allan_data_type": str(adev_i["data_type"]),
+        "noise_identification_baseline": _ni_b,
+        "noise_identification_improved": _ni_i,
+        "allan_minimum_baseline": _am_b,
+        "allan_minimum_improved": _am_i,
         "notes": [
             "Improvement percent > 0 means the improved estimator reduced the chosen error/statistic.",
             "When truth is unavailable, the report focuses on stability/spectral summaries rather than RMSE-based accuracy.",
