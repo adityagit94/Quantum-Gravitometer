@@ -33,7 +33,7 @@ from matplotlib.figure import Figure
 from tkinter import BOTH, END, LEFT, VERTICAL, X, filedialog, messagebox, ttk
 
 from qgrav.bench_ifo import load_real_gravity
-from qgrav.config import load_config, validate_config_structure
+from qgrav.config import find_project_root, load_config, validate_config_structure
 from qgrav.datasets import list_stations_in_source
 from qgrav.metrics import allan_deviation_overlapping, available_allan_backends, compute_psd
 from qgrav.pipeline import run_pipeline
@@ -102,6 +102,7 @@ class QGravApp:
         self._run_in_progress = False
         self._last_temp_config_path: Path | None = None
         self._temp_config_paths: list[Path] = []
+        self._project_root: Path = find_project_root(Path(__file__))
 
         self._configure_style()
         self._build()
@@ -742,6 +743,8 @@ Recommended flow:
         except Exception as exc:
             messagebox.showerror("qgrav", str(exc))
             return
+        # Remember the real project root so temp configs resolve relative paths correctly
+        self._project_root = find_project_root(path)
         self.editor.delete("1.0", END)
         self.editor.insert("1.0", text)
         self.sync_controls_from_dict(cfg)
@@ -813,7 +816,11 @@ Recommended flow:
     def _editor_config(self) -> dict[str, Any]:
         cfg = yaml.safe_load(self.editor.get("1.0", END))
         if not isinstance(cfg, dict):
-            raise ValueError("Configuration root must be a mapping/dictionary.")
+            raise ValueError(
+                "Configuration root must be a YAML mapping (dictionary).\n\n"
+                "The editor may be empty or contain invalid YAML.\n"
+                "Load a config file or choose one from the Examples menu."
+            )
         return cfg
 
     def validate_editor_config(self) -> None:
@@ -971,7 +978,11 @@ Recommended flow:
         editor_text = self.editor.get("1.0", END)
         cfg = yaml.safe_load(editor_text)
         if not isinstance(cfg, dict):
-            raise ValueError("Configuration root must be a mapping/dictionary.")
+            raise ValueError(
+                "Configuration root must be a YAML mapping (dictionary).\n\n"
+                "The editor may be empty or contain invalid YAML.\n"
+                "Load a config file or choose one from the Examples menu."
+            )
         issues = validate_config_structure(cfg)
         if issues:
             raise ValueError("Configuration validation failed\n- " + "\n- ".join(issues))
@@ -994,7 +1005,7 @@ Recommended flow:
 
     def _run_worker(self, config_path: Path) -> None:
         try:
-            report = run_pipeline(config_path)
+            report = run_pipeline(config_path, project_root=self._project_root)
             bundle = load_run_bundle(report.parent)
             self._queue.put(("success", {"report": report, "bundle": bundle}))
         except Exception as exc:

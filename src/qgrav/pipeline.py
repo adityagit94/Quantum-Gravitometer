@@ -500,12 +500,12 @@ def _make_real_gravity_plots(
 
 
 # ---------- stage runners ----------
-def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path) -> Path:
+def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path, *, project_root: Path | None = None) -> Path:
     grav_cfg = cfg["bench_real_gravity"]
     data = load_real_gravity(
-        source_path=resolve_project_relative_path(config_path, grav_cfg["source_path"]) or grav_cfg["source_path"],
+        source_path=resolve_project_relative_path(config_path, grav_cfg["source_path"], project_root=project_root) or grav_cfg["source_path"],
         station_code=grav_cfg.get("station_code"),
-        metadata_path=resolve_project_relative_path(config_path, grav_cfg.get("metadata_path")),
+        metadata_path=resolve_project_relative_path(config_path, grav_cfg.get("metadata_path"), project_root=project_root),
         segment_strategy=str(grav_cfg.get("segment_strategy", "longest_contiguous")),
     )
 
@@ -603,13 +603,13 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
     return build_html_report(run_dir=paths.run_dir, config_text=cfg_text, metrics=metrics_jsonable, plot_paths=plot_paths)
 
 
-def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path) -> Path:
+def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path, *, project_root: Path | None = None) -> Path:
     bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
     bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
     if bench_type == "real":
         real_cfg = cfg["bench_real_ifo"]
         data = load_real_ifo_csv(
-            csv_path=resolve_project_relative_path(config_path, real_cfg["csv_path"]) or real_cfg["csv_path"],
+            csv_path=resolve_project_relative_path(config_path, real_cfg["csv_path"], project_root=project_root) or real_cfg["csv_path"],
             sample_rate_hz=real_cfg.get("sample_rate_hz"),
             delimiter=str(real_cfg.get("delimiter", ",")),
             has_header=bool(real_cfg.get("has_header", True)),
@@ -774,7 +774,19 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     return build_html_report(run_dir=paths.run_dir, config_text=cfg_text, metrics=metrics_jsonable, plot_paths=plot_paths)
 
 
-def run_pipeline(config_path: Path) -> Path:
+def run_pipeline(config_path: Path, *, project_root: Path | None = None) -> Path:
+    """Run the full qgrav pipeline from a YAML config file.
+
+    Parameters
+    ----------
+    config_path:
+        Path to the YAML configuration file (may be a temp file).
+    project_root:
+        Optional override for the project root directory. When the GUI
+        materializes the config to a temp file, relative paths in the config
+        cannot be resolved from the temp directory.  Passing the real project
+        root ensures ``data/raw/...`` and similar paths resolve correctly.
+    """
     try:
         cfg, cfg_text = load_config(config_path)
         validate_config(cfg)
@@ -786,7 +798,7 @@ def run_pipeline(config_path: Path) -> Path:
         bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
         bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
         if bench_type == "real_gravity":
-            return _run_real_gravity_pipeline(cfg, cfg_text, paths, config_path)
-        return _run_interferometer_pipeline(cfg, cfg_text, paths, config_path)
+            return _run_real_gravity_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
+        return _run_interferometer_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
     finally:
         plt.close("all")
