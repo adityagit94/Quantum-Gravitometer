@@ -96,10 +96,9 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
 
         if kind == "dashboard":
             axes = fig.subplots(2, 2)
-        for ax in axes.flat:
-            ax.tick_params(labelsize=8)
-            for ax in axes.flat:
-                ax.tick_params(labelsize=8)
+            for a in axes.flat:
+                a.tick_params(labelsize=8)
+
             ax = axes[0, 0]
             ax.plot(t_full / 86400.0, x_full, linewidth=0.8)
             ax.set_title("Gravity series")
