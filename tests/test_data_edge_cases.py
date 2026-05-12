@@ -25,6 +25,22 @@ def test_real_ifo_single_row_csv_is_normalized(tmp_path: Path) -> None:
     assert data['Q_meas'].shape == (1,)
 
 
+def test_real_ifo_csv_tracks_dropped_rows(tmp_path: Path) -> None:
+    csv_path = tmp_path / 'ifo_with_nan.csv'
+    csv_path.write_text(
+        't,I_meas,Q_meas\n'
+        '0.0,1.0,2.0\n'
+        '0.01,nan,2.0\n'
+        '0.02,1.0,nan\n'
+        '0.03,1.0,2.0\n'
+        '0.04,1.0,2.0\n',
+        encoding='utf-8',
+    )
+    data = load_real_ifo_csv(csv_path=csv_path)
+    assert data['dropped_rows'] == 2
+    assert len(data['t']) == 3
+
+
 def test_real_gravity_csv_drops_bad_rows_and_reports_it(tmp_path: Path) -> None:
     csv_path = tmp_path / 'gravity.csv'
     csv_path.write_text(
