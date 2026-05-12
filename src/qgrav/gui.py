@@ -183,6 +183,7 @@ class QGravApp:
         self._browser_data: dict[str, Any] | None = None
         self._run_in_progress = False
         self._last_temp_config_path: Path | None = None
+        self._temp_config_paths: list = []
 
         self._configure_style()
         self._build()
@@ -789,7 +790,20 @@ Recommended flow:
         path = Path(temp_name)
         path.write_text(editor_text, encoding="utf-8")
         self._last_temp_config_path = path
+        self._temp_config_paths.append(path)
         return path
+
+    def _cleanup_temp_configs(self) -> None:
+        for p in self._temp_config_paths:
+            try:
+                if hasattr(p, 'exists') and p.exists():
+                    p.unlink()
+                elif isinstance(p, str):
+                    if os.path.exists(p):
+                        os.unlink(p)
+            except Exception:
+                pass
+        self._temp_config_paths.clear()
 
     def pick_config(self) -> None:
         path = filedialog.askopenfilename(filetypes=[("YAML files", "*.yaml *.yml"), ("All files", "*")])
@@ -1339,5 +1353,6 @@ def main(default_config: Path | None = None) -> None:
         root = tk.Tk()
     except tk.TclError as exc:
         raise RuntimeError("GUI could not start. This environment may be headless or missing Tk support.") from exc
-    QGravApp(root, default_config=default_config)
+    app = QGravApp(root, default_config=default_config)
+    root.protocol("WM_DELETE_WINDOW", lambda: (app._cleanup_temp_configs(), root.destroy()))
     root.mainloop()
