@@ -64,6 +64,45 @@ def test_error_stats():
     assert stats["mae"] >= 0.0
 
 
+def test_identify_noise_type_white_freq():
+    """White frequency noise should have ADEV slope near -0.5."""
+    rng = np.random.default_rng(42)
+    x = rng.normal(size=10000)
+    from qgrav.metrics.allan import allan_deviation_overlapping, identify_noise_type
+    taus_req = np.logspace(0, 2, 20)
+    result = allan_deviation_overlapping(x, 100.0, taus_req, backend="custom", data_type="freq")
+    noise = identify_noise_type(np.asarray(result["taus_s"]), np.asarray(result["adev"]))
+    assert -0.8 < noise["slope"] < -0.2
+    assert noise["fit_r2"] > 0.5
+
+
+def test_identify_noise_type_random_walk():
+    """Random walk (cumulative sum of white noise) should have positive slope."""
+    rng = np.random.default_rng(123)
+    x = np.cumsum(rng.normal(size=5000))
+    from qgrav.metrics.allan import allan_deviation_overlapping, identify_noise_type
+    taus_req = np.logspace(0, 2, 15)
+    result = allan_deviation_overlapping(x, 100.0, taus_req, backend="custom", data_type="freq")
+    noise = identify_noise_type(np.asarray(result["taus_s"]), np.asarray(result["adev"]))
+    assert noise["slope"] > 0.0
+
+
+def test_identify_noise_type_insufficient_data():
+    from qgrav.metrics.allan import identify_noise_type
+    noise = identify_noise_type(np.array([1.0]), np.array([0.5]))
+    assert noise["noise_type"] == "insufficient_data"
+
+
+def test_allan_minimum_basic():
+    taus = np.array([1, 2, 4, 8, 16, 32], dtype=float)
+    adev = np.array([0.5, 0.3, 0.1, 0.05, 0.08, 0.2])
+    from qgrav.metrics.allan import allan_minimum
+    result = allan_minimum(taus, adev)
+    assert result["min_adev"] == 0.05
+    assert result["min_tau_s"] == 8.0
+    assert result["min_index"] == 3
+
+
 def test_match_taus_with_float_perturbation():
     from qgrav.pipeline import _match_taus
     t1 = np.array([1.0, 2.0, 4.0, 8.0])

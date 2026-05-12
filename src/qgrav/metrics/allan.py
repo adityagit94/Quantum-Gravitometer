@@ -172,3 +172,86 @@ def allan_deviation_overlapping(
         "backend": resolved_backend,
         "data_type": data_type,
     }
+
+
+# Alias used by the PRD and pipeline code
+compute_adev = allan_deviation_overlapping
+
+
+def identify_noise_type(taus_s: np.ndarray, adev: np.ndarray) -> dict:
+    """Identify dominant noise type from Allan deviation log-log slope.
+
+    Noise classification based on power-law slope of sigma(tau) ~ tau^mu:
+      mu < -0.75 : white phase noise
+      -0.75 <= mu < -0.25 : flicker phase noise
+      -0.25 <= mu < 0.25  : white frequency noise
+      0.25 <= mu < 0.75   : flicker frequency noise
+      mu >= 0.75           : random walk frequency noise
+
+    Returns dict with slope, noise_type, fit_r2, description.
+    If fewer than 3 valid points, returns noise_type='insufficient_data'.
+    """
+    taus_s = np.asarray(taus_s, dtype=np.float64)
+    adev = np.asarray(adev, dtype=np.float64)
+    valid = (taus_s > 0) & (adev > 0) & np.isfinite(taus_s) & np.isfinite(adev)
+    if np.sum(valid) < 3:
+        return {
+            "slope": float("nan"),
+            "noise_type": "insufficient_data",
+            "fit_r2": float("nan"),
+            "description": "Fewer than 3 valid ADEV points for slope fitting.",
+        }
+
+    log_tau = np.log10(taus_s[valid])
+    log_adev = np.log10(adev[valid])
+    coeffs = np.polyfit(log_tau, log_adev, 1)
+    slope = float(coeffs[0])
+
+    # Classify based on slope boundaries
+    if slope < -0.75:
+        noise_type = "white_phase"
+        description = "White phase noise (slope < -0.75)"
+    elif slope < -0.25:
+        noise_type = "flicker_phase"
+        description = "Flicker phase noise (-0.75 <= slope < -0.25)"
+    elif slope < 0.25:
+        noise_type = "white_frequency"
+        description = "White frequency noise (-0.25 <= slope < 0.25)"
+    elif slope < 0.75:
+        noise_type = "flicker_frequency"
+        description = "Flicker frequency noise (0.25 <= slope < 0.75)"
+    else:
+        noise_type = "random_walk_frequency"
+        description = "Random walk frequency noise (slope >= 0.75)"
+
+    # R-squared for fit quality
+    fitted = np.polyval(coeffs, log_tau)
+    ss_res = float(np.sum((log_adev - fitted) ** 2))
+    ss_tot = float(np.sum((log_adev - np.mean(log_adev)) ** 2))
+    fit_r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
+
+    return {
+        "slope": slope,
+        "noise_type": noise_type,
+        "fit_r2": fit_r2,
+        "description": description,
+    }
+
+
+def allan_minimum(taus_s: np.ndarray, adev: np.ndarray) -> dict:
+    """Find the minimum of the Allan deviation curve.
+
+    Returns dict with min_adev, min_tau_s, min_index.
+    """
+    taus_s = np.asarray(taus_s, dtype=np.float64)
+    adev = np.asarray(adev, dtype=np.float64)
+    valid = np.isfinite(adev) & (adev > 0)
+    if not np.any(valid):
+        return {"min_adev": float("nan"), "min_tau_s": float("nan"), "min_index": -1}
+    valid_idx = np.where(valid)[0]
+    best = valid_idx[np.argmin(adev[valid])]
+    return {
+        "min_adev": float(adev[best]),
+        "min_tau_s": float(taus_s[best]),
+        "min_index": int(best),
+    }
