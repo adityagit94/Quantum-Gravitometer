@@ -121,6 +121,21 @@ _TEMPLATE = """<!doctype html>
   {% endif %}
   {% endif %}
 
+  {% if metrics.systematics %}
+  <h2>Systematic effects (order-of-magnitude)</h2>
+  <table>
+    <tr><th>Effect</th><th>Value (m/s&sup2;)</th><th>Value (&micro;Gal)</th><th>Note</th></tr>
+    {% if metrics.systematics.gravity_gradient %}
+    <tr><td>Gravity gradient</td><td>{{ metrics.systematics.gravity_gradient.value_m_s2 }}</td><td>{{ metrics.systematics.gravity_gradient.value_ugal }}</td><td>{{ metrics.systematics.gravity_gradient.note }}</td></tr>
+    {% endif %}
+    {% if metrics.systematics.coriolis %}
+    <tr><td>Coriolis</td><td>{{ metrics.systematics.coriolis.value_m_s2 }}</td><td>{{ metrics.systematics.coriolis.value_ugal }}</td><td>{{ metrics.systematics.coriolis.note }}</td></tr>
+    {% endif %}
+    <tr><th>Total</th><td>{{ metrics.systematics.total_systematic_m_s2 }}</td><td>{{ metrics.systematics.total_systematic_ugal }}</td><td></td></tr>
+  </table>
+  <p class="muted">These are order-of-magnitude estimates and are NOT included in the AISim simulation.</p>
+  {% endif %}
+
   {% if metrics.allan_backend_comparison %}
   <h2>Allan backend comparison</h2>
   <table>

@@ -559,6 +559,15 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
     sim_cfg = cfg.get("simulation", {}) if isinstance(cfg.get("simulation", {}), dict) else {}
     _add_simulation(metrics, save_dict, sim_cfg)
 
+    try:
+        from qgrav.physics.systematics import systematics_summary
+        lat = data.get("latitude_deg")
+        metrics["systematics"] = systematics_summary(
+            latitude_deg=float(lat) if lat is not None else 45.0,
+        )
+    except Exception:
+        logger.debug("Systematics computation skipped", exc_info=True)
+
     metrics_jsonable = _jsonable(metrics)
     paths.metrics_path.write_text(json.dumps(metrics_jsonable, indent=2), encoding="utf-8")
     np.savez_compressed(paths.data_path, **save_dict)
@@ -720,6 +729,16 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
         save_dict["allan_truth"] = np.asarray(adev_true["adev"], dtype=np.float64)
     sim_cfg = cfg.get("simulation", {}) if isinstance(cfg.get("simulation", {}), dict) else {}
     _add_simulation(metrics, save_dict, sim_cfg)
+
+    try:
+        from qgrav.physics.systematics import systematics_summary
+        ifo_cfg = cfg.get("interferometer", {}) if isinstance(cfg.get("interferometer", {}), dict) else {}
+        metrics["systematics"] = systematics_summary(
+            interferometer_time_s=float(ifo_cfg.get("interferometer_time_s", 0.260)),
+            k_eff_rad_per_m=float(ifo_cfg.get("k_eff_rad_per_m", 1.6e7)),
+        )
+    except Exception:
+        logger.debug("Systematics computation skipped", exc_info=True)
 
     metrics_jsonable = _jsonable(metrics)
     paths.metrics_path.write_text(json.dumps(metrics_jsonable, indent=2), encoding="utf-8")
