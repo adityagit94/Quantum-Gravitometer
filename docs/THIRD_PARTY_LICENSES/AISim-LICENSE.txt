@@ -1,0 +1,19 @@
+AISim License Placeholder
+=========================
+
+The vendored AISim code at src/qgrav/vendor/aisim/ is derived from the
+upstream "aisim" Python package for simulating light-pulse atom
+interferometers.
+
+Upstream project: https://github.com/bleykauf/aisim
+Upstream license: GPL-3.0 (as stated on PyPI and GitHub)
+
+IMPORTANT: The full GPL-3.0 license text should be obtained from the
+upstream repository and placed here before any public distribution of
+this project. The license type must be confirmed with the upstream
+AISim maintainer (Bastian Leykauf) if there is any uncertainty.
+
+This placeholder was created because no license file was included with
+the vendored copy. The MIT license of the qgrav project may not be
+compatible with the GPL-3.0 license of AISim without additional
+consideration.
