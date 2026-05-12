@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 
 from qgrav.bench_ifo.real_ifo import load_real_ifo_csv
-from qgrav.datasets.gravimetry import _gap_report, load_real_gravity_dataset
+from qgrav.datasets.gravimetry import _gap_report, _unit_validation, load_real_gravity_dataset
 
 
 def test_gap_report_counts_reverse_timestamps_before_sorting() -> None:
@@ -55,3 +55,16 @@ def test_real_gravity_csv_drops_bad_rows_and_reports_it(tmp_path: Path) -> None:
     assert data['station_code'] == 'st001'
     assert data['dropped_rows'] == 2
     assert len(data['gravity_residual_full']) == 2
+
+
+def test_unit_validation_accepts_new_nm_variants() -> None:
+    vals = np.array([1.0, 2.0, 3.0])
+    for unit in ('nm/s**2', 'nm s-2', 'nanometers/second**2', 'nm/s2'):
+        warnings = _unit_validation(vals, declared_units=unit)
+        assert not any('Unrecognized' in w for w in warnings), f"Unit {unit!r} was not recognized"
+
+
+def test_unit_validation_still_warns_unknown() -> None:
+    vals = np.array([1.0, 2.0])
+    warnings = _unit_validation(vals, declared_units='furlongs/fortnight')
+    assert any('Unrecognized' in w for w in warnings)
