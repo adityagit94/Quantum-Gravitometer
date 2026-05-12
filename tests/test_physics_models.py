@@ -60,3 +60,40 @@ def test_scan_axis_helpers_lengths():
     assert len(phase_scan_axis(0.0, 2.0 * np.pi, 9)) == 9
     assert len(gravity_sweep_axis(9.81, 1e-6, 7)) == 7
     assert len(vibration_amplitude_axis(0.0, 1e-8, 11)) == 11
+
+
+def test_shot_noise_sensitivity_hand_calculated():
+    """Verify against hand calculation.
+    k_eff=1.6e7, T=0.26, N=1e6, C=0.5, T_cycle=1:
+    delta_g = 1/(0.5 * 1.6e7 * 0.0676 * 1000) = 1/5.408e8 ~ 1.85e-9
+    """
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    result = shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 1_000_000, 0.5, 1.0)
+    assert 1e-9 < result < 3e-9
+
+
+def test_sensitivity_scales_with_sqrt_N():
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    s100 = shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 1.0)
+    s10000 = shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 10000, 1.0)
+    ratio = s100 / s10000
+    assert abs(ratio - 10.0) < 0.1  # sqrt(10000/100) = 10
+
+
+def test_sensitivity_scales_with_T_squared():
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    s1 = shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.1, 1000, 1.0)
+    s2 = shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.2, 1000, 1.0)
+    ratio = s1 / s2
+    assert abs(ratio - 4.0) < 0.1  # (0.2/0.1)^2 = 4
+
+
+def test_sensitivity_rejects_bad_inputs():
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    import pytest
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 0, 1.0)
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 0.0)
+    with pytest.raises(ValueError):
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(1.6e7, 0.26, 100, 1.5)

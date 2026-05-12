@@ -50,3 +50,40 @@ def normalized_differential_signal(port2: np.ndarray | float, port3: np.ndarray 
     p3 = np.asarray(port3, dtype=np.float64)
     closed_total = np.maximum(p2 + p3, 1e-15)
     return (p3 - p2) / closed_total
+
+
+def shot_noise_sensitivity_m_s2_per_sqrt_hz(
+    k_eff_rad_per_m: float,
+    interferometer_time_s: float,
+    n_atoms: int,
+    contrast: float = 1.0,
+    cycle_time_s: float = 1.0,
+) -> float:
+    """Shot-noise-limited gravity sensitivity for a Mach-Zehnder atom interferometer.
+
+    delta_g = 1 / (C * k_eff * T^2 * sqrt(N / T_cycle))
+    """
+    if n_atoms <= 0:
+        raise ValueError("n_atoms must be positive")
+    if contrast <= 0 or contrast > 1:
+        raise ValueError("contrast must be in (0, 1]")
+    if interferometer_time_s <= 0:
+        raise ValueError("interferometer_time_s must be positive")
+    T = float(interferometer_time_s)
+    k = float(k_eff_rad_per_m)
+    C = float(contrast)
+    N = int(n_atoms)
+    return 1.0 / (C * k * T**2 * np.sqrt(N / float(cycle_time_s)))
+
+
+def sensitivity_ugal_per_sqrt_hz(
+    k_eff_rad_per_m: float,
+    interferometer_time_s: float,
+    n_atoms: int,
+    contrast: float = 1.0,
+    cycle_time_s: float = 1.0,
+) -> float:
+    """Same as shot_noise_sensitivity_m_s2_per_sqrt_hz but in uGal/sqrt(Hz)."""
+    return shot_noise_sensitivity_m_s2_per_sqrt_hz(
+        k_eff_rad_per_m, interferometer_time_s, n_atoms, contrast, cycle_time_s
+    ) * 1e8
