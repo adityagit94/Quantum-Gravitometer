@@ -14,6 +14,26 @@ from matplotlib.figure import Figure
 import numpy as np
 
 from qgrav.metrics import compute_psd
+from qgrav.metrics.allan import identify_noise_type
+
+
+def _annotate_noise_type(ax: Any, taus: np.ndarray, adev: np.ndarray) -> None:
+    """Add noise type annotation to an Allan deviation plot. Never raises."""
+    try:
+        info = identify_noise_type(np.asarray(taus), np.asarray(adev))
+        if info["noise_type"] != "insufficient_data":
+            label = f"{info['noise_type'].replace('_', ' ')} (slope={info['slope']:.2f})"
+            ax.annotate(
+                label,
+                xy=(0.02, 0.02),
+                xycoords="axes fraction",
+                fontsize=7,
+                color="0.4",
+                ha="left",
+                va="bottom",
+            )
+    except Exception:
+        pass
 
 
 def load_run_bundle(run_dir: Path) -> dict[str, Any]:
@@ -118,6 +138,7 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
 
             ax = axes[1, 1]
             ax.loglog(taus, adev)
+            _annotate_noise_type(ax, taus, adev)
             ax.set_title("Allan deviation")
             ax.set_xlabel("tau (s)")
             return fig
@@ -141,6 +162,7 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
             ax.legend()
         elif kind == "allan":
             ax.loglog(taus, adev)
+            _annotate_noise_type(ax, taus, adev)
             ax.set_xlabel("tau (s)")
             ax.set_ylabel("Allan deviation")
             ax.set_title(f"Allan deviation ({metrics.get('allan_backend_used', 'unknown')})")
@@ -192,6 +214,7 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
         ax.loglog(taus, arrays["allan_improved"], label="improved")
         if "allan_truth" in arrays:
             ax.loglog(taus, arrays["allan_truth"], label="truth")
+        _annotate_noise_type(ax, taus, arrays["allan_improved"])
         ax.set_title("Allan deviation")
         ax.set_xlabel("tau (s)")
         ax.legend()
@@ -229,6 +252,7 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
         ax.loglog(taus, arrays["allan_improved"], label="improved")
         if "allan_truth" in arrays:
             ax.loglog(taus, arrays["allan_truth"], label="truth")
+        _annotate_noise_type(ax, taus, arrays["allan_improved"])
         ax.set_xlabel("tau (s)")
         ax.set_ylabel("Allan deviation")
         ax.set_title(f"Allan deviation ({metrics.get('allan_backend_used', 'unknown')})")
