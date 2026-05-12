@@ -1,103 +1,33 @@
-# qgrav — Software-first gravimeter R&D platform
+# qgrav v0.7.0 — Quantum Gravimeter R&D Platform
 
-`qgrav` is a **software-first research workbench** for gravimeter-related studies when hardware is unavailable. It combines:
+A **software-first research workbench** for atom interferometer gravimetry when lab hardware is unavailable. Instead of making false hardware claims, `qgrav` provides a complete pipeline from simulation through analysis to reproducible reporting.
 
-- **atom simulation** (AISim-backed stage)
-- **virtual interferometer data generation**
-- **real gravimetry time-series ingestion** (`.ggp`, `.zip`, directory, or converted CSV)
-- **PSD / Allan deviation analysis**
-- **reproducible reports**
-- **desktop GUI**
-
-The project is designed for the realistic case where you cannot build or access a lab interferometer. Instead of making false hardware claims, it provides a clean research pipeline for:
-
-1. simulation,
-2. algorithm benchmarking,
-3. public gravimetry dataset analysis,
-4. reproducible reporting.
+**Author:** Aditya Prakash | **License:** MIT | **Python:** >= 3.9
 
 ---
 
-## What is new in v0.7.0?
+## What it does
 
-### Stabilization (Track A)
-- Fixed dashboard rendering bug in visuals
-- Reformatted semicolon-joined lines in pipeline plot functions
-- Added dropped-row tracking for real interferometer CSV loading
-- Fixed float tau matching (replaced fragile `np.intersect1d` with tolerance-based matching)
-- GUI now cleans up temporary config files on exit
-- AISim license placeholder added; scipy dependency documented
-
-### Scientific validation (Track B)
-- **Shot-noise sensitivity function** — `1/(C * k * T^2 * sqrt(N/T_cycle))`
-- **Sensitivity in AISim outputs** — all Mach-Zehnder simulation functions report sensitivity
-- **Noise type identification** — log-log slope classification of Allan deviation curves
-- **Allan minimum finder** — locates optimal averaging time
-- **Systematic effects module** — order-of-magnitude gravity gradient and Coriolis estimates
-- **Published references** — frozen registry of benchmark values (Freier 2016, Menoret 2018, etc.)
-
-### GUI refactor & infrastructure (Track C)
-- GUI split into `gui/` package with extracted `MetricCards` and `ScrollableFrame` widgets
-- IGETS unit format expansion (nm/s**2, nm s-2, etc.)
-- Batch processing scripts for multi-station scanning and comparison
-- Allan deviation plots annotated with noise type and slope
-- HTML reports include systematics table and sensitivity data
-
----
-
-## Repository layout
-
-```text
-qgrav/
-  configs/
-  data/
-    raw/
-      sg_sample/               # bundled sample station for testing the real-data lane
-  docs/
-  notebooks/
-  scripts/
-  src/qgrav/
-    algorithms/
-    bench_ifo/
-    datasets/
-    metrics/
-    reporting/
-    sim_ai/
-    validation/
-    physics/
-    gui/
-      widgets/
-      app.py
-    visuals.py
-    pipeline.py
-  tests/
-```
-
----
-
-## Bench modes
-
-### 1) `virtual`
-Synthetic interferometer I/Q data with known truth displacement.
-
-### 2) `real`
-Real interferometer-style CSV input with `I_meas`, `Q_meas` and optional `x_true`.
-
-### 3) `real_gravity`
-Real gravimetry time-series input:
-- `.ggp`
-- `.zip` archive of `.ggp` files
-- directory of `.ggp` files
-- converted CSV
-
-This mode is intended for superconducting gravimeter residual analysis.
+| Stage | Description |
+|-------|-------------|
+| **Simulate** | AISim-backed atom interferometry: Rabi scans, Mach-Zehnder phase scans, gravity sweeps, vibration sensitivity sweeps |
+| **Generate** | Virtual interferometer I/Q data with known truth displacement for algorithm benchmarking |
+| **Ingest** | Real gravimetry time-series from `.ggp`, `.zip`, directory, or CSV (superconducting gravimeter residuals) |
+| **Analyze** | PSD, overlapping Allan deviation (custom + AllanTools backends), noise type classification, shot-noise sensitivity |
+| **Validate** | Published reference comparison (Freier 2016, Menoret 2018, etc.), systematic effects estimation, backend cross-checks |
+| **Report** | Auto-generated HTML reports with plots, metrics, systematics tables, and full config snapshots |
+| **GUI** | tkinter desktop app for interactive config editing, pipeline execution, and plot viewing |
 
 ---
 
 ## Quick start
 
 ### Install
+
 ```bash
+git clone https://github.com/adityagit94/Quantum-Gravitometer.git
+cd Quantum-Gravitometer
+
 python -m venv .venv
 # Windows:
 .venv\Scripts\activate
@@ -108,129 +38,249 @@ pip install -U pip
 pip install -e .
 ```
 
-### Run the synthetic example
+### Run your first pipeline
+
 ```bash
+# Synthetic virtual interferometer (no external data needed)
 qgrav run --config configs/example.yaml
 ```
 
-### Run the AISim example
-```bash
-qgrav run --config configs/example_aisim.yaml
-```
+This creates a timestamped folder under `runs/` — open `report.html` in your browser for the full results.
 
-### Run the real gravimetry example
+### More examples
+
 ```bash
+# AISim Rabi scan
+qgrav run --config configs/example_aisim.yaml
+
+# AISim Mach-Zehnder phase scan
+qgrav run --config configs/example_aisim_phase_scan.yaml
+
+# AISim gravity sweep (hybrid: AISim pulse transfer + gravimeter phase law)
+qgrav run --config configs/example_aisim_gravity_sweep.yaml
+
+# AISim vibration sensitivity sweep
+qgrav run --config configs/example_aisim_vibration_sweep.yaml
+
+# Real gravimetry (requires data in data/raw/sg_sample/)
 qgrav run --config configs/example_real_gravity.yaml
 ```
 
 ### Launch the GUI
+
 ```bash
-qgrav gui --config configs/example_real_gravity.yaml
+qgrav gui
+# or pre-load a config:
+qgrav gui --config configs/example.yaml
 ```
 
-### Convert a `.ggp` source to CSV
+### Convert GGP to CSV
+
 ```bash
-qgrav convert-ggp --source data/raw/sg_sample --station ap046 --out /tmp/ap046.csv
+qgrav convert-ggp --source data/raw/sg_sample --station ap046 --out ap046.csv
 ```
 
 ---
 
-## Example outputs
+## Bench modes
 
-Each run creates a timestamped folder under `runs/` with:
+### `virtual`
+Synthetic interferometer I/Q data with configurable displacement signals, noise, and drift. Known ground truth enables algorithm accuracy measurement (RMSE, MAE, SNR, PSD correlation).
 
-- `config_used.yaml`
-- `data.npz`
-- `metrics.json`
-- `SUMMARY.md`
-- `report.html`
-- `plots/*.png`
+### `real`
+Real interferometer-style CSV input with `I_meas`, `Q_meas` columns and optional `x_true` for validation.
+
+### `real_gravity`
+Real gravimetry time-series ingestion supporting `.ggp` files, `.zip` archives, directories of `.ggp` files, or pre-converted CSV. Includes gap detection, longest-contiguous-segment analysis, and dropped-row tracking.
 
 ---
 
-## Real gravimetry workflow
+## Pipeline outputs
 
-1. Point `bench_real_gravity.source_path` to:
-   - a `.zip` archive,
-   - a directory of `.ggp` files,
-   - a single `.ggp` file,
-   - or a converted CSV.
-2. Choose `station_code`.
-3. Run the pipeline.
-4. Inspect:
-   - full trend plot,
-   - histogram,
-   - PSD,
-   - Allan deviation,
-   - gap report.
+Each `qgrav run` creates a timestamped folder:
 
-If gaps are present, the pipeline analyzes the **longest contiguous segment** by default and records the gap statistics in the report.
+```
+runs/<name>_<timestamp>/
+    config_used.yaml          # exact config snapshot for reproducibility
+    data.npz                  # all arrays (time, signals, Allan taus, ADEV, etc.)
+    metrics.json              # all computed metrics, sensitivity, noise ID, systematics
+    SUMMARY.md                # human-readable summary
+    report.html               # full HTML report with plots and tables
+    plots/
+        dashboard.png         # 2x2 overview
+        allan.png             # Allan deviation with noise type annotation
+        psd.png               # power spectral density
+        ...
+```
+
+### What's in metrics.json
+
+- Error statistics (RMSE, MAE, bias, SNR) with baseline vs. improved comparison
+- PSD via periodogram or Welch method
+- Overlapping Allan deviation with backend cross-validation
+- **Noise type identification** — slope classification (white PM/FM, flicker PM/FM, random walk FM)
+- **Allan minimum** — optimal averaging time
+- **Shot-noise sensitivity** — `1/(C * k_eff * T^2 * sqrt(N/T_cycle))` in m/s^2/sqrt(Hz) and uGal/sqrt(Hz)
+- **Systematic effects** — gravity gradient shift, Coriolis shift (order-of-magnitude estimates)
+- Gap report (for real gravity data)
+
+---
+
+## Scientific features
+
+### Shot-noise sensitivity
+Computes the quantum projection noise limit for atom interferometer gravimeters:
+
+```
+delta_g = 1 / (C * k_eff * T^2 * sqrt(N / T_cycle))
+```
+
+Available as `shot_noise_sensitivity_m_s2_per_sqrt_hz()` and `sensitivity_ugal_per_sqrt_hz()` in `qgrav.physics`.
+
+### Noise type identification
+Fits the log-log slope of Allan deviation curves and classifies into standard noise types:
+
+| Slope | Noise type |
+|-------|-----------|
+| -1.0 | White phase modulation |
+| -0.75 | Flicker phase modulation |
+| -0.5 | White frequency modulation |
+| -0.25 | Flicker frequency modulation |
+| +0.5 | Random walk frequency modulation |
+
+### Systematic effects
+Order-of-magnitude estimates (clearly documented as **not** included in AISim simulation):
+- **Gravity gradient** — vertical free-air gradient effect during free fall
+- **Coriolis** — Earth rotation coupling with horizontal atomic velocity
+
+### Published references
+Frozen registry of benchmark values with DOI links for validation:
+- Freier et al. (2016) — gravimetric sensitivity
+- Menoret et al. (2018) — absolute accuracy
+- Hinderer, Crossley & Warburton (2007) — SG noise floor
+- Peters, Chung & Chu (2001) — MZ fringe visibility
+
+---
+
+## Batch processing
+
+For multi-station analysis with real gravimetry data:
+
+```bash
+# Scan all stations, output quality metrics to CSV
+python scripts/batch_scan_stations.py --source path/to/ggp_data --output results.csv
+
+# Overlaid Allan/PSD comparison plot across stations
+python scripts/multi_station_comparison.py --source path/to/ggp_data --output comparison.png
+```
+
+---
+
+## AISim gravimeter studies
+
+Three thesis/report-quality simulation studies:
+
+| Config | Study |
+|--------|-------|
+| `example_aisim_phase_scan.yaml` | Full three-pulse Mach-Zehnder phase scan |
+| `example_aisim_gravity_sweep.yaml` | Hybrid gravity sweep (AISim pulse transfer + gravimeter phase law) |
+| `example_aisim_vibration_sweep.yaml` | Vibration sensitivity sweep (mirror-motion phase response) |
+
+```bash
+# Run all three
+scripts/run_aisim_gravimeter_studies.sh
+```
+
+See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and limitations of each study.
+
+---
+
+## Repository layout
+
+```
+qgrav/
+  configs/                      # YAML pipeline configurations
+  data/raw/sg_sample/           # bundled sample station for testing
+  docs/                         # detailed documentation
+  scripts/                      # batch processing and utility scripts
+  src/qgrav/
+    algorithms/                 # signal processing algorithms
+    bench_ifo/                  # interferometer bench (virtual, real, real_gravity)
+    datasets/                   # data loaders (IGETS/GGP, CSV)
+    metrics/                    # PSD, Allan deviation, noise ID, error stats
+    physics/                    # phase models, sensitivity, systematics
+    reporting/                  # HTML report generation (Jinja2)
+    sim_ai/                     # AISim adapter layer
+    validation/                 # published references, curve comparison
+    gui/                        # tkinter desktop application
+      widgets/                  # extracted MetricCards, ScrollableFrame
+      app.py                    # main GUI application
+    visuals.py                  # matplotlib figure builders
+    pipeline.py                 # orchestrates the full run
+    cli.py                      # CLI entry point
+  tests/                        # 79 tests (pytest)
+```
 
 ---
 
 ## Tests
 
-Run all tests with:
-
 ```bash
-pytest -q
+# Set backend for headless matplotlib (avoids tkinter display issues)
+# PowerShell:
+$env:MPLBACKEND = "Agg"
+# Bash:
+export MPLBACKEND=Agg
+
+# Run all tests
+python -m pytest -q
+
+# Verbose with tracebacks
+python -m pytest -v --tb=short
 ```
 
-Current stage includes tests for:
-- synthetic pipeline
-- AISim integration
-- GUI import
-- visual generation
-- `.ggp` parsing
-- CSV conversion
-- real gravimetry pipeline
+**79 tests** covering: synthetic pipeline, AISim integration, GUI imports, visual generation, `.ggp` parsing, CSV conversion, real gravimetry pipeline, Allan deviation backends, noise identification, shot-noise sensitivity, systematics, published references, batch scripts, and float tau matching edge cases.
 
 ---
 
-## Recommended next step after this stage
+## Documentation
 
-Once the real-data lane is stable, the next strongest upgrade is:
+| Document | Description |
+|----------|-------------|
+| [CHANGELOG.md](CHANGELOG.md) | Full change log with commit hashes |
+| [GUIDE.md](GUIDE.md) | User guide and workflow documentation |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture overview |
+| [docs/SCIENTIFIC_HARDENING.md](docs/SCIENTIFIC_HARDENING.md) | What is AISim-backed vs. hybrid vs. analytic |
+| [docs/AISIM_INTEGRATION.md](docs/AISIM_INTEGRATION.md) | AISim vendor integration details |
+| [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) | Scientific meaning of each AISim study |
+| [docs/REAL_GRAVITY_DATA.md](docs/REAL_GRAVITY_DATA.md) | Real gravimetry data ingestion guide |
+| [docs/GUI.md](docs/GUI.md) | Desktop GUI documentation |
+| [docs/REPRODUCTION.md](docs/REPRODUCTION.md) | Reproducing pipeline runs |
 
-- a **gravimeter-relevant AISim study mode**
-- gravity-phase scaling
-- vibration sensitivity sweeps
-- comparison between simulated stability and real gravimetry data signatures
+---
 
-See `GUIDE.md` and `docs/REAL_GRAVITY_DATA.md`.
+## Dependencies
 
+| Package | Version | Used by |
+|---------|---------|---------|
+| numpy | >= 1.23 | Core |
+| matplotlib | >= 3.7 | Core |
+| pyyaml | >= 6.0 | Core |
+| jinja2 | >= 3.1 | Core (reporting) |
+| scipy | >= 1.6 | Vendored allantools and vendor/aisim only |
 
-## AISim gravimeter studies
+---
 
-The repo now includes three thesis/report-quality AISim studies:
+## What's new in v0.7.0
 
-- `configs/example_aisim_phase_scan.yaml` — full three-pulse Mach–Zehnder-style phase scan in AISim
-- `configs/example_aisim_gravity_sweep.yaml` — hybrid gravity sweep using AISim for pulse-transfer effects and the standard gravimeter phase law for gravity
-- `configs/example_aisim_vibration_sweep.yaml` — hybrid vibration sensitivity sweep using the three-pulse mirror-motion phase response
+Upgrade from v0.5.0 with **+1503 lines** across **33 files**, followed by a comprehensive code audit.
 
-Run them with:
+**Stabilization (Track A):** Dashboard rendering fix, semicolon reformatting, dropped-row tracking, float tau matching rewrite (230x speedup), GUI temp file cleanup, dependency documentation.
 
-```bash
-qgrav run --config configs/example_aisim_phase_scan.yaml
-qgrav run --config configs/example_aisim_gravity_sweep.yaml
-qgrav run --config configs/example_aisim_vibration_sweep.yaml
-```
+**Scientific validation (Track B):** Shot-noise sensitivity function, sensitivity in all AISim MZ outputs, noise type identification (5 types via log-log slope), Allan minimum finder, systematic effects module (gravity gradient + Coriolis), published references registry with DOIs.
 
-Or use:
+**GUI & infrastructure (Track C):** GUI split into package with extracted widgets, IGETS unit format expansion, batch processing scripts, Allan noise annotations on all plots, systematics table in HTML reports.
 
-```bash
-scripts/run_aisim_gravimeter_studies.sh
-```
+**Code audit:** 8 bugs fixed (negative k_eff, Coriolis sign error, O(n^2) tau matching, format string crash, etc.) + 6 quality improvements (zero-value tolerance, DOI links, autoescape, logging, batch script tests).
 
-See `docs/AISIM_GRAVIMETER_STUDIES.md` for the scientific meaning and limitations of each study.
-
-
-## Scientific hardening
-
-The simulation layer now separates:
-- atom source
-- pulse sequence
-- phase model
-- readout model
-- ground-truth validation
-
-See `docs/SCIENTIFIC_HARDENING.md` for details on what is fully AISim-backed, what is hybrid, and how truth-checks are stored in reports.
+See [CHANGELOG.md](CHANGELOG.md) for the full commit-by-commit breakdown.
