@@ -54,3 +54,22 @@ def test_vibration_sweep_zero_amplitude_means_zero_equivalent_gravity_error():
     assert len(out["vibration_amplitude_m"]) == 9
     assert abs(float(out["equivalent_gravity_error_m_s2"][0])) < 1e-15
     assert np.all(np.isfinite(out["vibration_phase_rad"]))
+
+
+def test_gravity_sweep_includes_sensitivity():
+    out = run_aisim_gravity_sweep(n_atoms=200, n_gravity_points=7, seed=42)
+    assert "shot_noise_sensitivity_m_s2_per_sqrt_hz" in out
+    assert out["shot_noise_sensitivity_m_s2_per_sqrt_hz"] > 0
+    assert "shot_noise_sensitivity_ugal_per_sqrt_hz" in out
+
+
+def test_phase_scan_includes_sensitivity():
+    out = run_aisim_mach_zehnder_phase_scan(n_atoms=200, n_phase_points=9, seed=42)
+    assert "shot_noise_sensitivity_m_s2_per_sqrt_hz" in out
+    assert out["shot_noise_sensitivity_m_s2_per_sqrt_hz"] > 0
+
+
+def test_vibration_sweep_includes_sensitivity():
+    out = run_aisim_vibration_sensitivity_sweep(n_atoms=200, n_amplitude_points=7, seed=42)
+    assert "shot_noise_sensitivity_m_s2_per_sqrt_hz" in out
+    assert out["shot_noise_sensitivity_m_s2_per_sqrt_hz"] > 0

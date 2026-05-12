@@ -422,6 +422,18 @@ def run_aisim_mach_zehnder_phase_scan(
     fit = _fit_sinusoid(phases, port3)
     fit_curve = fit["offset"] + fit["amplitude"] * np.cos(phases + fit["phase_offset_rad"])
     peak_idx = int(np.argmax(port3))
+
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    _visibility = float(fit.get("visibility", 1.0))
+    _contrast = max(min(_visibility, 1.0), 0.01)
+    _sens = shot_noise_sensitivity_m_s2_per_sqrt_hz(
+        k_eff_rad_per_m=k_eff,
+        interferometer_time_s=float(interferometer_time_s),
+        n_atoms=max(detected_count, 1),
+        contrast=_contrast,
+        cycle_time_s=1.0,
+    )
+
     result = {
         "backend": "aisim",
         "model": "mach_zehnder_phase_scan",
@@ -443,6 +455,8 @@ def run_aisim_mach_zehnder_phase_scan(
         "fringe_visibility_port_3": float(fit["visibility"]),
         "fringe_fit_r2": float(fit["r2"]),
         "fit_phase_offset_rad": float(fit["phase_offset_rad"]),
+        "shot_noise_sensitivity_m_s2_per_sqrt_hz": _sens,
+        "shot_noise_sensitivity_ugal_per_sqrt_hz": _sens * 1e8,
         "summary_rows": {
             "Backend": "aisim",
             "Model": "mach_zehnder_phase_scan",
@@ -456,6 +470,8 @@ def run_aisim_mach_zehnder_phase_scan(
             "Fringe visibility (port 3)": float(fit["visibility"]),
             "Fringe fit R²": float(fit["r2"]),
             "Peak phase (rad)": float(phases[peak_idx]),
+            "Sensitivity (m/s²/√Hz)": _sens,
+            "Sensitivity (µGal/√Hz)": _sens * 1e8,
         },
         "plot_specs": [
             {
@@ -584,6 +600,16 @@ def run_aisim_gravity_sweep(
         slope = float((norm_diff[center_idx + 1] - norm_diff[center_idx - 1]) / (g_values[center_idx + 1] - g_values[center_idx - 1]))
     else:
         slope = float("nan")
+
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    _sens_gs = shot_noise_sensitivity_m_s2_per_sqrt_hz(
+        k_eff_rad_per_m=k_eff,
+        interferometer_time_s=float(interferometer_time_s),
+        n_atoms=max(detected_count, 1),
+        contrast=1.0,
+        cycle_time_s=1.0,
+    )
+
     result = {
         "backend": "aisim",
         "model": "gravity_sweep",
@@ -604,6 +630,8 @@ def run_aisim_gravity_sweep(
         "gravity_span_m_s2": float(gravity_span_m_s2),
         "phase_bias_rad": float(phase_bias_rad),
         "operating_slope_per_m_s2": slope,
+        "shot_noise_sensitivity_m_s2_per_sqrt_hz": _sens_gs,
+        "shot_noise_sensitivity_ugal_per_sqrt_hz": _sens_gs * 1e8,
         "summary_rows": {
             "Backend": "aisim",
             "Model": "gravity_sweep",
@@ -617,6 +645,8 @@ def run_aisim_gravity_sweep(
             "Gravity span (m/s²)": float(gravity_span_m_s2),
             "Phase bias (rad)": float(phase_bias_rad),
             "Mid-fringe slope (norm signal per m/s²)": slope,
+            "Sensitivity (m/s²/√Hz)": _sens_gs,
+            "Sensitivity (µGal/√Hz)": _sens_gs * 1e8,
         },
         "plot_specs": [
             {
@@ -759,6 +789,16 @@ def run_aisim_vibration_sensitivity_sweep(
         slope = float((equiv_g_error[-1] - equiv_g_error[0]) / max(amplitudes[-1] - amplitudes[0], 1e-30))
     else:
         slope = float("nan")
+
+    from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+    _sens_vs = shot_noise_sensitivity_m_s2_per_sqrt_hz(
+        k_eff_rad_per_m=k_eff,
+        interferometer_time_s=float(interferometer_time_s),
+        n_atoms=max(detected_count, 1),
+        contrast=1.0,
+        cycle_time_s=1.0,
+    )
+
     result = {
         "backend": "aisim",
         "model": "vibration_sensitivity_sweep",
@@ -781,6 +821,8 @@ def run_aisim_vibration_sensitivity_sweep(
         "normalized_differential_signal": norm_diff,
         "phase_bias_rad": float(phase_bias_rad),
         "equivalent_gravity_error_per_m": slope,
+        "shot_noise_sensitivity_m_s2_per_sqrt_hz": _sens_vs,
+        "shot_noise_sensitivity_ugal_per_sqrt_hz": _sens_vs * 1e8,
         "summary_rows": {
             "Backend": "aisim",
             "Model": "vibration_sensitivity_sweep",
@@ -794,6 +836,8 @@ def run_aisim_vibration_sensitivity_sweep(
             "Max amplitude (m)": float(amplitudes[-1]),
             "Max equivalent gravity error (m/s²)": float(np.max(np.abs(equiv_g_error))),
             "Equivalent gravity error per meter amplitude": slope,
+            "Sensitivity (m/s²/√Hz)": _sens_vs,
+            "Sensitivity (µGal/√Hz)": _sens_vs * 1e8,
         },
         "plot_specs": [
             {
