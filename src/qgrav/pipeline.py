@@ -86,6 +86,21 @@ def _jsonable(obj: Any) -> Any:
     return obj
 
 
+def _match_taus(taus1: np.ndarray, taus2: np.ndarray, rtol: float = 1e-9):
+    """Match tau values between two arrays using relative tolerance.
+
+    Returns (indices_in_taus1, indices_in_taus2) for matched pairs.
+    """
+    idx1, idx2 = [], []
+    for i, t1 in enumerate(taus1):
+        for j, t2 in enumerate(taus2):
+            if abs(t1 - t2) <= rtol * max(abs(t1), abs(t2), 1e-30):
+                idx1.append(i)
+                idx2.append(j)
+                break
+    return np.array(idx1, dtype=int), np.array(idx2, dtype=int)
+
+
 def _compare_allan_backends(
     x: np.ndarray,
     fs: float,
@@ -102,8 +117,8 @@ def _compare_allan_backends(
     taus2 = np.asarray(reference["taus_s"], dtype=np.float64)
     adev2 = np.asarray(reference["adev"], dtype=np.float64)
 
-    common = np.intersect1d(taus1, taus2)
-    if len(common) == 0:
+    i1, i2 = _match_taus(taus1, taus2)
+    if len(i1) == 0:
         return {
             "primary_backend": primary_backend,
             "reference_backend": reference_backend,
@@ -111,15 +126,15 @@ def _compare_allan_backends(
             "tau_count": 0,
             "note": "No common tau values available for backend comparison.",
         }
-    v1 = np.array([adev1[np.where(taus1 == tau)[0][0]] for tau in common], dtype=np.float64)
-    v2 = np.array([adev2[np.where(taus2 == tau)[0][0]] for tau in common], dtype=np.float64)
+    v1 = adev1[i1]
+    v2 = adev2[i2]
     abs_diff = np.abs(v1 - v2)
     rel_diff = abs_diff / np.maximum(np.abs(v2), 1e-30)
     return {
         "primary_backend": primary_backend,
         "reference_backend": reference_backend,
         "data_type": data_type,
-        "tau_count": int(len(common)),
+        "tau_count": int(len(i1)),
         "max_abs_diff": float(np.max(abs_diff)),
         "mean_abs_diff": float(np.mean(abs_diff)),
         "max_rel_diff": float(np.max(rel_diff)),
