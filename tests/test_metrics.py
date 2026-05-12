@@ -62,3 +62,14 @@ def test_error_stats():
     stats = compute_error_statistics(y_true, y_hat)
     assert stats["rmse"] >= 0.0
     assert stats["mae"] >= 0.0
+
+
+def test_match_taus_with_float_perturbation():
+    from qgrav.pipeline import _match_taus
+    t1 = np.array([1.0, 2.0, 4.0, 8.0])
+    t2 = np.array([1.0 + 1e-14, 2.0 - 1e-14, 4.0, 8.0 + 1e-15])
+    i1, i2 = _match_taus(t1, t2)
+    assert len(i1) == 4
+    assert len(i2) == 4
+    np.testing.assert_array_equal(i1, [0, 1, 2, 3])
+    np.testing.assert_array_equal(i2, [0, 1, 2, 3])
