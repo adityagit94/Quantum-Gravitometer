@@ -53,14 +53,14 @@ def scan_station(source_path: Path, station_code: str) -> dict[str, object]:
         if len(adev_result["adev"]) > 0:
             row["adev_min"] = float(np.min(adev_result["adev"]))
     except Exception:
-        pass
+        logger.warning("Allan deviation failed for %s", station_code, exc_info=True)
 
     try:
         psd_result = compute_psd(values, sample_rate, method="welch")
         if len(psd_result["psd"]) > 0:
             row["psd_median"] = float(np.median(psd_result["psd"]))
     except Exception:
-        pass
+        logger.warning("PSD computation failed for %s", station_code, exc_info=True)
 
     return row
 

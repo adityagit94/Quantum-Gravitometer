@@ -20,10 +20,17 @@ class PublishedReference:
     source: str
     year: int
     tolerance_pct: float = 10.0  # default ±10 % acceptance band
+    doi: str = ""  # DOI link, if available
 
-    def contains(self, measured: float) -> bool:
-        """Return True if *measured* falls within the tolerance band."""
+    def contains(self, measured: float, abs_tol: float = 1e-15) -> bool:
+        """Return True if *measured* falls within the tolerance band.
+
+        When ``value`` is zero the percentage band collapses to zero width,
+        so an absolute tolerance *abs_tol* is used as a fallback.
+        """
         half = abs(self.value) * self.tolerance_pct / 100.0
+        if half == 0.0:
+            half = abs_tol
         return (self.value - half) <= measured <= (self.value + half)
 
 
@@ -36,6 +43,7 @@ REFERENCES: dict[str, PublishedReference] = {
         source="Freier et al., J. Phys.: Conf. Ser. 723 012050 (2016)",
         year=2016,
         tolerance_pct=50.0,
+        doi="10.1088/1742-6596/723/1/012050",
     ),
     "menoret_2018_accuracy": PublishedReference(
         key="menoret_2018_accuracy",
@@ -45,6 +53,7 @@ REFERENCES: dict[str, PublishedReference] = {
         source="Menoret et al., Sci. Rep. 8, 12300 (2018)",
         year=2018,
         tolerance_pct=50.0,
+        doi="10.1038/s41598-018-30608-1",
     ),
     "sg_noise_floor": PublishedReference(
         key="sg_noise_floor",
@@ -54,6 +63,7 @@ REFERENCES: dict[str, PublishedReference] = {
         source="Hinderer, Crossley & Warburton, Treatise on Geophysics (2007)",
         year=2007,
         tolerance_pct=100.0,
+        doi="10.1016/B978-044452748-6.00058-4",
     ),
     "mz_visibility": PublishedReference(
         key="mz_visibility",
@@ -63,6 +73,7 @@ REFERENCES: dict[str, PublishedReference] = {
         source="Peters, Chung & Chu, Metrologia 38, 25 (2001)",
         year=2001,
         tolerance_pct=80.0,
+        doi="10.1088/0026-1394/38/1/4",
     ),
 }
 

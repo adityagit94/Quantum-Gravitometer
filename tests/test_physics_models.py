@@ -118,6 +118,13 @@ def test_gravity_gradient_positive():
     assert shift2 > shift
 
 
+def test_gravity_gradient_rejects_negative_time():
+    from qgrav.physics.systematics import gravity_gradient_shift_m_s2
+    import pytest
+    with pytest.raises(ValueError, match="non-negative"):
+        gravity_gradient_shift_m_s2(interferometer_time_s=-0.1)
+
+
 def test_coriolis_zero_at_pole():
     from qgrav.physics.systematics import coriolis_shift_m_s2
     shift = coriolis_shift_m_s2(latitude_deg=90.0, horizontal_velocity_m_s=1e-3)

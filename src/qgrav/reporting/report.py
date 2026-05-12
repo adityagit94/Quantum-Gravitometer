@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 
 _TEMPLATE = """<!doctype html>
 <html>
@@ -181,7 +181,7 @@ _TEMPLATE = """<!doctype html>
 
 
 def build_html_report(*, run_dir: Path, config_text: str, metrics: dict[str, Any], plot_paths: dict[str, Any]) -> Path:
-    env = Environment(loader=FileSystemLoader(str(run_dir)), autoescape=select_autoescape())
+    env = Environment(loader=FileSystemLoader(str(run_dir)), autoescape=True)
     template = env.from_string(_TEMPLATE)
     html = template.render(
         run_dir=str(run_dir),
