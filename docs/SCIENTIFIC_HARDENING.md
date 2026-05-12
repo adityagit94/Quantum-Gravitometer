@@ -57,3 +57,20 @@ Then be explicit about study scope:
 - or real-data only.
 
 That honesty improves the quality of the project instead of weakening it.
+
+## Additions in v0.7.0
+
+### Shot-noise sensitivity
+`phase_models.shot_noise_sensitivity_m_s2_per_sqrt_hz()` computes the quantum projection noise limit: `1/(C * k_eff * T^2 * sqrt(N/T_cycle))`. All three Mach-Zehnder AISim functions now report this in their output dictionaries and in the HTML report.
+
+### Noise type identification
+`metrics.allan.identify_noise_type()` fits a log-log slope to the Allan deviation curve and classifies the dominant noise process (white phase, flicker phase, white frequency, flicker frequency, or random walk). Allan plots are now annotated with the identified noise type.
+
+### Allan minimum
+`metrics.allan.allan_minimum()` locates the optimal averaging time (tau at minimum ADEV). Both pipeline paths report this in `metrics.json`.
+
+### Systematic effects
+`physics.systematics` provides order-of-magnitude estimates of the gravity gradient shift and the Coriolis effect. These are explicitly documented as NOT included in the AISim simulation and appear in the HTML report as a separate table.
+
+### Published references
+`validation.published_references` contains a registry of benchmark experimental values (Freier 2016, Menoret 2018, SG noise floor, MZ visibility) with a `compare_to_reference()` helper for tolerance-based comparison.

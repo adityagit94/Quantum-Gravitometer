@@ -18,20 +18,30 @@ The project is designed for the realistic case where you cannot build or access 
 
 ---
 
-## What is new in this stage?
+## What is new in v0.7.0?
 
-This stage adds a full **real gravimetry data lane**:
+### Stabilization (Track A)
+- Fixed dashboard rendering bug in visuals
+- Reformatted semicolon-joined lines in pipeline plot functions
+- Added dropped-row tracking for real interferometer CSV loading
+- Fixed float tau matching (replaced fragile `np.intersect1d` with tolerance-based matching)
+- GUI now cleans up temporary config files on exit
+- AISim license placeholder added; scipy dependency documented
 
-- `.ggp` parser for superconducting gravimeter residual files
-- station metadata support from `SG station.txt`
-- ZIP / directory / single-file ingestion
-- gap detection and analysis-segment selection
-- CSV conversion
-- PSD / Allan / histogram / trend reporting
-- GUI dataset browser for selecting and previewing stations
-- per-station report generation
+### Scientific validation (Track B)
+- **Shot-noise sensitivity function** — `1/(C * k * T^2 * sqrt(N/T_cycle))`
+- **Sensitivity in AISim outputs** — all Mach-Zehnder simulation functions report sensitivity
+- **Noise type identification** — log-log slope classification of Allan deviation curves
+- **Allan minimum finder** — locates optimal averaging time
+- **Systematic effects module** — order-of-magnitude gravity gradient and Coriolis estimates
+- **Published references** — frozen registry of benchmark values (Freier 2016, Menoret 2018, etc.)
 
-This is the correct validation path when hardware is out of scope.
+### GUI refactor & infrastructure (Track C)
+- GUI split into `gui/` package with extracted `MetricCards` and `ScrollableFrame` widgets
+- IGETS unit format expansion (nm/s**2, nm s-2, etc.)
+- Batch processing scripts for multi-station scanning and comparison
+- Allan deviation plots annotated with noise type and slope
+- HTML reports include systematics table and sensitivity data
 
 ---
 
@@ -54,8 +64,11 @@ qgrav/
     reporting/
     sim_ai/
     validation/
+    physics/
+    gui/
+      widgets/
+      app.py
     visuals.py
-    gui.py
     pipeline.py
   tests/
 ```
