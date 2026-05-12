@@ -121,7 +121,23 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
     return issues
 
 
-def resolve_project_relative_path(config_path: Path, raw_path: str | None) -> str | None:
+def resolve_project_relative_path(
+    config_path: Path,
+    raw_path: str | None,
+    *,
+    project_root: Path | None = None,
+) -> str | None:
+    """Resolve a relative path from a config file to an absolute path.
+
+    Resolution order:
+    1. If *raw_path* is absolute, return it unchanged.
+    2. Try relative to *config_path*'s parent directory.
+    3. Try relative to *project_root* (or ``find_project_root(config_path)``).
+    4. Fall back to the config-relative candidate (even if it doesn't exist).
+
+    The *project_root* parameter allows callers (e.g. the GUI) to supply the
+    real project root when *config_path* is a temporary file outside the repo.
+    """
     if raw_path is None:
         return None
     p = Path(str(raw_path))
@@ -131,8 +147,8 @@ def resolve_project_relative_path(config_path: Path, raw_path: str | None) -> st
     candidate = (base / p).resolve()
     if candidate.exists():
         return str(candidate)
-    project_root = find_project_root(config_path)
-    project_candidate = (project_root / p).resolve()
+    root = project_root or find_project_root(config_path)
+    project_candidate = (root / p).resolve()
     return str(project_candidate if project_candidate.exists() else candidate)
 
 
