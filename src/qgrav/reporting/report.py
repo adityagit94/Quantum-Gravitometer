@@ -25,6 +25,12 @@ _TEMPLATE = """<!doctype html>
     th { background: #f6f8fc; text-align: left; }
     .muted { color: #56657f; }
     ul { padding-left: 20px; }
+    .scope-panel { padding: 12px 16px; border-radius: 10px; margin: 12px 0; border: 1px solid; }
+    .scope-fully-simulated { background: #e8f6ec; border-color: #44b463; color: #143a1f; }
+    .scope-hybrid { background: #fff7e0; border-color: #d6a417; color: #4d3402; }
+    .scope-analytical { background: #e8eef9; border-color: #4a6fb5; color: #0f213f; }
+    .level-banner { padding: 10px 14px; border-radius: 8px; margin: 10px 0; border: 1px solid #c95757; background: #fdecec; color: #61130f; }
+    .format-footer { margin-top: 32px; padding-top: 14px; border-top: 1px solid #dbe2ef; color: #56657f; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -79,7 +85,50 @@ _TEMPLATE = """<!doctype html>
   <p>This run used real or externally loaded data without a reference displacement trace, so the report focuses on spectral and stability summaries.</p>
   {% endif %}
 
+  {% if metrics.bench_type == 'real_gravity' %}
+    {% if metrics.data_product_level_at_analysis is defined %}
+      {% if metrics.data_product_level_at_analysis < 3 %}
+        <div class="level-banner">
+          <strong>Data product level {{ metrics.data_product_level_at_analysis }} detected.</strong>
+          Allan deviation may be dominated by un-removed tides and pressure
+          loading. Published superconducting-gravimeter noise floors assume
+          Level-3 (post-correction) data. Enable
+          <code>bench_real_gravity.apply_corrections: true</code> with station
+          coordinates to subtract the solid-earth tide before analysis.
+        </div>
+      {% endif %}
+      {% if metrics.corrections_applied %}
+        <h2>Corrections applied</h2>
+        <table>
+          <tr><th>Data product level at analysis</th><td>{{ metrics.data_product_level_at_analysis }}</td></tr>
+          <tr><th>Corrections</th><td>{{ metrics.corrections_applied | join(', ') }}</td></tr>
+          {% for key, value in metrics.correction_metrics.items() %}
+            <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
   {% if metrics.simulation %}
+  {% set scope_cat = metrics.simulation.get('study_scope_category', 'FULLY_SIMULATED') %}
+  {% if scope_cat == 'HYBRID_AISIM_PLUS_ANALYTICAL' %}
+    <div class="scope-panel scope-hybrid">
+      <strong>Study scope: Hybrid (AISim + analytical)</strong>
+      <p>{{ metrics.simulation.get('study_scope_description', '') }}</p>
+      <p class="muted">Specifically: <code>{{ metrics.simulation.get('study_scope', '') }}</code></p>
+    </div>
+  {% elif scope_cat == 'ANALYTICAL_ONLY' %}
+    <div class="scope-panel scope-analytical">
+      <strong>Study scope: Analytical only</strong>
+      <p>{{ metrics.simulation.get('study_scope_description', '') }}</p>
+    </div>
+  {% else %}
+    <div class="scope-panel scope-fully-simulated">
+      <strong>Study scope: Fully simulated</strong>
+      <p>{{ metrics.simulation.get('study_scope_description', '') }}</p>
+    </div>
+  {% endif %}
   <h2>AISim simulation module</h2>
   <table>
     {% set sim_rows = metrics.simulation.get('summary_rows', {}) %}
@@ -175,6 +224,11 @@ _TEMPLATE = """<!doctype html>
 
   <h2>Metrics JSON</h2>
   <pre>{{ metrics_json }}</pre>
+
+  <div class="format-footer">
+    qgrav output format version: <code>{{ metrics.get('qgrav_output_format_version', '0.x') }}</code>
+    &middot; qgrav version: <code>{{ metrics.get('qgrav_version', 'unknown') }}</code>
+  </div>
 </body>
 </html>
 """

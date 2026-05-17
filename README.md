@@ -1,6 +1,20 @@
-# qgrav v0.7.0 — Quantum Gravimeter R&D Platform
+# qgrav v0.8.0 — Software-first R&D pipeline for atom-interferometric gravimetry
 
-A **software-first research workbench** for atom interferometer gravimetry when lab hardware is unavailable. Instead of making false hardware claims, `qgrav` provides a complete pipeline from simulation through analysis to reproducible reporting.
+**qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim), a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), and an auto-generated HTML report — all driven from a single YAML config.
+
+### What this is
+
+- A reproducible pipeline that takes synthetic or real time-series in and writes a versioned run folder out (raw arrays, metrics JSON, plots, HTML report).
+- A research workbench for designing and benchmarking atom-interferometer parameters against published instruments.
+- An honest tool: every simulation result carries a **study-scope label** (fully simulated / hybrid / analytical only) so users can tell at a glance what is computed from first principles vs imposed analytically.
+
+### What this is not
+
+- Hardware control: there is no GPIB / serial / real-time loop.
+- A general-purpose geodynamics suite: the v0.8 tide / pressure correction stage exists only to make IGETS Allan-deviation comparisons meaningful. For serious geodynamics use PyGTide, ETERNA, or SPOTL.
+- A competitor to dedicated research-group simulation codes (Mueller/Berkeley, SYRTE, Stanford, Humboldt). The AISim integration is the simulation core; qgrav wraps and extends it.
+
+See `docs/COMPLETE_GUIDE.md` for the full user guide and `docs/CHANGELOG.md` for the v0.7 → v0.8 changes.
 
 **Author:** Aditya Prakash | **License:** MIT | **Python:** >= 3.9
 

@@ -1,10 +1,45 @@
-from qgrav.validation import REFERENCES, PublishedReference, compare_to_reference
+import warnings
+
 import pytest
+
+from qgrav.validation import REFERENCES, PublishedReference, compare_to_reference
 
 
 def test_references_keys_exist():
-    expected = {"freier_2016_sensitivity", "menoret_2018_accuracy", "sg_noise_floor", "mz_visibility"}
-    assert expected == set(REFERENCES.keys())
+    # v0.8: registry expanded to cover GAIN, AQG, Wuhan 10 m, Stanford,
+    # Kasevich-Chu 1991, Bidel 2018 marine, NLNM, plus the v0.7 retained
+    # entries. The exact set may grow; check the core members.
+    core_v08 = {
+        "freier_2016_short_term_noise",
+        "freier_2016_accuracy",
+        "freier_2016_long_term_stability",
+        "menoret_2018_short_term_noise",
+        "menoret_2018_long_term_stability",
+        "hu_2013_short_term_noise",
+        "peters_2001_accuracy",
+        "kasevich_chu_1991_first_demo",
+        "bidel_2018_marine",
+        "nlnm_low_freq",
+        "sg_noise_floor",
+        "mz_visibility",
+    }
+    assert core_v08 <= set(REFERENCES.keys())
+
+
+def test_legacy_keys_emit_deprecation_warning():
+    """v0.7 keys still work but issue a DeprecationWarning."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = compare_to_reference("freier_2016_sensitivity", 9.6e-8)
+    assert any(issubclass(w.category, DeprecationWarning) for w in caught)
+    # The legacy key should resolve to the corrected entry.
+    assert result["key"] == "freier_2016_short_term_noise"
+    assert result["reference_value"] == 9.6e-8
+
+
+def test_corrected_freier_short_term_noise_value():
+    """Regression: v0.7 stored 5e-8; the true value is 9.6e-8 m/s^2/sqrt(Hz)."""
+    assert REFERENCES["freier_2016_short_term_noise"].value == 9.6e-8
 
 
 def test_all_references_are_frozen_dataclass():
