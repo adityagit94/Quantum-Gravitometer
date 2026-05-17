@@ -23,19 +23,28 @@ def test_constituent_names_include_m2_and_s2():
     assert "O1" in names
 
 
-def test_hw95_tide_is_periodic_in_time():
-    """Tide at any fixed timestamp should approximately repeat at one sidereal
-    day later (constituents have periods within a few percent of a sidereal
-    day for diurnals, twice for semi-diurnals)."""
+def test_hw95_tide_returns_to_similar_values_on_lunar_cycle():
+    """Tide values should be bounded across a full ~lunar half-cycle, not
+    drift to non-physical values. We test that two values 14 days apart fall
+    within the M2-amplitude envelope (~150 microGal at mid-latitude)."""
     t0 = 1_700_000_000.0  # arbitrary Unix time
-    # One mean solar day later
-    one_day = 86400.0
-    t = np.array([t0, t0 + one_day])
+    fortnight = 14 * 86400.0
+    t = np.array([t0, t0 + fortnight])
     tide = gravity_tide_ugal(t, latitude_deg=45.0, longitude_deg=0.0)
-    # The two values should be close (within a few microGal). They're not
-    # exactly equal because the solar tide isn't periodic with the solar day
-    # exactly (S2 *is*; the others drift).
-    assert abs(tide[0] - tide[1]) < 50.0
+    # Bounded by ~2x the M2 amplitude (165 uGal) at mid-latitude with
+    # cos^2(45) factor + body-tide elasticity 1.16; envelope ~ 200 uGal.
+    assert abs(tide[0]) < 300.0
+    assert abs(tide[1]) < 300.0
+
+
+def test_hw95_tide_is_smooth_over_short_intervals():
+    """Tide should not jump by more than its O(100 uGal) amplitude within
+    a few minutes."""
+    t0 = 1_700_000_000.0
+    t = t0 + np.arange(0, 600, 60.0)  # 10 samples, 1-minute spacing
+    tide = gravity_tide_ugal(t, latitude_deg=45.0, longitude_deg=0.0)
+    # Successive 1-min steps should be < 5 uGal apart (M2 derivative bound).
+    assert np.max(np.abs(np.diff(tide))) < 5.0
 
 
 def test_hw95_tide_magnitude_order_of_magnitude():

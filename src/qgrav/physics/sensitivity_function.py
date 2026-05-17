@@ -144,28 +144,36 @@ def transfer_function_vibration(
     interferometer_time_s: float,
     pulse_duration_s: float = 0.0,
 ) -> np.ndarray:
-    """Mod-squared transfer function |H(2 pi f)|^2 for vibration coupling.
+    """Laser-phase-noise transfer function squared |G(2 pi f)|^2.
 
-    Instantaneous-pulse limit:
+    This is the squared magnitude of the Fourier transform of the
+    time-domain sensitivity function g(t) (-1 on [0,T], +1 on [T,2T]):
 
-        |H(2 pi f)|^2 = 16 sin^4(pi f T) / (2 pi f)^2
+        |G(2 pi f)|^2 = 16 sin^4(pi f T) / (2 pi f)^2
 
-    The transfer function has notches at f = n / T for n = 1, 2, 3, ... and
-    rolls off as 1/f^2 for f >> 1/T. At f << 1/T it behaves as
-    (2 pi f T)^2 * T^2 (low-frequency cutoff).
+    Use this when the input noise PSD is a *laser phase* PSD in rad^2/Hz;
+    the output phase variance is
+
+        sigma_phi^2 = int |G(2 pi f)|^2 S_phi(f) df
+
+    For mirror vibration (acceleration PSD) input, use
+    :func:`acceleration_to_phase_transfer_function_sq` instead, which
+    differs by a factor (k_eff / (2 pi f))^2.
+
+    The transfer function has notches at f = n/T for n = 1, 2, 3, ... and
+    rolls off as 1/f^2 above 1/T.
 
     For finite pulse duration tau, a sinc^2 factor multiplies the
     instantaneous-pulse expression:
 
-        |H_tau(2 pi f)|^2 = |H_0(2 pi f)|^2 * sinc^2(pi f tau)
+        |G_tau(2 pi f)|^2 = |G_0(2 pi f)|^2 * sinc^2(pi f tau)
 
     where sinc(x) = sin(x)/x.
 
     Parameters
     ----------
     f_hz:
-        Frequencies at which to evaluate, in Hz. May be a scalar or array.
-        f = 0 is handled correctly (returns 0).
+        Frequencies at which to evaluate, in Hz. f = 0 returns 0.
     interferometer_time_s:
         Free-evolution time T.
     pulse_duration_s:
@@ -173,8 +181,8 @@ def transfer_function_vibration(
 
     Returns
     -------
-    Array of |H|^2 values in (rad^2 * s^2) / (m/s^2)^2 units when later
-    multiplied by an acceleration PSD in (m/s^2)^2 / Hz.
+    Array of |G|^2 values; multiply by laser-phase PSD (rad^2/Hz) and
+    integrate over df to obtain phase variance in rad^2.
     """
     f = np.asarray(f_hz, dtype=float)
     T = float(interferometer_time_s)
@@ -195,6 +203,50 @@ def transfer_function_vibration(
         )
         base = base * sinc_factor
     out[nonzero] = base
+    return out
+
+
+def acceleration_to_phase_transfer_function_sq(
+    f_hz: np.ndarray,
+    *,
+    interferometer_time_s: float,
+    pulse_duration_s: float = 0.0,
+    k_eff_rad_per_m: float,
+) -> np.ndarray:
+    """Mod-squared transfer function from acceleration PSD to phase variance.
+
+    Integrating an acceleration PSD S_a(f) in (m/s^2)^2/Hz against this
+    function yields the interferometer phase variance:
+
+        sigma_phi^2 = int |H_a(2 pi f)|^2 S_a(f) df
+
+    with
+
+        |H_a(2 pi f)|^2 = 16 k_eff^2 sin^4(pi f T) / (2 pi f)^4
+
+    Equivalently, the acceleration-to-equivalent-gravity transfer function
+    squared is |H_a|^2 / (k_eff^2 T^4) = 16 sin^4(pi f T) / [(2 pi f)^4 T^4].
+
+    Derivation: the second-difference operator [1, -2, 1] applied to z(0),
+    z(T), z(2T) has discrete-frequency response |H_disc|^2 = 16 sin^4(pi f T).
+    Converting displacement PSD S_z = S_a / (2 pi f)^4 and multiplying by
+    k_eff^2 gives the formula above.
+    """
+    f = np.asarray(f_hz, dtype=float)
+    T = float(interferometer_time_s)
+    if T <= 0:
+        raise ValueError("interferometer_time_s must be positive")
+    if k_eff_rad_per_m <= 0:
+        raise ValueError("k_eff_rad_per_m must be positive")
+    out = np.zeros_like(f)
+    nz = f != 0.0
+    f_nz = f[nz]
+    omega = 2.0 * np.pi * f_nz
+    base = 16.0 * (k_eff_rad_per_m ** 2) * np.sin(np.pi * f_nz * T) ** 4 / (omega ** 4)
+    if pulse_duration_s > 0:
+        sinc_sq = (np.sin(np.pi * f_nz * pulse_duration_s) / (np.pi * f_nz * pulse_duration_s)) ** 2
+        base = base * sinc_sq
+    out[nz] = base
     return out
 
 
@@ -244,21 +296,21 @@ def integrate_vibration_noise(
     if k_eff_rad_per_m <= 0:
         raise ValueError("k_eff_rad_per_m must be positive")
 
-    # Acceleration-to-equivalent-gravity transfer function squared:
-    #     |H_g(2 pi f)|^2 = 16 sin^4(pi f T) / [(2 pi f)^2 T^4]
-    # so that  sigma_g^2 = int |H_g|^2 S_a df.
-    # The phase variance is then sigma_phi = sigma_g * k_eff * T^2.
-    H_phi_sq = transfer_function_vibration(
+    # Acceleration-to-phase transfer function squared:
+    #     |H_a(2 pi f)|^2 = 16 k_eff^2 sin^4(pi f T) / (2 pi f)^4
+    # so that  sigma_phi^2 = int |H_a|^2 S_a df.
+    # The equivalent gravity noise is sigma_g = sigma_phi / (k_eff * T^2).
+    H_a_sq = acceleration_to_phase_transfer_function_sq(
         f,
         interferometer_time_s=interferometer_time_s,
         pulse_duration_s=pulse_duration_s,
+        k_eff_rad_per_m=k_eff_rad_per_m,
     )
+    integrand = H_a_sq * psd
+    sigma_phi_sq = float(_trapezoid(integrand, f))
+    sigma_phi = float(np.sqrt(max(sigma_phi_sq, 0.0)))
     T = interferometer_time_s
-    H_g_sq = H_phi_sq / (T ** 4)
-    integrand = H_g_sq * psd
-    sigma_g_sq = float(_trapezoid(integrand, f))
-    sigma_g = float(np.sqrt(max(sigma_g_sq, 0.0)))
-    sigma_phi = sigma_g * k_eff_rad_per_m * (T ** 2)
+    sigma_g = sigma_phi / (k_eff_rad_per_m * (T ** 2))
     return {
         "sigma_phi_rad": sigma_phi,
         "sigma_g_m_s2": sigma_g,
@@ -269,6 +321,7 @@ def integrate_vibration_noise(
 __all__ = [
     "sensitivity_function_time_domain",
     "transfer_function_vibration",
+    "acceleration_to_phase_transfer_function_sq",
     "integrate_vibration_noise",
     "NLNM_PSD",
     "NHNM_PSD",
