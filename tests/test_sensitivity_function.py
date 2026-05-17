@@ -85,6 +85,39 @@ def test_transfer_function_rolloff_above_1_over_T():
     assert -2.3 < slope < -1.7, f"expected ~-2 rolloff, got slope {slope:.2f}"
 
 
+def test_integrate_vibration_matches_analytical_rms_over_phase():
+    """For mirror motion z(t) = A sin(2*pi*f0*t + phi0), averaging |Phi|^2
+    over uniformly distributed phi0 in [0, 2*pi) gives
+
+        <|Phi|^2>_phi0 = 8 k_eff^2 A^2 sin^4(pi f0 T)
+
+    The integrator (which assumes random-phase tones, the standard PSD
+    convention) must match this within 1%. This pins down both the
+    transfer-function form and the integration normalization.
+    """
+    T = 0.26
+    f0 = 1.7
+    A = 1e-9
+    k_eff = K_EFF_RB87_D2.value
+    expected_sigma_phi_sq = 8.0 * (k_eff ** 2) * (A ** 2) * (math.sin(math.pi * f0 * T) ** 4)
+    expected_sigma_phi = math.sqrt(expected_sigma_phi_sq)
+
+    # Single-tone PSD: total variance over the band equals 0.5 * a_peak^2.
+    a_peak = A * (2 * math.pi * f0) ** 2
+    var_acc = 0.5 * a_peak ** 2
+    df = 1e-4
+    f_grid = np.array([f0 - df / 2, f0, f0 + df / 2])
+    psd = np.array([var_acc / df] * 3)
+    out = integrate_vibration_noise(
+        psd, f_grid,
+        interferometer_time_s=T,
+        k_eff_rad_per_m=k_eff,
+    )
+    assert math.isclose(out["sigma_phi_rad"], expected_sigma_phi, rel_tol=2e-2), (
+        f"integrator={out['sigma_phi_rad']:.4e}, expected={expected_sigma_phi:.4e}"
+    )
+
+
 def test_single_tone_phase_scales_linearly_with_amplitude():
     """The analytical single-tone vibration phase is linear in displacement
     amplitude. (The broadband-integrator-vs-analytical reconciliation requires

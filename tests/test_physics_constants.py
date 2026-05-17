@@ -114,6 +114,19 @@ def test_aisim_adapter_uses_constants_for_defaults():
     )
     assert "gravity_center_m_s2: float = 9.81" not in text
     assert "gravity_ref_m_s2: float = 9.81" not in text
+    # Also catch the sim_cfg.get(..., 9.81) literal fallbacks: those should
+    # also use NOMINAL_GRAVITY.value.
+    no_docstrings = re.sub(r'(?s)""".*?"""', "", text)
+    code_only = re.sub(r"#[^\n]*", "", no_docstrings)
+    # 9.81 appearing immediately after a comma is the dispatcher default
+    # fallback pattern. NOMINAL_GRAVITY.value carries the same value.
+    assert ", 9.81)" not in code_only, (
+        "Use NOMINAL_GRAVITY.value as the fallback in sim_cfg.get()"
+    )
+    # 780e-9 literal as a numeric fallback should be gone too.
+    assert ", 780e-9)" not in code_only, (
+        "Use WAVELENGTH_RB87_D2.value as the fallback in sim_cfg.get()"
+    )
 
 
 if __name__ == "__main__":
