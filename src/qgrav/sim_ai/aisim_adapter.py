@@ -20,6 +20,7 @@ from qgrav.physics import (
     vibration_amplitude_axis,
     vibration_phase_rad,
 )
+from qgrav.physics.constants import NOMINAL_GRAVITY, WAVELENGTH_RB87_D2
 from qgrav.validation.truth_checks import evaluate_simulation_truth
 
 logger = logging.getLogger(__name__)
@@ -210,6 +211,45 @@ def _vibration_phase_sinusoid(
     )
 
 
+# Canonical study-scope enum (per PRD v1.0 Workstream 10).
+STUDY_SCOPE_FULLY_SIMULATED = "FULLY_SIMULATED"
+STUDY_SCOPE_HYBRID = "HYBRID_AISIM_PLUS_ANALYTICAL"
+STUDY_SCOPE_ANALYTICAL_ONLY = "ANALYTICAL_ONLY"
+_ALLOWED_STUDY_SCOPE_CATEGORIES = {
+    STUDY_SCOPE_FULLY_SIMULATED,
+    STUDY_SCOPE_HYBRID,
+    STUDY_SCOPE_ANALYTICAL_ONLY,
+}
+
+
+def _classify_study_scope(study_scope: str) -> tuple[str, str]:
+    """Map the free-text study_scope string to (category, description)."""
+    s = study_scope.lower()
+    if "hybrid" in s or "plus_closed_form" in s or "plus_reference_mirror" in s:
+        category = STUDY_SCOPE_HYBRID
+        description = (
+            "Hybrid: AISim provides the microscopic atom-optics simulation "
+            "(contrast and ensemble inhomogeneity); the inertial-phase term "
+            "is imposed via a closed-form analytical formula. Truth checks "
+            "verify the code matches the formula, not that the formula "
+            "matches hardware."
+        )
+    elif "analytical_only" in s or "closed_form_only" in s:
+        category = STUDY_SCOPE_ANALYTICAL_ONLY
+        description = (
+            "Analytical only: the quantity is the direct evaluation of a "
+            "published formula with no microscopic simulation involved."
+        )
+    else:
+        category = STUDY_SCOPE_FULLY_SIMULATED
+        description = (
+            "Fully simulated: quantities are computed from the AISim "
+            "microscopic atom-optics propagator with no closed-form "
+            "inertial-phase formula imposed."
+        )
+    return category, description
+
+
 def _pack_result(
     result: dict[str, Any],
     *,
@@ -224,6 +264,9 @@ def _pack_result(
     result["pulse_sequence"] = pulse_sequence
     result["physical_model"] = physical_model
     result["study_scope"] = study_scope
+    category, description = _classify_study_scope(study_scope)
+    result["study_scope_category"] = category
+    result["study_scope_description"] = description
     result["limitations"] = limitations
     truth = evaluate_simulation_truth(result)
     result["truth_checks"] = truth
@@ -233,6 +276,7 @@ def _pack_result(
         summary_rows["Truth checks passed"] = f"{truth['passed_count']}/{truth['total_count']}"
         summary_rows["All truth checks passed"] = bool(truth['all_passed'])
         summary_rows["Study scope"] = study_scope
+        summary_rows["Study scope category"] = category
     return result
 
 
@@ -248,7 +292,7 @@ def run_aisim_rabi_scan(
     pre_pulse_delay_s: float = 100e-3,
     beam_radius_m: float = 15e-3,
     center_rabi_freq_hz: float = 15e3,
-    wavelength_m: float = 780e-9,
+    wavelength_m: float = WAVELENGTH_RB87_D2.value,
     tau_step_s: float = 1e-6,
     n_steps: int = 60,
     k1_rad_per_m: float | None = None,
@@ -371,7 +415,7 @@ def run_aisim_mach_zehnder_phase_scan(
     detector_radius_m: float = 5e-3,
     beam_radius_m: float = 29.5e-3 / 2.0,
     center_rabi_freq_hz: float = 12.5e3,
-    wavelength_m: float = 780e-9,
+    wavelength_m: float = WAVELENGTH_RB87_D2.value,
     tau_pi_half_s: float = 23e-6,
     interferometer_time_s: float = 260e-3,
     phase_min_rad: float = 0.0,
@@ -536,10 +580,10 @@ def run_aisim_gravity_sweep(
     detector_radius_m: float = 5e-3,
     beam_radius_m: float = 29.5e-3 / 2.0,
     center_rabi_freq_hz: float = 12.5e3,
-    wavelength_m: float = 780e-9,
+    wavelength_m: float = WAVELENGTH_RB87_D2.value,
     tau_pi_half_s: float = 23e-6,
     interferometer_time_s: float = 260e-3,
-    gravity_center_m_s2: float = 9.81,
+    gravity_center_m_s2: float = NOMINAL_GRAVITY.value,
     gravity_span_m_s2: float = 6.0e-6,
     n_gravity_points: int = 61,
     phase_bias_rad: float | None = None,
@@ -710,10 +754,10 @@ def run_aisim_vibration_sensitivity_sweep(
     detector_radius_m: float = 5e-3,
     beam_radius_m: float = 29.5e-3 / 2.0,
     center_rabi_freq_hz: float = 12.5e3,
-    wavelength_m: float = 780e-9,
+    wavelength_m: float = WAVELENGTH_RB87_D2.value,
     tau_pi_half_s: float = 23e-6,
     interferometer_time_s: float = 260e-3,
-    gravity_ref_m_s2: float = 9.81,
+    gravity_ref_m_s2: float = NOMINAL_GRAVITY.value,
     vibration_frequency_hz: float = 1.0,
     vibration_phase0_rad: float = 0.0,
     amplitude_min_m: float = 0.0,
@@ -910,7 +954,7 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
         detector_radius_m=float(sim_cfg.get("detector_radius_m", 5e-3)),
         beam_radius_m=float(sim_cfg.get("beam_radius_m", 29.5e-3 / 2.0)),
         center_rabi_freq_hz=float(sim_cfg.get("center_rabi_freq_hz", 12.5e3)),
-        wavelength_m=float(sim_cfg.get("wavelength_m", 780e-9)),
+        wavelength_m=float(sim_cfg.get("wavelength_m", WAVELENGTH_RB87_D2.value)),
         k1_rad_per_m=None if sim_cfg.get("k1_rad_per_m") is None else float(sim_cfg.get("k1_rad_per_m")),
         k2_rad_per_m=None if sim_cfg.get("k2_rad_per_m") is None else float(sim_cfg.get("k2_rad_per_m")),
     )

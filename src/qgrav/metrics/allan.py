@@ -231,11 +231,103 @@ def identify_noise_type(taus_s: np.ndarray, adev: np.ndarray) -> dict:
     fit_r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
 
     return {
+        "method": "log_log_slope_fit",
         "slope": slope,
         "noise_type": noise_type,
         "fit_r2": fit_r2,
         "description": description,
     }
+
+
+_ACF_ALPHA_INT_TO_NAME = {
+    2: "white_phase",
+    1: "flicker_phase",
+    0: "white_frequency",
+    -1: "flicker_frequency",
+    -2: "random_walk_frequency",
+    -3: "flicker_walk_frequency",
+    -4: "random_run_frequency",
+}
+
+
+def identify_noise_type_acf(
+    x: np.ndarray,
+    *,
+    data_type: str = "freq",
+    averaging_factor: int = 1,
+    dmin: int = 0,
+    dmax: int = 2,
+) -> dict:
+    """Identify noise type using lag-1 autocorrelation (Riley 2004).
+
+    Wraps :func:`allantools.ci.autocorr_noise_id`. The ACF method works on
+    the *time series* (not on the Allan deviation curve) and is more robust
+    than slope-fitting on the ADEV log-log plot, especially for mixed
+    noise.
+
+    Parameters
+    ----------
+    x:
+        Phase or fractional-frequency time series. Minimum length ~30.
+    data_type:
+        ``"phase"`` or ``"freq"``.
+    averaging_factor:
+        Decimation factor before differencing.
+    dmin, dmax:
+        Bounds on the number of differentiations the algorithm performs.
+
+    Returns
+    -------
+    dict with keys ``method``, ``noise_type``, ``alpha_int``, ``alpha``,
+    ``d``, ``rho``. If the series is too short to identify, returns a
+    safe sentinel.
+
+    References
+    ----------
+    Riley, W.J., *Handbook of Frequency Stability Analysis*, NIST SP1065 (2008).
+    """
+    arr = np.asarray(x, dtype=np.float64)
+    # The vendored allantools requires len >= 30 after decimation.
+    if arr.size < max(30, 2 * averaging_factor):
+        return {
+            "method": "lag1_autocorrelation",
+            "noise_type": "insufficient_data",
+            "alpha_int": None,
+            "alpha": float("nan"),
+            "d": 0,
+            "rho": float("nan"),
+            "description": "Time series too short for ACF noise-type ID.",
+        }
+    try:
+        from allantools.ci import autocorr_noise_id  # type: ignore
+
+        alpha_int, alpha, d, rho = autocorr_noise_id(
+            arr, af=int(averaging_factor), data_type=data_type,
+            dmin=int(dmin), dmax=int(dmax),
+        )
+        noise_type = _ACF_ALPHA_INT_TO_NAME.get(int(alpha_int), f"alpha_int={alpha_int}")
+        return {
+            "method": "lag1_autocorrelation",
+            "noise_type": noise_type,
+            "alpha_int": int(alpha_int),
+            "alpha": float(alpha),
+            "d": int(d),
+            "rho": float(rho),
+            "description": (
+                f"ACF-based ID (Riley 2004): alpha={alpha:+.2f}, "
+                f"differentiations d={d}, lag-1 ACF rho={rho:+.3f}."
+            ),
+        }
+    except (NotImplementedError, ValueError, ZeroDivisionError) as exc:
+        return {
+            "method": "lag1_autocorrelation",
+            "noise_type": "indeterminate",
+            "alpha_int": None,
+            "alpha": float("nan"),
+            "d": 0,
+            "rho": float("nan"),
+            "description": f"ACF noise-type ID failed: {exc!r}",
+        }
 
 
 def allan_minimum(taus_s: np.ndarray, adev: np.ndarray) -> dict:

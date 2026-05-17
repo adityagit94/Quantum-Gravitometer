@@ -70,6 +70,17 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
         else:
             if "source_path" not in grav_cfg:
                 issues.append("Missing `bench_real_gravity.source_path`.")
+            level = str(grav_cfg.get("igets_level", "auto")).strip().lower()
+            if level not in {"auto", "1", "2", "3"}:
+                issues.append(
+                    "`bench_real_gravity.igets_level` must be one of: auto, 1, 2, 3."
+                )
+            tide_backend = str(grav_cfg.get("tide_backend", "auto")).strip().lower()
+            if tide_backend not in {"auto", "pygtide", "internal_hw95"}:
+                issues.append(
+                    "`bench_real_gravity.tide_backend` must be one of: "
+                    "auto, pygtide, internal_hw95."
+                )
 
     stats = cfg.get("stats", {})
     if stats is not None and not isinstance(stats, dict):

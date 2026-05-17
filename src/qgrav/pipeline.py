@@ -516,6 +516,92 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
         raise ValueError('Dataset too small. Need at least 3 samples.')
     t = np.asarray(data["t"], dtype=np.float64)
     fs = float(data["sample_rate_hz"])
+
+    # ----- v0.8: optional tide / pressure corrections -----
+    corrections_applied: list[str] = []
+    correction_metrics: dict[str, Any] = {}
+    raw_igets_level_cfg = str(grav_cfg.get("igets_level", "auto")).lower()
+    apply_corrections = bool(grav_cfg.get("apply_corrections", False))
+
+    from qgrav.datasets.corrections import (
+        apply_pressure_correction,
+        apply_tide_correction,
+        detect_igets_level,
+    )
+
+    if raw_igets_level_cfg == "auto":
+        data_product_level = detect_igets_level(data)
+    else:
+        try:
+            data_product_level = int(raw_igets_level_cfg)
+        except ValueError:
+            data_product_level = detect_igets_level(data)
+
+    if apply_corrections and data_product_level < 3:
+        lat = data.get("latitude_deg")
+        lon = data.get("longitude_deg")
+        if lat is not None and lon is not None:
+            # Convert numpy datetime64 timestamps to Unix seconds.
+            ts_full = data.get("timestamps_full")
+            ts_seg = data.get("timestamps")
+            if ts_full is not None and ts_seg is not None:
+                unix_full = np.asarray(ts_full, dtype="datetime64[ns]").astype("int64") / 1e9
+                unix_seg = np.asarray(ts_seg, dtype="datetime64[ns]").astype("int64") / 1e9
+                tide_backend = str(grav_cfg.get("tide_backend", "auto"))
+                try:
+                    tide_full = apply_tide_correction(
+                        unix_full, x_full,
+                        latitude_deg=float(lat), longitude_deg=float(lon),
+                        backend=tide_backend,
+                    )
+                    tide_seg = apply_tide_correction(
+                        unix_seg, x,
+                        latitude_deg=float(lat), longitude_deg=float(lon),
+                        backend=tide_backend,
+                    )
+                    x_full = tide_full["corrected"]
+                    x = tide_seg["corrected"]
+                    corrections_applied.append(
+                        f"solid_earth_tide ({tide_seg['backend_used']})"
+                    )
+                    correction_metrics["tide_rms_subtracted_ugal"] = float(
+                        tide_seg["rms_subtracted_ugal"]
+                    )
+                    correction_metrics["tide_backend"] = tide_seg["backend_used"]
+                except Exception as exc:
+                    logger.warning("Tide correction skipped: %s", exc)
+        # Optional pressure correction
+        pressure_path = grav_cfg.get("pressure_csv_path")
+        if pressure_path:
+            try:
+                pressure_path_resolved = resolve_project_relative_path(
+                    config_path, pressure_path, project_root=project_root
+                )
+                pressure_data = np.loadtxt(pressure_path_resolved, delimiter=",", skiprows=1)
+                # Expect columns: unix_seconds, pressure_hpa
+                p_t = pressure_data[:, 0]
+                p_v = pressure_data[:, 1]
+                ts_seg = data.get("timestamps")
+                if ts_seg is not None:
+                    unix_seg = np.asarray(ts_seg, dtype="datetime64[ns]").astype("int64") / 1e9
+                    pressure_interp = np.interp(unix_seg, p_t, p_v)
+                    admittance = float(
+                        grav_cfg.get("pressure_admittance_nm_s2_per_hpa", -3.0)
+                    )
+                    rms_pressure_before = float(np.std(x))
+                    x = apply_pressure_correction(
+                        unix_seg, x, pressure_interp,
+                        admittance_nm_s2_per_hpa=admittance,
+                    )
+                    rms_pressure_after = float(np.std(x))
+                    corrections_applied.append("atmospheric_pressure")
+                    correction_metrics["pressure_admittance_nm_s2_per_hpa"] = admittance
+                    correction_metrics["pressure_rms_change_ugal"] = (
+                        rms_pressure_before - rms_pressure_after
+                    ) * 1e8
+            except Exception as exc:
+                logger.warning("Pressure correction skipped: %s", exc)
+    # ----- end v0.8 corrections -----
     psd_method, nperseg, noverlap, metrics_backend, allan_data_type, compare_allan_backends, comparison_backend = _stats_cfg(cfg)
     nperseg = min(max(8, nperseg), len(x))
     noverlap = min(max(1, noverlap), max(1, nperseg - 1))
@@ -523,13 +609,18 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
 
     adev = allan_deviation_overlapping(x, fs, taus, backend=metrics_backend, data_type=allan_data_type)
 
-    from qgrav.metrics.allan import identify_noise_type, allan_minimum
+    from qgrav.metrics.allan import identify_noise_type, identify_noise_type_acf, allan_minimum
     _adev_arr = np.asarray(adev["adev"])
     _taus_arr = np.asarray(adev["taus_s"])
-    noise_id = identify_noise_type(_taus_arr, _adev_arr)
+    # v0.8: primary noise-ID is the lag-1 autocorrelation method (Riley 2004);
+    # the older log-log-slope fit is preserved alongside for cross-checking.
+    noise_id = identify_noise_type_acf(x, data_type=allan_data_type)
+    noise_id["legacy_slope_method"] = identify_noise_type(_taus_arr, _adev_arr)
     adev_min = allan_minimum(_taus_arr, _adev_arr)
 
     metrics: dict[str, Any] = {
+        "qgrav_output_format_version": "1.0",
+        "qgrav_version": __version__,
         "bench_type": "real_gravity",
         "have_truth": False,
         "sample_rate_hz": fs,
@@ -540,6 +631,9 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
         "allan_backend_used": str(adev["backend"]),
         "allan_data_type": str(adev["data_type"]),
         "series_units": data.get("units"),
+        "data_product_level_at_analysis": int(data_product_level),
+        "corrections_applied": corrections_applied,
+        "correction_metrics": correction_metrics,
         "station_code": data.get("station_code"),
         "longitude_deg": data.get("longitude_deg"),
         "latitude_deg": data.get("latitude_deg"),
@@ -683,6 +777,8 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     _am_i = allan_minimum(np.asarray(adev_i["taus_s"]), np.asarray(adev_i["adev"]))
 
     metrics: dict[str, Any] = {
+        "qgrav_output_format_version": "1.0",
+        "qgrav_version": __version__,
         "bench_type": bench_type,
         "have_truth": have_truth,
         "sample_rate_hz": fs,
