@@ -17,13 +17,16 @@ The third lane is the most important when you do not have hardware.
 ## 2) Recommended working order
 
 ### Phase A — make the real-data lane reliable
-Use one station file first. Make sure the parser, plots, and statistics are correct.
+Use one station file first. Make sure the parser, plots, and statistics are correct. For IGETS Level 1 or Level 2 data, enable `apply_corrections: true` in `bench_real_gravity` so that tides and pressure effects are removed before stability analysis.
 
 ### Phase B — compare stations
 Once one station works, compare several stations and document differences in drift, gaps, and long-term stability.
 
 ### Phase C — tie this to the simulation lane
 Use the same reporting language (PSD, Allan, summary metrics) for both simulated and real data.
+
+### Phase D — noise budget via sensitivity function (v0.8)
+Use `integrate_vibration_noise()` with the Peterson NLNM/NHNM models to estimate what fraction of your real-data noise comes from seismic vibrations vs. instrument-intrinsic noise. Compare to the shot-noise sensitivity from your AISim simulation.
 
 ---
 
@@ -119,7 +122,7 @@ That is still valuable and legitimate.
 
 The best next scientific milestone is:
 
-> add a gravimeter-style AISim mode and compare its stability/phase outputs to the same reporting framework used for the real gravimetry lane.
+> validate that your corrections-enabled real-data Allan deviations are consistent with published SG noise floors, and compare the vibration-limited sensitivity from the sensitivity function against your AISim shot-noise sensitivity.
 
 
 ## Phase 2 — AISim gravimeter studies
@@ -159,3 +162,19 @@ The simulation layer now separates:
 - ground-truth validation
 
 See `docs/SCIENTIFIC_HARDENING.md` for details on what is fully AISim-backed, what is hybrid, and how truth-checks are stored in reports.
+
+
+## Corrections workflow (v0.8)
+
+For IGETS Level 1 or Level 2 data, the raw gravity residual contains the body-tide signal (~100 uGal amplitude) which dominates any instrument noise. To get meaningful Allan deviation results:
+
+1. Set `apply_corrections: true` in your `bench_real_gravity` config section
+2. The pipeline auto-detects the IGETS level from sample rate (or set `igets_level: "1"` to force)
+3. Solid-earth body tide is subtracted (PyGTide if installed, else internal 20-constituent HW95 model)
+4. If `pressure_csv_path` is provided, atmospheric pressure admittance is applied (-3 nm/s^2/hPa default)
+5. The corrected series is used for all downstream PSD/Allan/noise-ID computation
+6. `metrics.json` records what was applied, which backend was used, and the RMS of each subtracted signal
+
+This makes IGETS Allan deviation results comparable to published SG noise floors (which assume Level 3 processing).
+
+See `docs/REAL_GRAVITY_DATA.md` for configuration keys and backend details.

@@ -1,6 +1,6 @@
 # qgrav — The Complete Guide
 
-**Quantum Gravimeter R&D Platform v0.7.0**
+**Quantum Gravimeter R&D Platform v0.8.0**
 
 *A software-first research workbench for simulating, benchmarking, and analyzing quantum gravity sensors.*
 
@@ -600,6 +600,11 @@ CSV must contain columns: `I_meas`, `Q_meas`. Optional: `t` (time), `x_true` (gr
 | `station_code` | string | Station identifier (e.g., `ap046`) |
 | `segment_strategy` | string | How to handle data gaps. Use `longest_contiguous` |
 | `metadata_path` | string | Optional path to `SG station.txt` metadata file |
+| `apply_corrections` | bool | Enable tide + pressure correction stage (default: `false`) |
+| `igets_level` | string | Force IGETS product level: `auto`, `1`, `2`, `3` (default: `auto`) |
+| `tide_backend` | string | Tide model: `auto`, `pygtide`, `internal_hw95` (default: `auto`) |
+| `pressure_csv_path` | string | Path to co-located pressure CSV (columns: `unix_seconds`, `pressure_hpa`) |
+| `pressure_admittance_nm_s2_per_hpa` | float | Barometric admittance (default: `-3.0`) |
 
 #### `algorithms` — Signal Processing
 
@@ -678,13 +683,33 @@ Structured metrics. Example for a virtual run:
 
 ```json
 {
+  "qgrav_output_format_version": "1.0",
+  "qgrav_version": "0.8.0",
   "error_stats": {
     "baseline": {"rmse_m": 1.2e-9, "mae_m": 0.9e-9, "snr_db": 15.3, "bias_m": 0.05e-9},
     "improved": {"rmse_m": 0.4e-9, "mae_m": 0.3e-9, "snr_db": 24.1, "bias_m": 0.01e-9}
   },
-  "allan_deviation": {"tau_s": [...], "adev_m": [...]},
-  "noise_identification": {"slope": -0.52, "noise_type": "white frequency modulation"},
+  "allan_deviation": {"tau_s": ["..."], "adev_m": ["..."]},
+  "noise_identification": {
+    "method": "lag1_autocorrelation",
+    "noise_type": "white frequency modulation",
+    "alpha_int": 0,
+    "legacy_slope_method": {"slope": -0.52, "noise_type": "white frequency modulation"}
+  },
   "allan_minimum": {"optimal_tau_s": 0.025, "minimum_adev_m": 2.1e-10}
+}
+```
+
+For real gravity runs with corrections enabled, additional keys appear:
+
+```json
+{
+  "data_product_level_at_analysis": 1,
+  "corrections_applied": ["tide"],
+  "correction_metrics": {
+    "tide_rms_subtracted_ugal": 85.3,
+    "tide_backend_used": "internal_hw95"
+  }
 }
 ```
 
@@ -827,7 +852,11 @@ The **minimum Allan deviation** is one of the most important numbers. It tells y
 
 ### Noise Type Identification
 
-The slope of the Allan deviation curve on a log-log plot reveals what kind of noise dominates:
+qgrav uses two complementary methods to identify the dominant noise type:
+
+**ACF method (primary, v0.8):** The lag-1 autocorrelation method (Riley 2004) works directly on the time series. It computes the autocorrelation at lag 1 and maps it to a noise type. This is more robust than slope-fitting, especially for mixed noise or short datasets. The result appears in `metrics.json` under `noise_identification`.
+
+**Slope method (legacy):** Fits the log-log slope of the Allan deviation curve. The slope reveals the noise type:
 
 | Slope | Noise Type | Meaning |
 |-------|-----------|---------|
@@ -836,6 +865,8 @@ The slope of the Allan deviation curve on a log-log plot reveals what kind of no
 | −0.5 | White frequency noise | Random walk in phase — ideal sensor behavior |
 | −0.25 | Flicker frequency noise | Low-frequency instability |
 | +0.5 | Random walk frequency | Long-term drift — sensor is wandering |
+
+The slope result is preserved in `metrics.json` under `noise_identification.legacy_slope_method` for cross-checking.
 
 **White frequency noise (slope = −0.5)** is the best case for a gravimeter — it means your noise is purely statistical and averages down as expected.
 
@@ -887,6 +918,28 @@ Order-of-magnitude estimates for two major error sources:
 **Coriolis force:** Earth's rotation causes a sideways force on falling atoms. Depends on latitude and atomic velocity. Effect: 1–10 µGal.
 
 These are estimates — the actual values depend on your specific setup.
+
+### Sensitivity Function and Vibration Noise Budget (v0.8)
+
+The Mach-Zehnder sensitivity function g_s(t) (Cheinet 2008) quantifies how laser-phase perturbations or mirror vibrations translate into interferometer phase shift. This is the foundation for vibration noise budgets.
+
+Available functions in `qgrav.physics.sensitivity_function`:
+
+- `sensitivity_function_time_domain(t, *, interferometer_time_s, pulse_duration_s=0)` — returns g_s(t): -1 on [0,T], +1 on [T,2T] for instantaneous pulses, or continuous ramps for finite-duration pulses.
+- `transfer_function_vibration(f_hz, ...)` — returns |G(2pif)|^2. Has notches at f = n/T (the interferometer is blind to vibrations at these frequencies) and rolls off as 1/f^2 above 1/T.
+- `acceleration_to_phase_transfer_function_sq(f_hz, *, ..., k_eff_rad_per_m)` — converts acceleration PSD to phase variance: |H_a|^2 = 16 k_eff^2 sin^4(pi f T) / (2 pi f)^4.
+- `integrate_vibration_noise(psd, f_hz, ...)` — integrates an acceleration PSD against the transfer function and returns the equivalent gravity noise in m/s^2 and uGal.
+
+Built-in Peterson 1993 NLNM/NHNM seismic noise models (`interpolate_psd(f, model="nlnm")`) provide reference acceleration PSDs for estimating vibration-limited performance at quiet and noisy sites.
+
+### Tide and Pressure Corrections (v0.8)
+
+For real gravity data at IGETS Level 1 or Level 2, enable `apply_corrections: true` to subtract:
+
+1. **Solid-earth body tide** — using PyGTide (if installed) or the internal 20-constituent HW95 model
+2. **Atmospheric pressure loading** — linear admittance model (-3 nm/s^2/hPa, Crossley 1995)
+
+Without these corrections, the Allan deviation is dominated by the ~100 uGal body-tide signal rather than instrument noise. See the `bench_real_gravity` configuration keys in Section 8 for details.
 
 ---
 
@@ -949,10 +1002,10 @@ The output CSV has columns: `timestamp`, `gravity_residual`, `station_code`.
 
 ```
 src/qgrav/
-├── __init__.py              Version string (0.7.0)
+├── __init__.py              Version string (0.8.0)
 ├── cli.py                   Command-line interface (3 commands)
-├── config.py                YAML loading, validation, path resolution
-├── pipeline.py              Main orchestrator — connects everything
+├── config.py                YAML loading, validation (incl. corrections keys)
+├── pipeline.py              Main orchestrator — corrections stage, output_format_version
 │
 ├── bench_ifo/               Data source layer
 │   ├── virtual_ifo.py       Synthetic I/Q signal generator
@@ -964,30 +1017,41 @@ src/qgrav/
 │   └── improved.py          Adaptive offset tracking + phase smoothing
 │
 ├── metrics/                 Statistical analysis
-│   ├── allan.py             Allan deviation (overlapping, custom + allantools)
+│   ├── allan.py             Allan deviation, noise ID (ACF + slope), Allan minimum
 │   ├── psd.py               Power spectral density (Welch + periodogram)
 │   └── error_stats.py       RMSE, MAE, SNR, bias computation
 │
-├── physics/                 Physical models
+├── physics/                 Physical models and constants
+│   ├── constants.py         Physical constants registry (v0.8)
+│   ├── sensitivity_function.py  MZ sensitivity + vibration transfer functions (v0.8)
+│   ├── _seismic_models.py   Peterson NLNM/NHNM noise floor models (v0.8)
 │   ├── phase_models.py      Gravity phase, vibration phase, shot-noise sensitivity
-│   ├── systematics.py       Gravity gradient, Coriolis effect estimates
+│   ├── systematics.py       Gravity gradient, Coriolis effect (uses constants module)
 │   ├── noise_models.py      White noise, random walk, outlier injection
 │   ├── readout_models.py    Output port population models
 │   └── pulse_sequences.py   Three-pulse Mach-Zehnder timing
 │
 ├── sim_ai/                  Simulation engine
-│   └── aisim_adapter.py     Wraps AISim for Rabi, phase scan, gravity/vibration sweeps
+│   └── aisim_adapter.py     AISim adapter with study_scope labels (v0.8)
 │
 ├── datasets/                Data format handling
-│   └── gravimetry.py        GGP parsing, station metadata, gap detection, CSV conversion
+│   ├── gravimetry.py        GGP parsing, station metadata, gap detection, CSV conversion
+│   ├── corrections.py       Tide + pressure corrections, IGETS level detection (v0.8)
+│   └── _tides_hw95.py       20-constituent HW95 internal tide model (v0.8)
 │
-├── visuals.py               Plot generation (dashboard, individual plots, simulation plots)
-├── report.py                HTML report generation (Jinja2 templates)
+├── validation/              Published references and truth checks
+│   ├── published_references.py  12 benchmark values with deprecation shims (v0.8)
+│   ├── truth_checks.py      Per-study pass/fail checks
+│   └── curve_comparison.py  R-squared, Pearson correlation
+│
+├── reporting/               HTML report generation
+│   └── report.py            Jinja2 templates (scope panel, corrections, level banner)
+├── visuals.py               Plot generation (dashboard, individual, simulation plots)
 │
 ├── gui/                     Desktop application
 │   ├── __init__.py          GUI entry point
 │   ├── app.py               Main application class (1200+ lines)
-│   └── widgets.py           Custom widgets (MetricCards, ScrollableFrame)
+│   └── widgets/             Custom widgets (MetricCards, ScrollableFrame)
 │
 └── vendor/                  Vendored dependencies
     ├── aisim/               Atom interferometer simulator
@@ -1012,14 +1076,23 @@ run_pipeline()
     ├──→ [real]    load_real_ifo_csv()    → same algorithms as virtual
     │
     ├──→ [real_gravity] load_real_gravity_dataset() → gap analysis
+    │                       │
+    │                       ▼
+    │                   detect_igets_level()
+    │                       │
+    │                       ▼  (if apply_corrections: true)
+    │                   apply_tide_correction() → apply_pressure_correction()
     │
-    ├──→ [if simulation.enabled] run_aisim_*() → simulation metrics
+    ├──→ [if simulation.enabled] run_aisim_*() → study_scope labels
     │
-    ├──→ allan_deviation_overlapping() ─→ noise type identification
+    ├──→ allan_deviation_overlapping() ─→ identify_noise_type_acf()
     ├──→ compute_psd()
     │
     ▼
-save outputs: data.npz, metrics.json, plots/, SUMMARY.md, report.html
+save outputs:
+    metrics.json  (qgrav_output_format_version: "1.0")
+    data.npz, plots/, SUMMARY.md
+    report.html   (study-scope panel, corrections section, level banner)
 ```
 
 ---
@@ -1076,18 +1149,26 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 |------|-----------|
 | **Allan deviation** | A measure of measurement stability over different averaging times. Standard tool in precision measurement science. |
 | **Atom interferometer** | A device that exploits quantum superposition of atoms to measure accelerations (including gravity) with extreme precision. |
+| **Body-tide elasticity** | Factor (delta ~ 1.16) by which the solid Earth amplifies the direct tidal acceleration due to elastic deformation of the mantle and crust. |
 | **Contrast / Visibility** | How well the interferometer distinguishes between constructive and destructive interference. Ranges from 0 (useless) to 1 (perfect). |
 | **Coriolis effect** | A deflection caused by Earth's rotation. Affects falling atoms because they have a horizontal velocity component. |
+| **Doodson number** | Six-integer code identifying each harmonic constituent of the tidal potential. Used in the HW95 catalogue. |
 | **EWMA** | Exponentially Weighted Moving Average — a filter that tracks slow changes while ignoring fast noise. |
 | **Fringe** | The oscillating output pattern of an interferometer as the phase difference changes. Like light and dark bands in an optical experiment. |
 | **GGP** | Global Geodynamics Project — a standard text format for sharing gravity time-series data between observatories. |
 | **Gravimetry** | The science of measuring gravitational acceleration and its spatial/temporal variations. |
+| **HW95** | Hartmann-Wenzel 1995 tidal potential catalogue (~12,000 constituents). qgrav uses a simplified 20-constituent version. |
 | **I/Q signals** | In-phase and Quadrature — two signals 90° apart that together encode the full phase of an interferometric measurement. |
+| **IGETS** | International Geodynamics and Earth Tide Service. Distributes superconducting gravimeter data at three processing levels (L1: raw, L2: minute, L3: hourly corrected). |
 | **k_eff** | Effective wave vector — the momentum kick atoms receive from laser pulses. For rubidium-87: ~16 million rad/m. |
 | **Mach-Zehnder** | A three-pulse interferometer geometry: split → redirect → recombine. The standard design for atom gravimeters. |
 | **microGal (µGal)** | Unit of gravitational acceleration. 1 µGal = 10⁻⁸ m/s². Typical gravity variations of interest are 0.1–100 µGal. |
 | **nanoGal (nGal)** | 1 nGal = 10⁻¹¹ m/s². The sensitivity floor of the best superconducting gravimeters. |
+| **NLNM / NHNM** | New Low/High Noise Models (Peterson 1993). Acceleration PSD bounds for seismically quiet and noisy sites worldwide. |
 | **PSD** | Power Spectral Density — shows how noise power is distributed across frequency. |
+| **Sensitivity function** | g_s(t) — the time-domain function relating a laser-phase perturbation to the resulting interferometer phase shift. |
+| **Tide correction** | Subtracting the predicted solid-earth body tide from a gravity residual time series so that instrument noise is revealed. |
+| **Transfer function** | Frequency-domain representation of how input noise (laser phase or mirror acceleration) maps to interferometer output phase. |
 | **π pulse** | A laser pulse that flips an atom from ground to excited state (or vice versa). Acts as a "mirror" in the interferometer. |
 | **π/2 pulse** | A laser pulse that puts an atom into a 50/50 superposition. Acts as a "beam splitter." |
 | **Rabi oscillation** | The oscillation of an atom between ground and excited states when driven by a resonant laser pulse. |
@@ -1102,4 +1183,4 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 
 ---
 
-*This guide was written for qgrav v0.7.0. For the latest version, visit [github.com/adityagit94/Quantum-Gravitometer](https://github.com/adityagit94/Quantum-Gravitometer).*
+*This guide was written for qgrav v0.8.0. For the latest version, visit [github.com/adityagit94/Quantum-Gravitometer](https://github.com/adityagit94/Quantum-Gravitometer).*
