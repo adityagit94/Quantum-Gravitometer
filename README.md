@@ -14,7 +14,7 @@
 - A general-purpose geodynamics suite: the v0.8 tide / pressure correction stage exists only to make IGETS Allan-deviation comparisons meaningful. For serious geodynamics use PyGTide, ETERNA, or SPOTL.
 - A competitor to dedicated research-group simulation codes (Mueller/Berkeley, SYRTE, Stanford, Humboldt). The AISim integration is the simulation core; qgrav wraps and extends it.
 
-See `docs/COMPLETE_GUIDE.md` for the full user guide and `docs/CHANGELOG.md` for the v0.7 → v0.8 changes.
+See `docs/COMPLETE_GUIDE.md` for the full user guide and `CHANGELOG.md` for the v0.7 → v0.8 changes.
 
 **Author:** Aditya Prakash | **License:** MIT | **Python:** >= 3.9
 
@@ -132,10 +132,12 @@ runs/<name>_<timestamp>/
 - Error statistics (RMSE, MAE, bias, SNR) with baseline vs. improved comparison
 - PSD via periodogram or Welch method
 - Overlapping Allan deviation with backend cross-validation
-- **Noise type identification** — slope classification (white PM/FM, flicker PM/FM, random walk FM)
+- **Noise type identification** — via lag-1 autocorrelation (primary, ACF) or legacy log-log slope fit
 - **Allan minimum** — optimal averaging time
 - **Shot-noise sensitivity** — `1/(C * k_eff * T^2 * sqrt(N/T_cycle))` in m/s^2/sqrt(Hz) and uGal/sqrt(Hz)
 - **Systematic effects** — gravity gradient shift, Coriolis shift (order-of-magnitude estimates)
+- **Output format version** — `qgrav_output_format_version: "1.0"` for downstream consumers
+- **Corrections metadata** — `data_product_level_at_analysis`, `corrections_applied`, `correction_metrics` (when corrections enabled)
 - Gap report (for real gravity data)
 
 ---
@@ -152,7 +154,11 @@ delta_g = 1 / (C * k_eff * T^2 * sqrt(N / T_cycle))
 Available as `shot_noise_sensitivity_m_s2_per_sqrt_hz()` and `sensitivity_ugal_per_sqrt_hz()` in `qgrav.physics`.
 
 ### Noise type identification
-Fits the log-log slope of Allan deviation curves and classifies into standard noise types:
+
+Two complementary methods:
+
+- **ACF method (primary, v0.8)** — lag-1 autocorrelation (Riley 2004) applied directly to the time series. More robust for mixed noise types. Uses `allantools.ci.autocorr_noise_id`.
+- **Slope method (legacy)** — fits the log-log slope of the Allan deviation curve. Classifies into 5 standard noise types:
 
 | Slope | Noise type |
 |-------|-----------|
@@ -162,17 +168,50 @@ Fits the log-log slope of Allan deviation curves and classifies into standard no
 | -0.25 | Flicker frequency modulation |
 | +0.5 | Random walk frequency modulation |
 
+Both methods are stored in `metrics.json`. The ACF result is under `noise_identification`; the slope result is under `noise_identification.legacy_slope_method`.
+
 ### Systematic effects
 Order-of-magnitude estimates (clearly documented as **not** included in AISim simulation):
 - **Gravity gradient** — vertical free-air gradient effect during free fall
 - **Coriolis** — Earth rotation coupling with horizontal atomic velocity
 
+### Sensitivity function and vibration transfer function
+
+The three-pulse Mach-Zehnder sensitivity function g_s(t) (Cheinet 2008) quantifies how laser-phase or mirror-vibration perturbations translate into interferometer phase shift. Available functions:
+
+- `sensitivity_function_time_domain()` — time-domain g_s(t) for instantaneous or finite-duration pulses
+- `transfer_function_vibration()` — |G(2πf)|² with notches at f = n/T and 1/f² rolloff
+- `acceleration_to_phase_transfer_function_sq()` — |H_a(2πf)|² for acceleration PSD input
+- `integrate_vibration_noise()` — broadband integrator returning equivalent gravity noise σ_g
+
+Built-in Peterson 1993 NLNM/NHNM seismic noise models are available as reference acceleration PSDs for vibration-limited noise budgets.
+
+### Tide and pressure corrections (real gravimetry)
+
+For IGETS Level 1 or Level 2 data, enable `apply_corrections: true` in `bench_real_gravity` to subtract:
+
+1. **Solid-earth body tide** — PyGTide (if installed) or internal 20-constituent HW95 model (~50 nGal RMS truncation error)
+2. **Atmospheric pressure loading** — linear admittance model (-3 nm/s²/hPa default, Crossley 1995)
+
+The pipeline auto-detects the IGETS data product level from sample rate, applies corrections before Allan/PSD computation, and records what was applied in `metrics.json`. This makes Allan deviation comparisons against published SG noise floors meaningful for un-corrected input data.
+
 ### Published references
-Frozen registry of benchmark values with DOI links for validation:
-- Freier et al. (2016) — gravimetric sensitivity
-- Menoret et al. (2018) — absolute accuracy
-- Hinderer, Crossley & Warburton (2007) — SG noise floor
-- Peters, Chung & Chu (2001) — MZ fringe visibility
+Frozen registry of 12 benchmark values with DOI links for validation:
+
+| Key | Value | Source |
+|-----|-------|--------|
+| `freier_2016_short_term_noise` | 9.6e-8 m/s²/√Hz | Freier et al. (2016) |
+| `freier_2016_accuracy` | 3.9e-8 m/s² | Freier et al. (2016) |
+| `freier_2016_long_term_stability` | 5e-10 m/s² | Freier et al. (2016) |
+| `menoret_2018_short_term_noise` | 5e-7 m/s²/√Hz | Menoret et al. (2018) |
+| `menoret_2018_long_term_stability` | 1e-8 m/s² | Menoret et al. (2018) |
+| `hu_2013_short_term_noise` | 4.2e-9 m/s²/√Hz | Hu et al. (2013) |
+| `peters_2001_accuracy` | 3e-8 m/s² | Peters, Chung & Chu (2001) |
+| `kasevich_chu_1991_first_demo` | 3e-6 m/s²/√Hz | Kasevich & Chu (1991) |
+| `bidel_2018_marine` | 1.7e-6 m/s²/√Hz | Bidel et al. (2018) |
+| `nlnm_low_freq` | 7e-10 m/s²/√Hz | Peterson (1993) |
+| `sg_noise_floor` | 1e-11 m/s²/√Hz | Hinderer et al. (2007) |
+| `mz_visibility` | 0.5 | Peters et al. (2001) |
 
 ---
 
@@ -221,18 +260,24 @@ qgrav/
     algorithms/                 # signal processing algorithms
     bench_ifo/                  # interferometer bench (virtual, real, real_gravity)
     datasets/                   # data loaders (IGETS/GGP, CSV)
-    metrics/                    # PSD, Allan deviation, noise ID, error stats
+      corrections.py            #   tide + pressure corrections (v0.8)
+      _tides_hw95.py            #   20-constituent HW95 internal tide model
+    metrics/                    # PSD, Allan deviation, noise ID (ACF + slope), error stats
     physics/                    # phase models, sensitivity, systematics
+      constants.py              #   physical constants registry (v0.8)
+      sensitivity_function.py   #   MZ sensitivity function + vibration integrator (v0.8)
+      _seismic_models.py        #   Peterson NLNM/NHNM noise floor models (v0.8)
     reporting/                  # HTML report generation (Jinja2)
-    sim_ai/                     # AISim adapter layer
-    validation/                 # published references, curve comparison
+    sim_ai/                     # AISim adapter layer (study_scope labels)
+    validation/                 # published references (12 entries), curve comparison
     gui/                        # tkinter desktop application
       widgets/                  # extracted MetricCards, ScrollableFrame
       app.py                    # main GUI application
+    config.py                   # YAML loading, validation (incl. corrections keys)
     visuals.py                  # matplotlib figure builders
-    pipeline.py                 # orchestrates the full run
+    pipeline.py                 # orchestrates the full run (corrections stage, output_format_version)
     cli.py                      # CLI entry point
-  tests/                        # 79 tests (pytest)
+  tests/                        # 134 tests (pytest)
 ```
 
 ---
@@ -253,7 +298,7 @@ python -m pytest -q
 python -m pytest -v --tb=short
 ```
 
-**79 tests** covering: synthetic pipeline, AISim integration, GUI imports, visual generation, `.ggp` parsing, CSV conversion, real gravimetry pipeline, Allan deviation backends, noise identification, shot-noise sensitivity, systematics, published references, batch scripts, and float tau matching edge cases.
+**134 tests** covering: synthetic pipeline, AISim integration, GUI imports, visual generation, `.ggp` parsing, CSV conversion, real gravimetry pipeline, Allan deviation backends, noise identification (ACF + slope), shot-noise sensitivity, systematics, published references (12 entries + deprecation shims), physical constants regression, sensitivity function (time-domain + frequency-domain + integrator), tide/pressure corrections, unit conversions, study-scope labels, batch scripts, and float tau matching edge cases.
 
 ---
 
@@ -285,16 +330,20 @@ python -m pytest -v --tb=short
 
 ---
 
-## What's new in v0.7.0
+## What's new in v0.8.0
 
-Upgrade from v0.5.0 with **+1503 lines** across **33 files**, followed by a comprehensive code audit.
+Milestone 1 of the Physics PRD: scientific foundations. **55 new tests** (79 → 134 passing).
 
-**Stabilization (Track A):** Dashboard rendering fix, semicolon reformatting, dropped-row tracking, float tau matching rewrite (230x speedup), GUI temp file cleanup, dependency documentation.
+**Physical constants (W1):** All hardcoded numerical literals (wavelengths, masses, Earth rotation rate, free-air gradient, gravity defaults) replaced with a frozen `PhysicalConstant` registry in `physics/constants.py`. Published references expanded from 4 to 12 entries with deprecation shims for renamed keys.
 
-**Scientific validation (Track B):** Shot-noise sensitivity function, sensitivity in all AISim MZ outputs, noise type identification (5 types via log-log slope), Allan minimum finder, systematic effects module (gravity gradient + Coriolis), published references registry with DOIs.
+**Sensitivity function (W2):** Mach-Zehnder time-domain sensitivity function g_s(t), laser-phase transfer function |G(2πf)|², acceleration-to-phase transfer function |H_a(2πf)|², and broadband vibration noise integrator. Peterson 1993 NLNM/NHNM seismic noise models bundled for vibration-limited noise budgets.
 
-**GUI & infrastructure (Track C):** GUI split into package with extracted widgets, IGETS unit format expansion, batch processing scripts, Allan noise annotations on all plots, systematics table in HTML reports.
+**Corrections (W6):** Solid-earth tide correction (PyGTide or internal 20-constituent HW95 fallback) and atmospheric pressure correction (linear admittance). IGETS data product level auto-detection. Gated on `apply_corrections: true` for backwards compatibility.
 
-**Code audit:** 8 bugs fixed (negative k_eff, Coriolis sign error, O(n^2) tau matching, format string crash, etc.) + 6 quality improvements (zero-value tolerance, DOI links, autoescape, logging, batch script tests).
+**ACF noise ID (W9):** Lag-1 autocorrelation noise identification (Riley 2004) as primary method, with legacy slope-fit preserved as cross-check.
 
-See [CHANGELOG.md](CHANGELOG.md) for the full commit-by-commit breakdown.
+**Study scope labels (W10):** Every AISim simulation carries a `study_scope_category` (FULLY_SIMULATED / HYBRID / ANALYTICAL_ONLY) with colour-coded panels in the HTML report.
+
+**Pipeline:** `qgrav_output_format_version: "1.0"` in every `metrics.json`. Corrections stage runs between data load and Allan/PSD for real gravimetry. Level-banner warning when IGETS Level < 3.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full breakdown.

@@ -1,5 +1,138 @@
 # Changelog
 
+## v0.8.0 (2026-05-17)
+
+Milestone 1 of the Physics PRD: scientific foundations. Adds a physical constants registry, Mach-Zehnder sensitivity function with vibration integrator, solid-earth tide and atmospheric pressure corrections for real gravimetry data, ACF-based noise identification, study-scope labelling on every simulation, and expands the published-reference registry from 4 to 12 entries. **55 new tests** (79 → 134 passing).
+
+---
+
+### Physical Constants Module (W1)
+
+New `src/qgrav/physics/constants.py` — single source of truth for all physical constants used across the codebase.
+
+- Frozen `PhysicalConstant` dataclass with `value`, `unit`, `source`, `uncertainty`, `note` fields
+- CODATA fundamentals: speed of light, Planck constant, Boltzmann constant
+- Rb-87 / Cs-133 atom data: masses, hyperfine frequencies, D2 wavelengths, recoil velocities/energies
+- Effective wavevectors: `K_EFF_RB87_D2 = 1.6105747e7 rad/m` (counter-propagating Raman)
+- Geophysical: Earth rotation rate (IERS 2010), free-air gradient, standard/nominal gravity
+- All previously hardcoded literals in `systematics.py`, `aisim_adapter.py`, and `gui/app.py` replaced with constants module references
+- Regression test (`test_physics_constants.py`) scans source files for stray numerical literals
+
+### Sensitivity Function Module (W2)
+
+New `src/qgrav/physics/sensitivity_function.py` — three-pulse Mach-Zehnder sensitivity function and vibration transfer function (Cheinet 2008).
+
+- `sensitivity_function_time_domain(t, *, interferometer_time_s, pulse_duration_s=0)` — instantaneous and finite-pulse g_s(t)
+- `transfer_function_vibration(f_hz, ...)` — laser-phase transfer function |G(2πf)|² = 16 sin⁴(πfT) / (2πf)²
+- `acceleration_to_phase_transfer_function_sq(f_hz, *, ..., k_eff_rad_per_m)` — acceleration-to-phase |H_a|² = 16 k_eff² sin⁴(πfT) / (2πf)⁴
+- `integrate_vibration_noise(psd_acceleration, f_hz, ...)` → `{sigma_phi_rad, sigma_g_m_s2, sigma_g_ugal}` via trapezoidal integration
+
+New `src/qgrav/physics/_seismic_models.py` — Peterson 1993 NLNM/NHNM seismic noise floor models as (f_hz, psd) pairs with log-log interpolation.
+
+### Corrections Module (W6)
+
+New `src/qgrav/datasets/corrections.py` — tide and atmospheric pressure corrections for IGETS gravimetry data.
+
+- `detect_igets_level(data)` — heuristic from sample rate (1 Hz → L1, 1/60 Hz → L2, 1/3600 Hz → L3)
+- `apply_tide_correction(timestamps, values, *, latitude_deg, longitude_deg, backend="auto")` — PyGTide preferred, internal HW95 fallback
+- `apply_pressure_correction(timestamps, gravity, pressure, *, admittance_nm_s2_per_hpa=-3.0)` — Crossley 1995 linear admittance
+- Returns corrected series plus `{backend_used, rms_subtracted_ugal}` metadata
+
+New `src/qgrav/datasets/_tides_hw95.py` — simplified 20-constituent Wenzel HW95 tidal catalogue.
+
+- Constituents: M2, S2, N2, K2, K1, O1, P1, Q1, Mf, Mm, plus 10 smaller
+- Doodson-argument computation from UTC timestamps (GMST, lunar/solar longitudes)
+- Body-tide elasticity factor δ = 1.16 (Wahr-Dehant)
+- Geographic amplitude factors: cos²(lat) for semi-diurnal, sin(2·lat)/2 for diurnal
+- Truncation error ~50 nGal RMS vs full HW95 catalogue
+
+### ACF Noise Identification (W9)
+
+- New `identify_noise_type_acf()` in `metrics/allan.py` wrapping `allantools.ci.autocorr_noise_id`
+- Lag-1 autocorrelation method (Riley 2004) — more robust than slope-fitting for mixed noise
+- Returns `{method, noise_type, alpha_int, alpha, d, rho, description}`
+- ACF is now the primary noise-ID method in the pipeline; legacy slope method preserved under `noise_identification.legacy_slope_method`
+
+### Study Scope Labels (W10)
+
+- Every `run_aisim_*` function now returns `study_scope_category` and `study_scope_description`
+- Categories: `FULLY_SIMULATED`, `HYBRID_AISIM_PLUS_ANALYTICAL`, `ANALYTICAL_ONLY`
+- HTML report renders a colour-coded study-scope panel (green/amber) above each simulation block
+- `_classify_study_scope()` helper in `aisim_adapter.py`
+
+### Published References Expansion (W1)
+
+Registry expanded from 4 to 12 entries in `validation/published_references.py`:
+
+| Key | Value | Unit | Status |
+|-----|-------|------|--------|
+| `freier_2016_short_term_noise` | 9.6e-8 | m/s²/√Hz | **corrected** (was 5e-8) |
+| `freier_2016_accuracy` | 3.9e-8 | m/s² | new |
+| `freier_2016_long_term_stability` | 5e-10 | m/s² | new |
+| `menoret_2018_short_term_noise` | 5e-7 | m/s²/√Hz | new |
+| `menoret_2018_long_term_stability` | 1e-8 | m/s² | **corrected** (was mislabeled 2.5e-8) |
+| `hu_2013_short_term_noise` | 4.2e-9 | m/s²/√Hz | new |
+| `peters_2001_accuracy` | 3e-8 | m/s² | new |
+| `kasevich_chu_1991_first_demo` | 3e-6 | m/s²/√Hz | new |
+| `bidel_2018_marine` | 1.7e-6 | m/s²/√Hz | new |
+| `nlnm_low_freq` | 7e-10 | m/s²/√Hz | new (Peterson 1993) |
+| `sg_noise_floor` | 1e-11 | m/s²/√Hz | retained |
+| `mz_visibility` | 0.5 | dimensionless | retained |
+
+- Deprecated keys `freier_2016_sensitivity` and `menoret_2018_accuracy` remain importable via `_LEGACY_KEYS` with `DeprecationWarning`
+- New `get_reference(key)` function resolves aliases automatically
+
+### Pipeline Enhancements
+
+- `qgrav_output_format_version: "1.0"` added to every `metrics.json`
+- Corrections stage in `_run_real_gravity_pipeline()`: runs between data load and Allan/PSD computation when `apply_corrections: true`
+- New metrics keys: `data_product_level_at_analysis`, `corrections_applied`, `correction_metrics`
+- `qgrav_version` field in all outputs
+
+### Configuration Additions
+
+New keys under `bench_real_gravity`:
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `apply_corrections` | bool | `false` | Enable tide + pressure correction stage |
+| `igets_level` | string | `"auto"` | Force IGETS level: auto, 1, 2, 3 |
+| `tide_backend` | string | `"auto"` | Tide model: auto, pygtide, internal_hw95 |
+| `pressure_csv_path` | string | — | Path to pressure CSV |
+| `pressure_admittance_nm_s2_per_hpa` | float | `-3.0` | Barometric admittance |
+
+### HTML Report
+
+- Study-scope panel (colour-coded green/amber) above each AISim simulation block
+- Corrections section listing what was applied and RMS subtracted
+- IGETS level banner (red/orange) when Level < 3 warning about un-removed tides
+- Footer showing `qgrav_output_format_version` and `qgrav_version`
+
+### Version Bump
+
+Version `0.7.0` → `0.8.0` in `__init__.py` and `pyproject.toml`.
+
+### Test Summary
+
+| Category | Tests |
+|----------|-------|
+| **Total** | **134 passing** (was 79) |
+| New: `test_physics_constants.py` | 14 tests |
+| New: `test_sensitivity_function.py` | 9 tests |
+| New: `test_corrections.py` | 12 tests |
+| New: `test_noise_id_v2.py` | 5 tests |
+| New: `test_unit_conversions.py` | 5 tests |
+| New: `test_scope_labels.py` | 7 tests |
+| Expanded existing files | +3 tests |
+
+### Files Changed
+
+- **16 source files** modified or created
+- **6 new test files** (55 new tests)
+- New modules: `physics/constants.py`, `physics/sensitivity_function.py`, `physics/_seismic_models.py`, `datasets/corrections.py`, `datasets/_tides_hw95.py`
+
+---
+
 ## v0.7.0 (2026-05-12)
 
 Upgrade from v0.5.0 covering 22 commits across 3 tracks: stabilization, scientific validation, and GUI refactoring. Followed by a comprehensive code audit that identified and fixed 8 bugs and resolved 10 code-quality issues.
