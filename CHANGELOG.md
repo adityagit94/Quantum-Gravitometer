@@ -1,5 +1,137 @@
 # Changelog
 
+## v0.9.2 (2026-05-22)
+
+Developer experience improvements. **6 new tests** (170 → 176 passing).
+
+---
+
+### CLI Commands (Phase 4.1–4.3)
+
+- **`qgrav validate-data --source PATH`**: Load and validate a gravimetry dataset
+  without running the full pipeline. Prints station code, sample rate, IGETS
+  level, gap report, statistics, unit warnings, and coordinates.
+- **`qgrav info`**: Print version, Python version, platform, dependency versions
+  (core and optional), and vendored package availability.
+- **`qgrav run --dry-run`**: Validate config and print a summary (bench type,
+  source path, PSD method, etc.) without executing the pipeline.
+
+### Test Determinism (Phase 4.4)
+
+- Pinned `MPLBACKEND=Agg` via `os.environ` in `conftest.py` (supplements
+  `matplotlib.use("Agg")` call)
+- Added determinism documentation to `conftest.py` docstring: seed discipline,
+  tolerance guidance, `@pytest.mark.flaky` for statistical tests
+
+### Pre-commit Hooks (Phase 4.5)
+
+- Added `--exit-non-zero-on-fix` to ruff hook for CI compatibility
+- Added local `constants-regression` hook: runs `test_physics_constants.py` and
+  `test_unit_conversions.py` when `src/qgrav/physics/constants.py` is modified
+- Added local `tide-catalogue-regression` hook: runs tide constituent tests when
+  `_tides_hw95.py` is modified
+
+---
+
+## v0.9.1 (2026-05-22)
+
+Robustness and testing improvements. **22 new tests** (148 → 170 passing).
+
+---
+
+### Thread-safe Matplotlib (Phase 3.1)
+
+- **Replaced all `plt.*` global API calls with OO `Figure`/`Axes` API** across the entire pipeline package
+  - `_plots.py`: Rewritten — `Figure()` + `ax.plot()` instead of `plt.figure()` + `plt.plot()`
+  - `_simulation.py`: Rewritten — same OO pattern, removed `plt.close("all")` cleanup
+  - `_common.py`: Removed unused `import matplotlib.pyplot as plt`
+- All plotting is now thread-safe for concurrent pipeline runs
+
+### Edge-case Allan Deviation Tests (Phase 3.2)
+
+- 6 new tests in `tests/test_allan_edge_cases.py`:
+  - Minimum 10 samples accepted, 9 samples raises ValueError
+  - Large tau near half-record boundary handled gracefully
+  - Constant input returns ADEV = 0
+  - Single-element taus array works
+  - Custom backend matches allantools on edge-case data
+
+### Property-based Tests with Hypothesis (Phase 3.3)
+
+- Added `hypothesis` to `[project.optional-dependencies]` test group
+- 21 new property tests in `tests/test_properties.py` covering:
+  - **PSD**: non-negativity, frequency grid structure, constant-input zero, Welch non-negativity
+  - **Allan deviation**: non-negativity, linear amplitude scaling
+  - **Phase models**: gravity→phase→gravity roundtrip, bias additivity, normalized signal bounds
+  - **Sensitivity function**: integral-is-zero (balanced interferometer), antisymmetry about T, transfer function notches at harmonics, non-negativity
+  - **Shot noise**: positivity, improves with more atoms
+  - **Tide model**: µGal-to-m/s² conversion, finite output for all latitudes, amplitude bounds
+  - **Error statistics**: perfect prediction yields zero RMSE, RMSE ≥ MAE, improvement sign
+
+### Synthetic Correction Integration Test (Phase 3.4)
+
+- New test `test_synthetic_tide_correction_improves_allan_deviation`:
+  creates a 3-day synthetic signal (tide + white noise), applies HW95 tide
+  correction, and verifies that the corrected Allan deviation is strictly
+  lower than the uncorrected one at all averaging times
+
+---
+
+## v0.9.0 (2026-05-22)
+
+Architecture refactoring. **No new tests** in this phase — all 140 tests pass unchanged.
+
+---
+
+### Pipeline Package (Phase 2)
+
+- **Split `pipeline.py` (933 lines) into `pipeline/` package** with 6 focused modules:
+  - `__init__.py` (44 lines) — `run_pipeline()` entry point
+  - `_common.py` (264 lines) — `RunPaths`, helpers, summary writer
+  - `_gravity.py` (259 lines) — real-gravity pipeline stage
+  - `_interferometer.py` (204 lines) — virtual/real interferometer pipeline stage
+  - `_plots.py` (172 lines) — matplotlib plot generation
+  - `_simulation.py` (77 lines) — AISim integration
+- All public imports (`from qgrav.pipeline import run_pipeline`) remain unchanged
+- Internal test imports updated (`_match_taus` moved to `_common`)
+
+### Type Definitions
+
+- Created `src/qgrav/types.py` with TypedDicts:
+  - `GravityDataset` — return type of `load_real_gravity_dataset`
+  - `AllanResult` — return type of `allan_deviation_overlapping`
+  - `PSDResult` — return type of `compute_psd`
+  - `AiSimResult` — return type of `run_aisim_*` functions
+
+---
+
+## v0.8.1 (2026-05-22)
+
+Critical bug fixes and licensing compliance. **6 new tests** (134 → 140 passing).
+
+---
+
+### Licensing (Phase 0)
+
+- **Relicensed to GPL-3.0-or-later** — resolves incompatibility with vendored AISim (GPL-3.0) and AllanTools (LGPL-3.0)
+- Created `LICENSE` file at project root with full GPL-3.0 text
+- Replaced placeholder `docs/THIRD_PARTY_LICENSES/AISim-LICENSE.txt` with actual GPL-3.0 text
+- Moved vendored AllanTools from `src/allantools/` to `src/qgrav/vendor/allantools/` for proper namespacing
+- Fixed self-import in vendored `ci.py` (now uses relative import)
+- Updated `allan.py` to import from `qgrav.vendor.allantools` with fallback to external package
+
+### Bug Fixes (Phase 1)
+
+- **AISim global random state**: replaced `np.random.seed()` with `np.random.default_rng()` in `atoms.py`, `dist.py`, and `beam.py` — AISim no longer mutates global NumPy random state
+- **Raw data preservation**: pipeline now saves `gravity_residual_raw`, `gravity_residual_full_raw`, and `tide_subtracted` arrays in `data.npz` when corrections are applied
+- **Raw vs corrected plot**: new `raw_vs_corrected` plot kind in `visuals.py` overlays pre- and post-correction series
+- **Gap detection tolerance**: `_gap_report` and `_select_longest_contiguous_segment` now use configurable `gap_tolerance_fraction` (default 0.1) instead of exact `dt != expected_dt_s` comparison — prevents spurious segment fragmentation from timing jitter
+- **Corrections warnings**: pipeline now emits `corrections_warnings` in `metrics.json` and shows a red warning banner in the HTML report when corrections are skipped (e.g., missing station coordinates) or partially applied
+- **Pressure bounds checking**: pressure correction now validates temporal coverage before interpolation — skips correction if overlap < 50%, warns if < 95%
+- **HTML autoescape**: verified and tested that Jinja2 `autoescape=True` correctly escapes `<script>` and similar payloads in config text and warnings
+
+---
+
 ## v0.8.0 (2026-05-17)
 
 Milestone 1 of the Physics PRD: scientific foundations. Adds a physical constants registry, Mach-Zehnder sensitivity function with vibration integrator, solid-earth tide and atmospheric pressure corrections for real gravimetry data, ACF-based noise identification, study-scope labelling on every simulation, and expands the published-reference registry from 4 to 12 entries. **55 new tests** (79 → 134 passing).

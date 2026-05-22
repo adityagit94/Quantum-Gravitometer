@@ -104,7 +104,7 @@ def test_allan_minimum_basic():
 
 
 def test_match_taus_with_float_perturbation():
-    from qgrav.pipeline import _match_taus
+    from qgrav.pipeline._common import _match_taus
     t1 = np.array([1.0, 2.0, 4.0, 8.0])
     t2 = np.array([1.0 + 1e-14, 2.0 - 1e-14, 4.0, 8.0 + 1e-15])
     i1, i2 = _match_taus(t1, t2)
@@ -116,7 +116,7 @@ def test_match_taus_with_float_perturbation():
 
 def test_match_taus_no_duplicate_targets():
     """Each taus2 element should be matched at most once."""
-    from qgrav.pipeline import _match_taus
+    from qgrav.pipeline._common import _match_taus
     t1 = np.array([1.0, 1.0 + 1e-15])  # two nearly identical source values
     t2 = np.array([1.0])  # one target
     i1, i2 = _match_taus(t1, t2)
@@ -127,7 +127,7 @@ def test_match_taus_no_duplicate_targets():
 
 
 def test_match_taus_empty():
-    from qgrav.pipeline import _match_taus
+    from qgrav.pipeline._common import _match_taus
     i1, i2 = _match_taus(np.array([]), np.array([1.0]))
     assert len(i1) == 0
     i1, i2 = _match_taus(np.array([1.0]), np.array([]))

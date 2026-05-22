@@ -3,9 +3,30 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-        args: [--fix]
+        args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
+
+  # Local hooks — domain-specific regression guards
+  - repo: local
+    hooks:
+      # Guard physics constants against inadvertent edits
+      - id: constants-regression
+        name: physics constants regression
+        language: system
+        entry: python -m pytest tests/test_physics_constants.py tests/test_unit_conversions.py -q --tb=short
+        pass_filenames: false
+        files: 'src/qgrav/physics/constants\.py|tests/test_physics_constants\.py'
+        types: [python]
+
+      # Guard tidal constituent catalogue against edits
+      - id: tide-catalogue-regression
+        name: tide catalogue regression
+        language: system
+        entry: python -m pytest tests/test_corrections.py -k "constituent_names or tide_magnitude" -q --tb=short
+        pass_filenames: false
+        files: 'src/qgrav/datasets/_tides_hw95\.py'
+        types: [python]

@@ -127,7 +127,7 @@ def parse_ggp_lines(lines: Iterable[str]) -> tuple[np.ndarray, np.ndarray]:
     return np.asarray(timestamps, dtype='datetime64[s]'), np.asarray(values, dtype=np.float64)
 
 
-def _gap_report(raw_timestamps: np.ndarray) -> dict[str, Any]:
+def _gap_report(raw_timestamps: np.ndarray, *, gap_tolerance_fraction: float = 0.1) -> dict[str, Any]:
     timestamps = np.asarray(raw_timestamps)
     finite_mask = _finite_time_mask(timestamps)
     times_clean = timestamps[finite_mask].astype('datetime64[s]')
@@ -159,7 +159,8 @@ def _gap_report(raw_timestamps: np.ndarray) -> dict[str, Any]:
         gap_mask = gap_steps > 1
         gap_count = int(np.sum(gap_mask))
         missing_samples = int(np.sum(np.maximum(gap_steps[gap_mask] - 1, 0)))
-        segment_breaks = np.where((dt != median_dt) | (dt <= 0))[0]
+        tolerance = max(1, int(round(median_dt * gap_tolerance_fraction)))
+        segment_breaks = np.where((np.abs(dt - median_dt) > tolerance) | (dt <= 0))[0]
         segment_count = int(len(segment_breaks) + 1)
         boundaries = np.concatenate(([0], segment_breaks + 1, [len(timestamps_sorted)]))
         lengths = np.diff(boundaries)
@@ -176,7 +177,7 @@ def _gap_report(raw_timestamps: np.ndarray) -> dict[str, Any]:
     }
 
 
-def _select_longest_contiguous_segment(timestamps: np.ndarray, values: np.ndarray, expected_dt_s: int | None) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+def _select_longest_contiguous_segment(timestamps: np.ndarray, values: np.ndarray, expected_dt_s: int | None, *, gap_tolerance_fraction: float = 0.1) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
     if len(timestamps) == 0:
         raise ValueError('Empty time series.')
     if expected_dt_s is None or len(timestamps) < 2:
@@ -188,7 +189,8 @@ def _select_longest_contiguous_segment(timestamps: np.ndarray, values: np.ndarra
             'segment_samples': int(len(timestamps)),
         }
     dt = np.diff(timestamps).astype('timedelta64[s]').astype(np.int64)
-    breaks = np.where((dt != expected_dt_s) | (dt <= 0))[0]
+    tolerance = max(1, int(round(expected_dt_s * gap_tolerance_fraction)))
+    breaks = np.where((np.abs(dt - expected_dt_s) > tolerance) | (dt <= 0))[0]
     boundaries = np.concatenate(([0], breaks + 1, [len(timestamps)]))
     best_i = 0
     best_len = -1
@@ -255,16 +257,39 @@ def _parse_csv_series(text: str) -> tuple[np.ndarray, np.ndarray, dict[str, Any]
     return t_arr, v_arr, meta
 
 
+def _normalize_unit(raw: str) -> str:
+    """Map a raw unit string to a canonical form.
+
+    Returns a lowercase canonical key such as ``"ugal"``, ``"nm/s^2"``,
+    ``"m/s^2"``, or the lowered/stripped input if no mapping applies.
+    """
+    s = raw.strip().lower()
+    # micro-gal variants
+    if s in {"ugal", "µgal", "microgal", "micro-gal", "ug"}:
+        return "ugal"
+    # nm/s^2 variants
+    if s in {"nm/s^2", "nm/s**2", "nm s-2", "nm/s2", "nanometers/second**2",
+             "nanometers/second^2", "nm s^-2"}:
+        return "nm/s^2"
+    # m/s^2 variants
+    if s in {"m/s^2", "m/s**2", "ms^-2", "ms-2", "m s-2", "m s^-2"}:
+        return "m/s^2"
+    # pass-through special value
+    if s == "gravity residual (dataset units)":
+        return s
+    return s
+
+
+_KNOWN_CANONICAL_UNITS = {
+    "ugal", "nm/s^2", "m/s^2", "gravity residual (dataset units)",
+}
+
+
 def _unit_validation(values: np.ndarray, declared_units: str | None = None) -> list[str]:
     warnings: list[str] = []
     if declared_units:
-        normalized = declared_units.strip().lower()
-        known = {
-            'ugal', 'µgal', 'm/s^2', 'ms^-2', 'nm/s^2',
-            'nm/s**2', 'nm s-2', 'nanometers/second**2', 'nm/s2',
-            'gravity residual (dataset units)',
-        }
-        if normalized not in known:
+        canonical = _normalize_unit(declared_units)
+        if canonical not in _KNOWN_CANONICAL_UNITS:
             warnings.append(f'Unrecognized declared units: {declared_units}')
     finite = np.asarray(values, dtype=np.float64)
     finite = finite[np.isfinite(finite)]
@@ -283,6 +308,7 @@ def load_real_gravity_dataset(
     station_code: str | None = None,
     metadata_path: str | Path | None = None,
     segment_strategy: str = 'longest_contiguous',
+    gap_tolerance_fraction: float = 0.1,
 ) -> dict[str, Any]:
     path = Path(source_path)
     source_kind = path.suffix.lower().lstrip('.') if path.is_file() else 'directory'
@@ -342,7 +368,7 @@ def load_real_gravity_dataset(
     finite_mask = _finite_time_mask(timestamps_raw) & np.isfinite(values_raw)
     timestamps_raw = timestamps_raw[finite_mask]
     values_raw = values_raw[finite_mask]
-    gap_report = _gap_report(timestamps_raw)
+    gap_report = _gap_report(timestamps_raw, gap_tolerance_fraction=gap_tolerance_fraction)
     order = np.argsort(timestamps_raw)
     timestamps = timestamps_raw[order]
     values = values_raw[order]
@@ -353,7 +379,7 @@ def load_real_gravity_dataset(
 
     expected_dt_s = gap_report.get('median_dt_s')
     if segment_strategy == 'longest_contiguous':
-        seg_t, seg_v, segment_report = _select_longest_contiguous_segment(timestamps, values, expected_dt_s)
+        seg_t, seg_v, segment_report = _select_longest_contiguous_segment(timestamps, values, expected_dt_s, gap_tolerance_fraction=gap_tolerance_fraction)
     else:
         seg_t, seg_v = timestamps, values
         segment_report = {

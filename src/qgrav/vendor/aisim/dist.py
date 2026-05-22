@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 from .convert import vel_from_temp
 
 
-def position_dist_gaussian(n: int, std: float) -> np.ndarray:
+def position_dist_gaussian(n: int, std: float, *, rng=None) -> np.ndarray:
     """Create a random position distribution from a Gaussian distribution.
 
     Parameters
@@ -15,11 +15,15 @@ def position_dist_gaussian(n: int, std: float) -> np.ndarray:
         number of samples
     std : float
         standard deviation of the Gaussian distribution in meters
+    rng : numpy.random.Generator, optional
+        Random number generator instance.  Falls back to a fresh
+        ``default_rng()`` when *None* so the global state is never mutated.
     """
-    return np.random.normal(scale=std, size=n)
+    _rng = rng if rng is not None else np.random.default_rng()
+    return _rng.normal(scale=std, size=n)
 
 
-def velocity_dist_from_temp(n: int, temperature: float) -> np.ndarray:
+def velocity_dist_from_temp(n: int, temperature: float, *, rng=None) -> np.ndarray:
     """Create a random velocity distribution from a given temperature.
 
     Parameters
@@ -34,11 +38,13 @@ def velocity_dist_from_temp(n: int, temperature: float) -> np.ndarray:
     velocities : array
         n-dimensional array of the randomly selected velocities
     """
-    return np.random.normal(scale=vel_from_temp(temperature), size=n)
+    _rng = rng if rng is not None else np.random.default_rng()
+    return _rng.normal(scale=vel_from_temp(temperature), size=n)
 
 
 def velocity_dist_for_box_pulse_velsel(
-    n: int, pulse_duration: float, wavelenth: float = 780e-9, n_lobes: int = 3
+    n: int, pulse_duration: float, wavelenth: float = 780e-9, n_lobes: int = 3,
+    *, rng=None,
 ) -> np.ndarray:
     """Create a random velocity distribution for a box pulse velocity selection.
 
@@ -75,11 +81,12 @@ def velocity_dist_for_box_pulse_velsel(
     y_cumsum = y_cumsum - y_cumsum.min()
     f = interp1d(y_cumsum / y_cumsum.max(), x)
 
-    return wavelenth * f(np.random.random(n)) / 2
+    _rng = rng if rng is not None else np.random.default_rng()
+    return wavelenth * f(_rng.random(n)) / 2
 
 
 def velocity_dist_for_gaussian_velsel(
-    n: int, pulse_duration: float, wavelength: float = 780e-9
+    n: int, pulse_duration: float, wavelength: float = 780e-9, *, rng=None,
 ):
     """Create a random velocity distribution for a Gaussian pulse velocity selection.
 
@@ -101,4 +108,5 @@ def velocity_dist_for_gaussian_velsel(
     pulse_duration = pulse_duration / 2  # Convert to sigma
     sigma_nu = 1 / (2 * np.pi * pulse_duration)
 
-    return np.random.normal(scale=sigma_nu, size=n) * wavelength / 2
+    _rng = rng if rng is not None else np.random.default_rng()
+    return _rng.normal(scale=sigma_nu, size=n) * wavelength / 2
