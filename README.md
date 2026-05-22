@@ -16,7 +16,7 @@
 
 See `docs/COMPLETE_GUIDE.md` for the full user guide and `CHANGELOG.md` for the v0.7 → v0.8 changes.
 
-**Author:** Aditya Prakash | **License:** MIT | **Python:** >= 3.9
+**Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.9
 
 ---
 

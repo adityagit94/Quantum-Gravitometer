@@ -316,17 +316,16 @@ def create_random_ensemble(
         Atomic ensemble containing the generated phase space vectors.
     """
 
-    if seed is not None:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     # initialize vector with phase-space entries and fill them
     phase_space_vectors = np.zeros((n_samples, 6))
-    phase_space_vectors[:, 0] = x_dist(n_samples) + mean_x
-    phase_space_vectors[:, 1] = y_dist(n_samples) + mean_y
-    phase_space_vectors[:, 2] = z_dist(n_samples) + mean_z
-    phase_space_vectors[:, 3] = vx_dist(n_samples) + mean_vx
-    phase_space_vectors[:, 4] = vy_dist(n_samples) + mean_vy
-    phase_space_vectors[:, 5] = vz_dist(n_samples) + mean_vz
+    phase_space_vectors[:, 0] = x_dist(n_samples, rng=rng) + mean_x
+    phase_space_vectors[:, 1] = y_dist(n_samples, rng=rng) + mean_y
+    phase_space_vectors[:, 2] = z_dist(n_samples, rng=rng) + mean_z
+    phase_space_vectors[:, 3] = vx_dist(n_samples, rng=rng) + mean_vx
+    phase_space_vectors[:, 4] = vy_dist(n_samples, rng=rng) + mean_vy
+    phase_space_vectors[:, 5] = vz_dist(n_samples, rng=rng) + mean_vz
     ensemble = AtomicEnsemble(phase_space_vectors, **kwargs)
     return ensemble
 

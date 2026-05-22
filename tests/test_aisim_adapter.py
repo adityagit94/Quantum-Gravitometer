@@ -73,3 +73,20 @@ def test_vibration_sweep_includes_sensitivity():
     out = run_aisim_vibration_sensitivity_sweep(n_atoms=200, n_amplitude_points=7, seed=42)
     assert "shot_noise_sensitivity_m_s2_per_sqrt_hz" in out
     assert out["shot_noise_sensitivity_m_s2_per_sqrt_hz"] > 0
+
+
+def test_aisim_does_not_mutate_global_random_state():
+    """Ensure that AISim functions use local RNG and never touch np.random global state."""
+    # Set a known global state and capture reference draws
+    np.random.seed(12345)
+    expected = np.random.random(5).copy()
+
+    # Reset to same global seed, then run AISim in between
+    np.random.seed(12345)
+    _ = run_aisim_rabi_scan(n_atoms=100, n_steps=5, tau_step_s=1e-6, seed=99)
+    actual = np.random.random(5)
+
+    np.testing.assert_array_equal(
+        actual, expected,
+        err_msg="AISim mutated the global numpy random state",
+    )

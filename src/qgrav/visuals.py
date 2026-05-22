@@ -54,6 +54,11 @@ def available_plot_kinds(bundle: dict[str, Any]) -> list[str]:
     bench_type = metrics.get("bench_type")
     if bench_type == "real_gravity":
         kinds = ["dashboard", "gravity_series", "histogram", "psd", "allan"]
+        if "gravity_residual_raw" in arrays:
+            raw = arrays["gravity_residual_raw"]
+            corrected = arrays["gravity_residual"]
+            if not np.array_equal(raw, corrected):
+                kinds.append("raw_vs_corrected")
     else:
         kinds = ["dashboard", "raw", "displacement", "psd", "allan"]
         if "x_true" in arrays:
@@ -169,6 +174,15 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
             ax.set_xlabel("tau (s)")
             ax.set_ylabel("Allan deviation")
             ax.set_title(f"Allan deviation ({metrics.get('allan_backend_used', 'unknown')})")
+        elif kind == "raw_vs_corrected":
+            t_seg = arrays["t"]
+            raw_seg = arrays.get("gravity_residual_raw", x)
+            ax.plot(t_seg / 86400.0, raw_seg, linewidth=0.6, alpha=0.7, label="raw")
+            ax.plot(t_seg / 86400.0, x, linewidth=0.6, alpha=0.9, label="corrected")
+            ax.set_xlabel("days from start")
+            ax.set_ylabel("gravity residual")
+            ax.set_title("Raw vs corrected gravity residual")
+            ax.legend()
         elif isinstance(sim_specs, list) and any(isinstance(spec, dict) and str(spec.get("name")) == kind for spec in sim_specs):
             spec = next(spec for spec in sim_specs if isinstance(spec, dict) and str(spec.get("name")) == kind)
             _plot_sim_from_spec(ax, arrays, spec)

@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
 import scipy.stats  # used in confidence_intervals()
 import scipy.signal  # decimation in lag-1 acf
-import allantools as at
+from . import allantools as at
 
 ########################################################################
 # Confidence Intervals

@@ -16,16 +16,20 @@ logger = logging.getLogger(__name__)
 def _import_allantools_module():
     """Import AllanTools.
 
-    In this repository a vendored copy is installed as a top-level ``allantools`` package,
-    so this works offline in editable installs while remaining compatible with an external
-    AllanTools installation.
+    Prefers the vendored copy under ``qgrav.vendor.allantools``.  Falls back to an
+    externally installed ``allantools`` package so the library can also be used
+    standalone.
     """
     try:
-        import allantools as at  # type: ignore
+        from qgrav.vendor.allantools import allantools as at  # type: ignore
         return at
     except Exception:
-        logger.exception("Failed to import AllanTools")
-        return None
+        try:
+            import allantools as at  # type: ignore
+            return at
+        except Exception:
+            logger.exception("Failed to import AllanTools")
+            return None
 
 
 def available_allan_backends() -> list[str]:
@@ -299,7 +303,7 @@ def identify_noise_type_acf(
             "description": "Time series too short for ACF noise-type ID.",
         }
     try:
-        from allantools.ci import autocorr_noise_id  # type: ignore
+        from qgrav.vendor.allantools.ci import autocorr_noise_id  # type: ignore
 
         alpha_int, alpha, d, rho = autocorr_noise_id(
             arr, af=int(averaging_factor), data_type=data_type,

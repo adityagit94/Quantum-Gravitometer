@@ -322,9 +322,8 @@ def gen_wavefront(
     wf : Wavefront
         artificial wavefront
     """
-    if seed is not None:
-        np.random.seed(seed)
-    coeff = np.random.normal(0, std, size=n_zern)
+    _rng = np.random.default_rng(seed)
+    coeff = _rng.normal(0, std, size=n_zern)
     zern_coeff = {
         j: val for j, val in enumerate(coeff, start=FIRST_INDEX_J[zern_order])
     }

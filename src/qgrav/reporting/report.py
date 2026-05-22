@@ -37,6 +37,17 @@ _TEMPLATE = """<!doctype html>
   <h1>qgrav run report</h1>
   <p class="muted">Generated from a single YAML config and saved alongside raw outputs for reproducibility.</p>
 
+  {% if metrics.get('corrections_warnings') %}
+  <div style="background:#fce4e4;border:1px solid #c00;padding:10px 14px;border-radius:6px;margin:12px 0;">
+    <strong style="color:#900;">&#9888; Corrections warnings</strong>
+    <ul style="margin:4px 0 0 16px;">
+      {% for w in metrics.corrections_warnings %}
+      <li>{{ w }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
   <div class="cards">
     <div class="card"><div class="muted">Bench type</div><div class="metric">{{ metrics.bench_type }}</div></div>
     <div class="card"><div class="muted">Sample rate</div><div class="metric">{{ metrics.sample_rate_hz }}</div><div class="muted">Hz</div></div>

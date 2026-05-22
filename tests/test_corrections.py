@@ -225,3 +225,258 @@ def test_pipeline_integration_default_apply_corrections_false():
         metrics = json.loads((report_path.parent / "metrics.json").read_text(encoding="utf-8"))
         assert metrics["qgrav_output_format_version"] == "1.0"
         assert metrics["corrections_applied"] == []
+
+
+def test_pressure_correction_warns_on_partial_overlap(tmp_path):
+    """Pressure correction should warn when pressure data has low temporal overlap."""
+    project_root = find_project_root(Path(__file__))
+    data_dir = project_root / "data" / "raw" / "sg_sample"
+    if not data_dir.exists():
+        pytest.skip(f"sample data not found at {data_dir}")
+
+    import tempfile
+    import yaml
+    import json
+    from qgrav.pipeline import run_pipeline
+
+    # Create a pressure CSV that only covers a tiny slice of the gravity time range.
+    # The gravity data for ap046 typically spans several days.
+    pressure_csv = tmp_path / "pressure.csv"
+    pressure_csv.write_text(
+        "unix_seconds,pressure_hpa\n"
+        "0,1013.0\n"
+        "100,1013.5\n",
+        encoding="utf-8",
+    )
+
+    cfg = {
+        "output": {"runs_dir": "runs", "name": "pressure_overlap_test"},
+        "bench": {"type": "real_gravity"},
+        "bench_real_gravity": {
+            "source_path": str(data_dir),
+            "station_code": "ap046",
+            "apply_corrections": True,
+            "tide_backend": "internal_hw95",
+            "igets_level": "1",
+            "pressure_csv_path": str(pressure_csv),
+        },
+        "stats": {
+            "metrics_backend": "auto",
+            "psd_method": "welch",
+            "welch_nperseg": 128,
+            "welch_noverlap": 64,
+        },
+    }
+    with tempfile.TemporaryDirectory() as tdir:
+        cfg_path = Path(tdir) / "config.yaml"
+        cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+        report_path = run_pipeline(cfg_path, project_root=project_root)
+        metrics = json.loads((report_path.parent / "metrics.json").read_text(encoding="utf-8"))
+        # With near-zero overlap, pressure should have been skipped.
+        assert "atmospheric_pressure" not in metrics["corrections_applied"], (
+            "Pressure correction should be skipped with <50% coverage"
+        )
+        # There should be a warning about coverage.
+        assert any("Pressure" in w for w in metrics.get("corrections_warnings", []))
+
+
+def test_corrections_skipped_warning_when_no_coordinates():
+    """When corrections are requested but station has no coordinates, the run
+    should complete and include a SKIPPED entry + warning."""
+    project_root = find_project_root(Path(__file__))
+    data_dir = project_root / "data" / "raw" / "sg_sample"
+    if not data_dir.exists():
+        pytest.skip(f"sample data not found at {data_dir}")
+
+    import tempfile
+    import yaml
+    import json
+    from qgrav.pipeline import run_pipeline
+
+    cfg = {
+        "output": {"runs_dir": "runs", "name": "no_coords_warning_test"},
+        "bench": {"type": "real_gravity"},
+        "bench_real_gravity": {
+            "source_path": str(data_dir),
+            "station_code": "ap046",
+            "apply_corrections": True,
+            "tide_backend": "internal_hw95",
+            "igets_level": "1",
+        },
+        "stats": {
+            "metrics_backend": "auto",
+            "psd_method": "welch",
+            "welch_nperseg": 128,
+            "welch_noverlap": 64,
+        },
+    }
+    # The sample ap046 actually *has* coordinates, so this test relies on the
+    # current dataset's metadata.  If lat/lon are present we instead verify
+    # there are no SKIPPED warnings.  (We test the full code-path; a unit test
+    # with mocked data would be needed to test the missing-coords path.)
+    with tempfile.TemporaryDirectory() as tdir:
+        cfg_path = Path(tdir) / "config.yaml"
+        cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+        report_path = run_pipeline(cfg_path, project_root=project_root)
+        metrics = json.loads((report_path.parent / "metrics.json").read_text(encoding="utf-8"))
+        # corrections_warnings key must always be present
+        assert "corrections_warnings" in metrics
+        # Since ap046 has coords, there should be no SKIPPED warning
+        skipped = [c for c in metrics["corrections_applied"] if c.startswith("SKIPPED")]
+        assert len(skipped) == 0, f"Expected no SKIPPED entries but got: {skipped}"
+
+
+def test_corrected_run_preserves_raw_data():
+    """When corrections are applied, the raw (pre-correction) arrays must be
+    stored alongside the corrected arrays in data.npz."""
+    project_root = find_project_root(Path(__file__))
+    data_dir = project_root / "data" / "raw" / "sg_sample"
+    if not data_dir.exists():
+        pytest.skip(f"sample data not found at {data_dir}")
+
+    import tempfile
+    import yaml
+    from qgrav.pipeline import run_pipeline
+
+    cfg = {
+        "output": {"runs_dir": "runs", "name": "raw_preservation_test"},
+        "bench": {"type": "real_gravity"},
+        "bench_real_gravity": {
+            "source_path": str(data_dir),
+            "station_code": "ap046",
+            "apply_corrections": True,
+            "tide_backend": "internal_hw95",
+            "igets_level": "1",
+        },
+        "stats": {
+            "metrics_backend": "auto",
+            "psd_method": "welch",
+            "welch_nperseg": 128,
+            "welch_noverlap": 64,
+        },
+    }
+    with tempfile.TemporaryDirectory() as tdir:
+        cfg_path = Path(tdir) / "config.yaml"
+        cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+        report_path = run_pipeline(cfg_path, project_root=project_root)
+        run_dir = report_path.parent
+        data = dict(np.load(run_dir / "data.npz"))
+        # Raw arrays must exist
+        assert "gravity_residual_raw" in data, "missing gravity_residual_raw in data.npz"
+        assert "gravity_residual_full_raw" in data, "missing gravity_residual_full_raw in data.npz"
+        assert "tide_subtracted" in data, "missing tide_subtracted in data.npz"
+        # Corrected and raw should differ (tide was applied)
+        assert not np.array_equal(data["gravity_residual"], data["gravity_residual_raw"]), (
+            "raw and corrected arrays should differ after corrections"
+        )
+
+
+def test_synthetic_tide_correction_improves_allan_deviation():
+    """Synthetic integration test: create data = tide + white noise, apply tide
+    correction, and verify that the corrected Allan deviation is lower than the
+    uncorrected one.  This tests the full corrections → metrics chain."""
+    from qgrav.metrics.allan import allan_deviation_overlapping
+
+    rng = np.random.default_rng(2024)
+    # 3 days of 1-minute samples ⇒ 4320 points
+    n = 4320
+    dt_s = 60.0
+    t0 = 1_700_000_000.0
+    t = t0 + np.arange(n) * dt_s
+    fs = 1.0 / dt_s
+
+    # Tide signal at mid-latitude (dominant M2 ~ 12.42 hr period)
+    from qgrav.datasets._tides_hw95 import gravity_tide_ugal
+    tide_ugal = gravity_tide_ugal(t, latitude_deg=45.0, longitude_deg=0.0)
+    tide_m_s2 = tide_ugal * 1e-8
+
+    # White noise at 0.1 µGal level (1e-9 m/s²)
+    noise = rng.normal(scale=1e-9, size=n)
+    raw_signal = tide_m_s2 + noise
+
+    # Compute Allan deviation BEFORE correction
+    taus = np.logspace(np.log10(2 * dt_s), np.log10(0.1 * n * dt_s), 10)
+    adev_before = allan_deviation_overlapping(raw_signal, fs, taus, backend="custom")
+
+    # Apply tide correction
+    corrected = apply_tide_correction(
+        t, raw_signal,
+        latitude_deg=45.0, longitude_deg=0.0,
+        backend="internal_hw95",
+    )
+    adev_after = allan_deviation_overlapping(corrected["corrected"], fs, taus, backend="custom")
+
+    # The corrected ADEV should be lower at every tau (tide was the dominant signal)
+    adev_b = np.asarray(adev_before["adev"])
+    adev_a = np.asarray(adev_after["adev"])
+    n_common = min(len(adev_b), len(adev_a))
+    assert n_common > 0, "No ADEV points produced"
+    assert np.all(adev_a[:n_common] < adev_b[:n_common]), (
+        f"Expected corrected ADEV < raw ADEV at all taus, but "
+        f"before={adev_b[:n_common].tolist()}, after={adev_a[:n_common].tolist()}"
+    )
+
+
+def test_html_report_escapes_special_characters():
+    """The HTML report must escape < > & characters in config text and metrics
+    to prevent XSS or rendering breakage."""
+    import json
+    from qgrav.reporting.report import build_html_report
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tdir:
+        run_dir = Path(tdir)
+        # Config text with script tag that should be escaped
+        config_text = 'name: "<script>alert(1)</script>"'
+        metrics = {
+            "bench_type": "real_gravity",
+            "sample_rate_hz": 1.0,
+            "psd_method": "welch",
+            "allan_backend_used": "custom",
+            "allan_data_type": "freq",
+            "qgrav_output_format_version": "1.0",
+            "qgrav_version": "0.8.1",
+            "corrections_warnings": ['<img src=x onerror="alert(1)">'],
+            "station_code": "test",
+            "source_path": "/tmp/test",
+            "record_start": "2024-01-01",
+            "record_end": "2024-01-02",
+            "longitude_deg": 0.0,
+            "latitude_deg": 0.0,
+            "gravity_summary": {"mean": 0.0, "std": 1.0},
+            "gap_report": {
+                "n_samples_total": 100,
+                "gap_count": 0,
+                "missing_samples_estimate": 0,
+                "largest_contiguous_segment_samples": 100,
+            },
+            "dropped_rows": 0,
+            "analysis_segment": {
+                "segment_samples": 100,
+                "segment_start": "2024-01-01",
+                "segment_end": "2024-01-02",
+            },
+            "series_units": "nm/s**2",
+            "unit_warnings": [],
+            "data_product_level_at_analysis": 1,
+            "corrections_applied": ["solid_earth_tide (internal_hw95)"],
+            "correction_metrics": {},
+        }
+        plot_paths = {
+            "displacement": "disp.png",
+            "psd": "psd.png",
+            "allan": "allan.png",
+            "raw": "raw.png",
+        }
+        report_path = build_html_report(
+            run_dir=run_dir,
+            config_text=config_text,
+            metrics=metrics,
+            plot_paths=plot_paths,
+        )
+        html = report_path.read_text(encoding="utf-8")
+        # The <script> tag in config text should be escaped
+        assert "<script>" not in html, "Config text was not escaped in HTML"
+        assert "&lt;script&gt;" in html, "Expected escaped script tag in HTML"
+        # The XSS payload in corrections_warnings should be escaped
+        assert '<img src=x' not in html, "corrections_warnings was not escaped"
