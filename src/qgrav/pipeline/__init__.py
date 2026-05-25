@@ -4,8 +4,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-
 from qgrav.config import load_config, resolve_runs_dir, validate_config
 from qgrav.pipeline._common import _make_run_dir
 from qgrav.pipeline._gravity import _run_real_gravity_pipeline
@@ -27,18 +25,15 @@ def run_pipeline(config_path: Path, *, project_root: Path | None = None) -> Path
         cannot be resolved from the temp directory.  Passing the real project
         root ensures ``data/raw/...`` and similar paths resolve correctly.
     """
-    try:
-        cfg, cfg_text = load_config(config_path)
-        validate_config(cfg)
-        out_base = resolve_runs_dir(cfg, config_path)
-        name = str(cfg.get("output", {}).get("name", "example"))
-        paths = _make_run_dir(out_base, name)
-        paths.config_copy.write_text(cfg_text, encoding="utf-8")
+    cfg, cfg_text = load_config(config_path)
+    validate_config(cfg)
+    out_base = resolve_runs_dir(cfg, config_path)
+    name = str(cfg.get("output", {}).get("name", "example"))
+    paths = _make_run_dir(out_base, name)
+    paths.config_copy.write_text(cfg_text, encoding="utf-8")
 
-        bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
-        bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
-        if bench_type == "real_gravity":
-            return _run_real_gravity_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
-        return _run_interferometer_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
-    finally:
-        plt.close("all")
+    bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
+    bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
+    if bench_type == "real_gravity":
+        return _run_real_gravity_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
+    return _run_interferometer_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)

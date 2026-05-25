@@ -41,7 +41,13 @@ class AtomicEnsemble:
     """
 
     def __init__(self, phase_space_vectors, state_kets=[1, 0], time: float = 0.0):
-        assert phase_space_vectors.shape[1] == 6
+        # [LOCAL PATCH] replaced assert with ValueError so validation
+        # survives ``python -O``.  Upstream: github.com/bleaktwig/aisim
+        if phase_space_vectors.shape[1] != 6:
+            raise ValueError(
+                f"phase_space_vectors must have 6 columns (x,y,z,vx,vy,vz), "
+                f"got {phase_space_vectors.shape[1]}"
+            )
         self.phase_space_vectors = phase_space_vectors
         self.state_kets = state_kets
         self.time = time

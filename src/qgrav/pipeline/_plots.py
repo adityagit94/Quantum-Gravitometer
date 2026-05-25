@@ -60,11 +60,14 @@ def _make_ifo_plots(
     ax = fig.add_subplot(111)
     if x_true is not None:
         psd_true = compute_psd(x_true, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
-        ax.loglog(psd_true["f_hz"][1:], psd_true["psd"][1:], label="PSD truth")
+        if len(psd_true["f_hz"]) > 1:
+            ax.loglog(psd_true["f_hz"][1:], psd_true["psd"][1:], label="PSD truth")
     psd_b = compute_psd(x_b, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
     psd_i = compute_psd(x_i, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
-    ax.loglog(psd_b["f_hz"][1:], psd_b["psd"][1:], label="PSD baseline", alpha=0.85)
-    ax.loglog(psd_i["f_hz"][1:], psd_i["psd"][1:], label="PSD improved", alpha=0.85)
+    if len(psd_b["f_hz"]) > 1:
+        ax.loglog(psd_b["f_hz"][1:], psd_b["psd"][1:], label="PSD baseline", alpha=0.85)
+    if len(psd_i["f_hz"]) > 1:
+        ax.loglog(psd_i["f_hz"][1:], psd_i["psd"][1:], label="PSD improved", alpha=0.85)
     ax.set_xlabel("frequency (Hz)")
     ax.set_ylabel("PSD (m^2/Hz)")
     ax.legend()
@@ -153,7 +156,8 @@ def _make_real_gravity_plots(
     psd = compute_psd(x, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
     fig = Figure(figsize=(10, 4.6))
     ax = fig.add_subplot(111)
-    ax.loglog(psd["f_hz"][1:], psd["psd"][1:])
+    if len(psd["f_hz"]) > 1:
+        ax.loglog(psd["f_hz"][1:], psd["psd"][1:])
     ax.set_xlabel("frequency (Hz)")
     ax.set_ylabel("PSD")
     ax.set_title("Gravity residual PSD")

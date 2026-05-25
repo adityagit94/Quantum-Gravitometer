@@ -78,7 +78,8 @@ def _new_fig(width: float = 9.2, height: float = 6.2, *, constrained: bool = Fal
 
 def _plot_psd(ax, x: np.ndarray, fs: float, label: str, psd_method: str, nperseg: int, noverlap: int) -> None:
     psd = compute_psd(x, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
-    ax.loglog(psd["f_hz"][1:], psd["psd"][1:], label=label)
+    if len(psd["f_hz"]) > 1:
+        ax.loglog(psd["f_hz"][1:], psd["psd"][1:], label=label)
 
 
 def _plot_sim_from_spec(ax, arrays: dict[str, np.ndarray], spec: dict[str, Any]) -> None:

@@ -154,7 +154,7 @@ def apply_tide_correction(
     if tide.size > 0:
         rms_ugal = float(np.sqrt(np.mean(tide ** 2)) * 1e8)
     else:
-        rms_ugal = 0.0
+        rms_ugal = float("nan")
     return {
         "corrected": corrected,
         "tide_subtracted": tide,

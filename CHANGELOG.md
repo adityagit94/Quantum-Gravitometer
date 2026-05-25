@@ -1,5 +1,45 @@
 # Changelog
 
+## v0.9.3 (2026-05-25)
+
+Codebase audit fix release. Addresses 15 issues found in a rigorous three-pronged audit (numerics, error handling, robustness, test coverage). **16 new tests** (176 → 192 passing).
+
+---
+
+### Numerical & Correctness Fixes
+
+- **`equivalent_gravity_error_m_s2`** — replaced unsafe `max(..., 1e-30)` denominator floor (which produced ~1e22 results on zero input) with proper input validation: `k_eff > 0`, `T > 0`
+- **`interpolate_psd`** — added guard against `log10(0)` / `log10(negative)` which produced -inf/nan propagation. Now raises `ValueError` for non-positive frequencies
+- **Empty tide RMS** — `apply_tide_correction` with empty arrays now returns `NaN` instead of `0.0` (semantically correct: no data ≠ zero error)
+
+### Error Handling
+
+- **CLI error handling** — all CLI commands now wrapped in `_safe_dispatch()`: prints clean `Error (ExceptionName): message` instead of raw tracebacks. Added `--verbose / -v` flag to show full tracebacks during development
+- **Systematics errors** — promoted swallowed `logger.debug("Systematics computation skipped")` to `logger.warning` in both gravity and interferometer pipelines
+- **Array length mismatch** — interferometer pipeline now warns when input arrays have mismatched lengths before truncating
+- **Pipeline config validation** — `cfg["bench_real_gravity"]` and `cfg["bench_real_ifo"]` replaced with `.get()` + explicit `ValueError` with context (was bare `KeyError`)
+
+### Robustness & Code Quality
+
+- **PSD plot guards** — all `psd["f_hz"][1:]` slicing in `_plots.py` and `visuals.py` now guarded with length checks to prevent empty loglog on tiny datasets
+- **Vendored AISim validation** — `assert shape[1] == 6` replaced with `ValueError` so validation survives `python -O`. Documented as local patch for re-vendoring
+- **`_jsonable()` extended types** — handles `np.datetime64` → str, `np.timedelta64` → float seconds (sub-second precision preserved), `np.str_`/`np.bytes_` → str. Fixed isinstance ordering for NumPy 2.x where `timedelta64` inherits from `signedinteger`
+- **Run directory uniqueness** — appended `uuid4().hex[:8]` to run_id to prevent collisions on concurrent runs within the same microsecond
+- **Dead pyplot cleanup** — removed `import matplotlib.pyplot as plt` and `plt.close("all")` from pipeline `__init__.py` (dead code after OO migration)
+- **PEP 561 marker** — added `py.typed` for typed package support
+
+### Test Fixes
+
+- **Allan edge-case assertion** — `assert len(result["adev"]) >= 0` (always true) → `>= 1`
+- **CLI test** — `pytest.raises(Exception)` → `pytest.raises(SystemExit)` to match `_safe_dispatch` behavior
+- **New test file:** `tests/test_audit_fixes.py` — 15 tests covering input validation, empty-data edge cases, CLI error handling, `_jsonable` extended types, PSD short-data guard, and pipeline config validation
+
+### Version
+
+`0.9.2` → `0.9.3` in `__init__.py` and `pyproject.toml`.
+
+---
+
 ## v0.9.2 (2026-05-22)
 
 Developer experience improvements. **6 new tests** (170 → 176 passing).
