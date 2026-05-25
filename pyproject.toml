@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qgrav"
-version = "0.9.2"
+version = "0.9.3"
 description = "Software-first quantum gravimeter R&D platform: simulation -> virtual/real bench -> algorithms -> validation -> report"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -26,6 +26,7 @@ qgrav = "qgrav.cli:main"
 qgrav-gui = "qgrav.gui:main"
 
 [tool.setuptools.package-data]
+"qgrav" = ["py.typed"]
 "qgrav.vendor.allantools" = ["*.json"]
 
 [tool.ruff]

@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import time
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -42,7 +43,7 @@ def _make_run_dir(base: Path, name: str) -> RunPaths:
     base.mkdir(parents=True, exist_ok=True)
     safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in name.strip()) or "run"
     for _ in range(10):
-        run_id = f"{datetime.now():%Y%m%d_%H%M%S_%f}_{safe}"
+        run_id = f"{datetime.now():%Y%m%d_%H%M%S_%f}_{uuid.uuid4().hex[:8]}_{safe}"
         run_dir = base / run_id
         plots_dir = run_dir / "plots"
         try:
@@ -75,8 +76,17 @@ def _jsonable(obj: Any) -> Any:
         return [_jsonable(v) for v in obj]
     if isinstance(obj, np.ndarray):
         return obj.tolist()
+    # Check datetime64/timedelta64 BEFORE generic np.integer/np.floating,
+    # because np.timedelta64 inherits from np.signedinteger in NumPy 2.x.
+    if isinstance(obj, np.datetime64):
+        return str(obj)
+    if isinstance(obj, np.timedelta64):
+        # Preserve sub-second precision as float seconds
+        return float(obj / np.timedelta64(1, "s")) if not np.isnat(obj) else None
     if isinstance(obj, (np.floating, np.integer, np.bool_)):
         return obj.item()
+    if isinstance(obj, (np.str_, np.bytes_)):
+        return str(obj)
     return obj
 
 

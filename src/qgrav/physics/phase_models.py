@@ -41,7 +41,11 @@ def equivalent_gravity_error_m_s2(
     k_eff_rad_per_m: float,
     interferometer_time_s: float,
 ) -> np.ndarray:
-    denom = max(abs(float(k_eff_rad_per_m) * (float(interferometer_time_s) ** 2)), 1e-30)
+    if k_eff_rad_per_m <= 0:
+        raise ValueError("k_eff_rad_per_m must be positive")
+    if interferometer_time_s <= 0:
+        raise ValueError("interferometer_time_s must be positive")
+    denom = float(k_eff_rad_per_m) * (float(interferometer_time_s) ** 2)
     return np.asarray(phase_rad, dtype=np.float64) / denom
 
 

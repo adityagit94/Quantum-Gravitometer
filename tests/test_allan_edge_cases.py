@@ -16,7 +16,8 @@ def test_allan_custom_minimum_10_samples():
     x = np.random.default_rng(42).normal(size=10)
     taus = np.array([1.0 / 10.0])  # tau0
     result = allan_deviation_overlapping(x, 10.0, taus, backend="custom")
-    assert len(result["adev"]) >= 0  # may or may not produce a point, but must not crash
+    # tau0 with 10 samples: m=1, 2*m=2 < 10 → guaranteed to produce ≥1 point
+    assert len(result["adev"]) >= 1
 
 
 def test_allan_custom_9_samples_raises():

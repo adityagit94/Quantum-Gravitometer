@@ -123,7 +123,10 @@ def interpolate_psd(
         freqs, psd_linear = NHNM_PSD
     else:
         raise ValueError(f"Unknown Peterson model '{model}'. Use 'nlnm' or 'nhnm'.")
-    log_f = np.log10(np.asarray(f_hz, dtype=float))
+    f_arr = np.asarray(f_hz, dtype=float)
+    if np.any(f_arr <= 0):
+        raise ValueError("Frequencies must be positive for log-space interpolation")
+    log_f = np.log10(f_arr)
     log_knot_f = np.log10(freqs)
     log_knot_psd = np.log10(psd_linear)
     log_psd = np.interp(log_f, log_knot_f, log_knot_psd)

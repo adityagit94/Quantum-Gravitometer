@@ -66,6 +66,6 @@ def test_dry_run_validates_config():
 def test_dry_run_invalid_config(tmp_path):
     cfg_path = tmp_path / "bad.yaml"
     cfg_path.write_text("not: a: valid: qgrav: config\n", encoding="utf-8")
-    # Should raise because validation will fail (no required keys)
-    with pytest.raises(Exception):
+    # _safe_dispatch catches the validation error and converts to SystemExit(1)
+    with pytest.raises(SystemExit):
         _run_cli("run", "--config", str(cfg_path), "--dry-run")

@@ -30,7 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path, *, project_root: Path | None = None) -> Path:
-    grav_cfg = cfg["bench_real_gravity"]
+    grav_cfg = cfg.get("bench_real_gravity")
+    if not isinstance(grav_cfg, dict):
+        raise ValueError("Config missing required section 'bench_real_gravity'")
     data = load_real_gravity(
         source_path=resolve_project_relative_path(config_path, grav_cfg["source_path"], project_root=project_root) or grav_cfg["source_path"],
         station_code=grav_cfg.get("station_code"),
@@ -248,7 +250,7 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
             latitude_deg=float(lat) if lat is not None else 45.0,
         )
     except Exception:
-        logger.debug("Systematics computation skipped", exc_info=True)
+        logger.warning("Systematics computation failed", exc_info=True)
 
     metrics_jsonable = _jsonable(metrics)
     paths.metrics_path.write_text(json.dumps(metrics_jsonable, indent=2), encoding="utf-8")

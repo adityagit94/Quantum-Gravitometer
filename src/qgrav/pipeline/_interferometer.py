@@ -35,7 +35,9 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
     bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
     if bench_type == "real":
-        real_cfg = cfg["bench_real_ifo"]
+        real_cfg = cfg.get("bench_real_ifo")
+        if not isinstance(real_cfg, dict):
+            raise ValueError("Config missing required section 'bench_real_ifo'")
         data = load_real_ifo_csv(
             csv_path=resolve_project_relative_path(config_path, real_cfg["csv_path"], project_root=project_root) or real_cfg["csv_path"],
             sample_rate_hz=real_cfg.get("sample_rate_hz"),
@@ -53,7 +55,9 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
             fs = float(1.0 / np.median(dt))
         lam = float(real_cfg.get("wavelength_m", cfg.get("bench_virtual_ifo", {}).get("wavelength_m", 1.55e-6)))
     else:
-        virtual_cfg = cfg["bench_virtual_ifo"]
+        virtual_cfg = cfg.get("bench_virtual_ifo")
+        if not isinstance(virtual_cfg, dict):
+            raise ValueError("Config missing required section 'bench_virtual_ifo'")
         data = generate_virtual_ifo(
             wavelength_m=float(virtual_cfg["wavelength_m"]),
             sample_rate_hz=float(virtual_cfg["sample_rate_hz"]),
@@ -93,7 +97,10 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
 
     x_b = np.asarray(est_base["x_hat"], dtype=np.float64)
     x_i = np.asarray(est_imp["x_hat"], dtype=np.float64)
-    n = min(len(t), len(I), len(Q), len(x_true), len(x_b), len(x_i))
+    lengths = [len(t), len(I), len(Q), len(x_true), len(x_b), len(x_i)]
+    n = min(lengths)
+    if len(set(lengths)) > 1:
+        logger.warning("Array length mismatch %s; truncating to %d samples", lengths, n)
     t, I, Q, x_true, x_b, x_i = t[:n], I[:n], Q[:n], x_true[:n], x_b[:n], x_i[:n]
     have_truth = bool(np.all(np.isfinite(x_true)))
     taus = _logspace_taus(duration_s=float(t[-1] - t[0]) if len(t) > 1 else 1.0, sample_rate_hz=fs)
@@ -193,7 +200,7 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
             interferometer_time_s=float(ifo_cfg.get("interferometer_time_s", 0.260)),
         )
     except Exception:
-        logger.debug("Systematics computation skipped", exc_info=True)
+        logger.warning("Systematics computation failed", exc_info=True)
 
     metrics_jsonable = _jsonable(metrics)
     paths.metrics_path.write_text(json.dumps(metrics_jsonable, indent=2), encoding="utf-8")

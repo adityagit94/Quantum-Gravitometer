@@ -55,6 +55,23 @@ def _cmd_convert_ggp(args: argparse.Namespace) -> None:
     print(f"CSV written: {out}")
 
 
+def _safe_dispatch(handler, args: argparse.Namespace) -> None:
+    """Run a CLI handler with proper error reporting."""
+    try:
+        handler(args)
+    except SystemExit:
+        raise
+    except KeyboardInterrupt:
+        raise SystemExit(130)
+    except Exception as exc:
+        exc_name = type(exc).__name__
+        print(f"Error ({exc_name}): {exc}", file=sys.stderr)
+        if getattr(args, "verbose", False):
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+        raise SystemExit(1)
+
+
 def _cmd_validate_data(args: argparse.Namespace) -> None:
     """Validate a gravimetry dataset and print a human-readable summary."""
     source = Path(args.source)
@@ -180,6 +197,7 @@ def main() -> None:
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
     parser = argparse.ArgumentParser(prog="qgrav", description="Quantum gravimeter R&D platform")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Show full tracebacks on error")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     # --- run ---
@@ -208,6 +226,8 @@ def main() -> None:
     sub.add_parser("info", help="Print version and environment information")
 
     args = parser.parse_args()
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     handlers = {
         "run": _cmd_run,
@@ -218,7 +238,7 @@ def main() -> None:
     }
     handler = handlers.get(args.cmd)
     if handler:
-        handler(args)
+        _safe_dispatch(handler, args)
     else:
         parser.print_help()
         raise SystemExit(2)
