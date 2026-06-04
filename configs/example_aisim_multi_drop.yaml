@@ -1,0 +1,48 @@
+# Realistic multi-drop measurement cycle (the flagship "fully-simulated"
+# gravimeter study). Repeated atom drops with an injected per-shot noise budget
+# and a fringe-lock servo produce a gravity time series, from which the pipeline
+# computes an amplitude spectral density (ASD) and Allan deviation -- the same
+# observables reported by real transportable gravimeters (cf. Freier et al. 2016).
+#
+# Parameters here are modest (n_atoms / n_drops kept small) so a GUI demo run
+# finishes in a few seconds. For a publication-grade reproduction, raise n_atoms
+# to >=4000 and n_drops to several hundred, or use the one-click reproduction
+# buttons on the GUI's "Validation" tab.
+output:
+  runs_dir: runs
+  name: example_aisim_multi_drop
+
+bench:
+  type: virtual
+
+stats:
+  metrics_backend: auto
+  allan_data_type: freq
+  psd_method: welch
+  compare_allan_backends: false
+
+simulation:
+  enabled: true
+  backend: aisim
+  model: multi_drop_cycle
+  # --- ensemble ---
+  n_atoms: 400
+  seed: 2016
+  beam_radius_m: 1.5e-2
+  # --- interferometer ---
+  tau_pi_half_s: 1.7e-5
+  interferometer_time_s: 2.60e-1
+  gravity_true_m_s2: 9.8109
+  gravity_propagation: true        # emergent gravity (ballistic + chirped laser)
+  # --- measurement cycle ---
+  n_drops: 60
+  cycle_time_s: 1.5
+  # --- per-shot noise budget ---
+  detection_noise_enabled: true
+  detection_sigma_p: 6.0e-3        # technical detection noise on excited fraction
+  raman_phase_noise_rad: 1.2e-2    # laser + residual-vibration phase noise
+  fit_visibility: true             # keep P->g inversion consistent with real contrast
+  # --- fringe-lock servo ---
+  servo_enabled: true
+  servo_type: integrator
+  servo_ki: 0.3

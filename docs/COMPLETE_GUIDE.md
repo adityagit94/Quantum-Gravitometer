@@ -1,11 +1,22 @@
 # qgrav — The Complete Guide
 
-**Quantum Gravimeter R&D Platform v0.8.0**
+**Quantum Gravimeter R&D Platform v1.2.3**
 
 *A software-first research workbench for simulating, benchmarking, and analyzing quantum gravity sensors.*
 
 **Author:** Aditya Prakash  
-**License:** MIT
+**License:** GPL-3.0
+
+> **Reader's note (v1.2):** sections 1–15 below describe the v0.8 base feature
+> set and remain accurate — those workflows are unchanged. The v1.0–v1.2
+> capabilities (emergent-gravity simulation, multi-drop cycle with servo &
+> correlated noise, AC Stark, wavefront aberrations, published-reference
+> validation, QuTiP cross-check, performance harness) are summarised in
+> [§16: What's new since v1.0](#16-whats-new-since-v10-capabilities-map) and
+> detailed in [V1_PHYSICS_UPGRADE.md](V1_PHYSICS_UPGRADE.md),
+> [AISIM_GRAVIMETER_STUDIES.md](AISIM_GRAVIMETER_STUDIES.md),
+> [SCIENTIFIC_PACKAGE_EVALUATION.md](SCIENTIFIC_PACKAGE_EVALUATION.md),
+> [PERFORMANCE.md](PERFORMANCE.md), and [CHANGELOG.md](../CHANGELOG.md).
 
 ---
 
@@ -339,12 +350,28 @@ The interface hides irrelevant controls based on your workflow choice. If you pi
 | Control | What It Means |
 |---------|--------------|
 | Enable AISim module | Turns on atom interferometer simulation |
-| Study model | Which simulation to run (see Section 10) |
+| Study model | Which simulation to run: `rabi_scan`, `mach_zehnder_phase_scan`, `gravity_sweep`, `multi_drop_cycle`, or `vibration_sensitivity_sweep` (see Section 10) |
 | Atoms | Number of atoms in the simulated cloud (more = less noise, slower) |
 | π/2 pulse duration | How long each beam-splitter pulse lasts (seconds) |
 | Interferometer T | Free-fall time between pulses — the most important sensitivity parameter |
 | Gravity center | The gravity value to simulate around (9.81 m/s² for Earth) |
 | Gravity span | How wide a range of gravity to sweep (in m/s²) |
+
+Two collapsible sections (collapsed by default) expose the full physics surface.
+Every field shows a hover tooltip explaining it:
+
+- **Advanced physics** — random seed, single-photon (Raman) detuning, gravity
+  propagation (the ballistic + chirped-laser "emergent gravity" path),
+  lock-to-mid-fringe, gravity gradient, and a Zernike wavefront (coefficients +
+  radius). These apply to `mach_zehnder_phase_scan`, `gravity_sweep`, and
+  `multi_drop_cycle`.
+- **Multi-drop noise budget & servo** (for `multi_drop_cycle`) — drops per cycle,
+  cycle time, true *g*, detection σ_p, Raman/vibration phase noise, correlated
+  seismic vibration (Peterson NLNM/NHNM) with an isolation cut-off, fringe-
+  visibility fitting, and a fringe-lock servo (`integrator` or full `pid`).
+
+Anything not surfaced as a control (e.g. cloud/detector geometry, temperatures)
+can still be set directly in the **Config Editor** tab.
 
 **Actions**
 
@@ -429,13 +456,45 @@ Every plot is interactive — you can zoom, pan, and save using the matplotlib t
 
 A detailed text log of everything that happened during the run: configuration loaded, data generated, algorithms applied, metrics computed, files saved.
 
-### Tab 5: Guides
+### Tab 5: Validation
 
-An in-app reference guide with:
-- Quickstart instructions for both real-data and synthetic workflows
-- Key term definitions
-- Common mistakes to avoid
-- Links to scientific notes and integration guides (if present in the `docs/` folder)
+This tab connects the simulation to the published literature and to an
+independent solver.
+
+**Published reference library** — the registry of measured values from
+published atom-gravimeter papers that the automated regression suite checks
+against. Click any row to see its description, source, tolerance band, and DOI.
+
+**Reproduce a published measurement (one click)** — a table of five reference
+instruments (Freier 2016, Hu 2013, Ménoret 2018, Xu 2022, Wu 2019). For each it
+shows the paper's published short-term ASD, qgrav's predicted ASD, the ratio,
+and whether it is within the documented band. Select a paper, optionally raise
+the atom count for fidelity, then **Load into editor** or **Load & Run** to
+build and execute a `multi_drop_cycle` config from that paper's parameters and
+noise budget. Freier 2016 is the primary regression target.
+
+**Independent cross-check (QuTiP)** — recomputes the single Raman-pulse dynamics
+a different way and reports the disagreement with qgrav's closed-form matrix.
+*AISim vs analytic* needs no extra packages (expect ~1e-15); *Full QuTiP
+cross-check* integrates the Schrödinger equation independently
+(`pip install qgrav[qutip]`, expect ~1e-6). Both run in a background thread.
+
+> The reproductions match *published numbers*, not raw laboratory data, and have
+> not yet had an independent expert physics review. The QuTiP check validates the
+> single-pulse quantum dynamics, not the noise budget or systematics.
+
+### Tab 6: Guides
+
+A navigable in-app reference. The left panel lists topics; the right panel shows
+the content. Topics include:
+- Quick start, Workflows, Study models, Noise & realism (multi-drop)
+- Validation & reproducing a paper, Interpreting results, Independent cross-checks
+- **How to move ahead** (the review / publish / JOSS roadmap)
+- Glossary and Common mistakes
+
+A **Project documents** section opens the on-disk guides (this guide, the v1
+physics upgrade, the scientific-package evaluation, the physics review packet,
+the performance notes, the roadmap, and the changelog).
 
 ---
 
@@ -818,6 +877,35 @@ This is a second-difference operation — the same operation a digital accelerom
 | `n_amplitude_points` | Points in the amplitude sweep | 41 |
 | `gravity_ref_m_s2` | Background gravity value | `9.81` |
 
+### Study Model 5: Multi-Drop Cycle (`multi_drop_cycle`)
+
+**What it does:** Simulates a full repeated-drop gravimeter campaign. The same
+three-pulse interferometer is run for many successive drops with a realistic
+per-shot noise budget and an optional fringe-lock servo, producing a gravity
+time series from which the pipeline computes an amplitude spectral density (ASD)
+and Allan deviation — the same observables real transportable gravimeters report.
+
+**Why it matters:** This is the **fully simulated** path. The recovered *g*
+emerges from the microscopic atom-optics (with `gravity_propagation: true`,
+from a ballistic trajectory under a chirped Raman laser), not from a closed-form
+phase formula. It is what the Validation tab's one-click reproductions drive.
+
+**Key parameters:**
+
+| Parameter | Meaning | Typical Value |
+|-----------|---------|---------------|
+| `n_drops` | Number of measurement drops | `100` |
+| `cycle_time_s` | Time per drop (sets the ASD/Allan time axis) | `1.0`–`1.5` |
+| `gravity_true_m_s2` | Ground-truth *g* to recover | `9.81` |
+| `detection_sigma_p` | Per-shot detection noise on the excited fraction | `6e-3` |
+| `raman_phase_noise_rad` | Per-shot laser + vibration phase noise | `1.2e-2` |
+| `fit_visibility` | Fit contrast and use it in the P→g inversion | `true` |
+| `servo_enabled` / `servo_type` | Fringe-lock loop (`integrator` or `pid`) | `true` / `integrator` |
+
+The short-term sensitivity is set by the noise budget, not the atom number — but
+too few atoms raises the 1/√N projection-noise floor and can swamp the budget,
+so a faithful reproduction uses several thousand atoms.
+
 ---
 
 ## 11. Metrics and What They Mean
@@ -1180,6 +1268,77 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 | **T (interferometer time)** | Free-fall time between pulses in a Mach-Zehnder sequence. The single most important parameter for sensitivity — sensitivity scales as T². |
 | **Welch method** | A PSD estimation technique that averages multiple overlapping FFT windows. Produces smoother, more reliable spectra. |
 | **YAML** | "YAML Ain't Markup Language" — a human-readable configuration file format used by qgrav. |
+
+---
+
+## 16. What's new since v1.0 (capabilities map)
+
+Sections 1–15 describe the v0.8 foundation. The v1.0–v1.2 releases added a full
+emergent-gravity simulation, realistic noise, published-reference validation, an
+independent cross-check, and release infrastructure. Use this section as the
+index into those capabilities; each links to its detailed doc.
+
+### Emergent-gravity simulation (v1.0)
+
+The gravimetric phase is no longer injected as `k_eff·g·T²`. Atoms propagate
+ballistically (`GravityFreePropagator`) between Raman pulses; a chirped laser
+(`ChirpedWavevectors`) tracks the fall; the integrated-phase propagator yields
+`k_eff·(g − g_chirp)·T²` from first principles. Enable per study with
+`gravity_propagation: true` in the simulation config block. Details:
+[V1_PHYSICS_UPGRADE.md](V1_PHYSICS_UPGRADE.md). Honest scope labels
+(`FULLY_SIMULATED` / `HYBRID` / `ANALYTICAL_ONLY`) accompany every result.
+
+### Noise & systematics (v1.0–v1.2)
+
+- **Multi-drop measurement cycle** (`multi_drop_cycle` model): N independent
+  drops, detection noise, correlated NLNM/NHNM seismic vibration, a
+  fringe-locking **integrator or PID servo** (with anti-windup), and an
+  overlapping Allan deviation. Config keys: `n_drops`, `cycle_time_s`,
+  `detection_sigma_p`, `raman_phase_noise_rad`, `correlated_vibration`,
+  `seismic_model`, `vibration_isolation_cutoff_hz`, `fit_visibility`,
+  `servo_type`, `servo_kp/ki/kd`.
+- **AC Stark / light shift** (`single_photon_detuning_hz`) and **wavefront
+  aberrations** (`wavefront_zernike_coeffs`, `wavefront_radius_m`) are
+  configurable for the `gravity_sweep` and `mach_zehnder_phase_scan` models. The
+  wavefront effect is the curvature systematic (second-order in inter-pulse
+  drift); see [AISIM_GRAVIMETER_STUDIES.md](AISIM_GRAVIMETER_STUDIES.md).
+
+### Published-reference validation (v1.1–v1.2)
+
+Automated regressions reproduce five published instruments — **Freier 2016**
+(primary, 96 nm/s²/√Hz), **Hu 2013**, **Ménoret 2018**, **Xu 2022**, **Wu
+2019** — each curated in `qgrav.validation.<name>_setup`. Run with
+`pytest -m slow`. The instrument parameters and noise budgets are sourced
+verbatim in `docs/research/`.
+
+### Independent cross-validation (v1.2.1)
+
+An optional **QuTiP** backend (`pip install qgrav[qutip]`) reproduces the Raman
+dynamics by independent numerical Schrödinger/Lindblad integration, agreeing
+with qgrav's closed-form propagator to ~1.6×10⁻⁶. Why QuTiP and not
+Qiskit/GEANT4/LAMMPS: [SCIENTIFIC_PACKAGE_EVALUATION.md](SCIENTIFIC_PACKAGE_EVALUATION.md).
+
+### Real-data validation (v1.3)
+
+qgrav's Allan/PSD analysis chain is validated on **real superconducting-
+gravimeter data** (IGETS station `ap046`, bundled). Note this validates the
+analysis chain, not the atom-interferometer simulation against hardware (no
+public atom-gravimeter raw data exists).
+
+### Performance & release infrastructure (v1.2–v1.3)
+
+- **Performance:** single MZ ~1.3 ms, 60-pt sweep ~0.1–0.2 s, 100-drop cycle
+  ~0.3 s. Harness: `pytest -m benchmark`; numbers in [PERFORMANCE.md](PERFORMANCE.md).
+- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.9–3.12),
+  nightly slow + QuTiP + benchmark runs, PyPI Trusted-Publishing release
+  workflow, a Docker image, and this MkDocs site.
+
+### Epistemic status
+
+What qgrav can be quoted for, and what still requires an independent expert
+review, is laid out honestly in [PHYSICS_REVIEW_PACKET.md](PHYSICS_REVIEW_PACKET.md),
+[SCIENTIFIC_HARDENING.md](SCIENTIFIC_HARDENING.md), and
+[AI_USAGE_DISCLOSURE.md](AI_USAGE_DISCLOSURE.md).
 
 ---
 

@@ -1,11 +1,32 @@
-# qgrav v0.8.0 — Software-first R&D pipeline for atom-interferometric gravimetry
+# qgrav v1.3.0 — Software-first R&D pipeline for atom-interferometric gravimetry
 
-**qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim), a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), and an auto-generated HTML report — all driven from a single YAML config.
+[![Tests](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml/badge.svg)](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+> **v1.2–v1.3 hardening highlights** (on top of the v1.1 published-reference
+> release): an independent **QuTiP** cross-validation backend (reproduces the
+> Raman dynamics to ~1.6×10⁻⁶); the finite-ensemble-floor finding that let the
+> Freier regression tighten to **factor 2** and the secondary benchmarks to
+> factor 3; the **Bertoldi 2019** closed-form finite-τ predictor; quantitative
+> **wavefront-curvature** validation; full gravity-sweep **YAML exposure** of
+> AC-Stark + wavefront; a **performance** harness (single MZ ~1.3 ms); **real
+> IGETS superconducting-gravimeter** analysis-chain validation; a **JOSS paper**
+> draft and a **MkDocs** site; and an honest **scientific-package evaluation**
+> (QuTiP integrated; Qiskit/GEANT4/LAMMPS documented as not applicable).
+> **378 tests pass.** See [CHANGELOG.md](CHANGELOG.md) and
+> [docs/ROADMAP_V1_TO_V2.md](docs/ROADMAP_V1_TO_V2.md).
+
+
+
+**qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim) with **emergent gravity-phase physics**, a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), multi-drop measurement cycles, and an auto-generated HTML report — all driven from a single YAML config.
 
 ### What this is
 
 - A reproducible pipeline that takes synthetic or real time-series in and writes a versioned run folder out (raw arrays, metrics JSON, plots, HTML report).
 - A research workbench for designing and benchmarking atom-interferometer parameters against published instruments.
+- **A self-consistent numerical gravimeter simulation (v1.0+)**: gravity phase emerges from a ballistic atom trajectory under a chirped Raman laser, not from injecting `k_eff·g·T²` analytically. Optional fall-back to the hybrid mode for backward compatibility.
 - An honest tool: every simulation result carries a **study-scope label** (fully simulated / hybrid / analytical only) so users can tell at a glance what is computed from first principles vs imposed analytically.
 
 ### What this is not
@@ -14,7 +35,7 @@
 - A general-purpose geodynamics suite: the v0.8 tide / pressure correction stage exists only to make IGETS Allan-deviation comparisons meaningful. For serious geodynamics use PyGTide, ETERNA, or SPOTL.
 - A competitor to dedicated research-group simulation codes (Mueller/Berkeley, SYRTE, Stanford, Humboldt). The AISim integration is the simulation core; qgrav wraps and extends it.
 
-See `docs/COMPLETE_GUIDE.md` for the full user guide and `CHANGELOG.md` for the v0.7 → v0.8 changes.
+See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.md` for the v1.0 emergent-physics design, and `CHANGELOG.md` for the v0.9 → v1.0 changes.
 
 **Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.9
 
@@ -24,13 +45,13 @@ See `docs/COMPLETE_GUIDE.md` for the full user guide and `CHANGELOG.md` for the 
 
 | Stage | Description |
 |-------|-------------|
-| **Simulate** | AISim-backed atom interferometry: Rabi scans, Mach-Zehnder phase scans, gravity sweeps, vibration sensitivity sweeps |
-| **Generate** | Virtual interferometer I/Q data with known truth displacement for algorithm benchmarking |
+| **Simulate** | AISim-backed atom interferometry: Rabi scans, Mach-Zehnder phase scans, gravity sweeps, vibration sensitivity sweeps, **emergent-gravity simulations (v1.0)**, **multi-drop measurement cycles (v1.0)** |
+| **Generate** | Virtual interferometer I/Q data with known truth displacement for algorithm benchmarking, **NLNM/NHNM time-domain vibration noise (v1.0)** |
 | **Ingest** | Real gravimetry time-series from `.ggp`, `.zip`, directory, or CSV (superconducting gravimeter residuals) |
-| **Analyze** | PSD, overlapping Allan deviation (custom + AllanTools backends), noise type classification, shot-noise sensitivity |
-| **Validate** | Published reference comparison (Freier 2016, Menoret 2018, etc.), systematic effects estimation, backend cross-checks |
+| **Analyze** | PSD, overlapping Allan deviation (custom + AllanTools backends), noise type classification, shot-noise sensitivity, **per-drop Allan deviation (v1.0)** |
+| **Validate** | Published reference comparison (Freier 2016, Menoret 2018, etc.), systematic effects estimation, backend cross-checks, **AC Stark light-shift and wavefront-aberration sensitivity (v1.0)** |
 | **Report** | Auto-generated HTML reports with plots, metrics, systematics tables, and full config snapshots |
-| **GUI** | tkinter desktop app for interactive config editing, pipeline execution, and plot viewing |
+| **GUI** | tkinter desktop app (6 tabs): config editing, pipeline execution, interactive plots, a Validation tab with one-click published-paper reproductions and a QuTiP cross-check, and a navigable in-app guide |
 
 ---
 
@@ -70,14 +91,37 @@ qgrav run --config configs/example_aisim.yaml
 # AISim Mach-Zehnder phase scan
 qgrav run --config configs/example_aisim_phase_scan.yaml
 
-# AISim gravity sweep (hybrid: AISim pulse transfer + gravimeter phase law)
+# AISim gravity sweep — hybrid mode (analytical gravity phase)
 qgrav run --config configs/example_aisim_gravity_sweep.yaml
+
+# AISim gravity sweep — fully simulated (v1.0: gravity phase EMERGES from simulation)
+# Add `gravity_propagation: true` to the simulation block of any AISim config.
 
 # AISim vibration sensitivity sweep
 qgrav run --config configs/example_aisim_vibration_sweep.yaml
 
 # Real gravimetry (requires data in data/raw/sg_sample/)
 qgrav run --config configs/example_real_gravity.yaml
+```
+
+### Programmatic use — multi-drop measurement cycle (v1.0)
+
+```python
+from qgrav.sim_ai.aisim_adapter import run_aisim_multi_drop_cycle
+
+result = run_aisim_multi_drop_cycle(
+    n_drops=100,             # 100 independent drops
+    cycle_time_s=1.0,        # 1 Hz cycle rate
+    gravity_true_m_s2=9.81,
+    gravity_propagation=True,  # emergent-gravity mode
+    detection_noise_enabled=True,
+    n_detected_per_drop=1000,
+    servo_enabled=True,       # closed-loop fringe lock
+    servo_gain=0.5,
+)
+
+print(f"Mean g = {result['mean_g_m_s2']:.9f} m/s^2")
+print(f"Allan deviation at tau=1s: {result['allan_dev_m_s2'][0]:.2e}")
 ```
 
 ### Launch the GUI
@@ -231,20 +275,25 @@ python scripts/multi_station_comparison.py --source path/to/ggp_data --output co
 
 ## AISim gravimeter studies
 
-Three thesis/report-quality simulation studies:
+Five thesis/report-quality simulation studies:
 
-| Config | Study |
-|--------|-------|
-| `example_aisim_phase_scan.yaml` | Full three-pulse Mach-Zehnder phase scan |
-| `example_aisim_gravity_sweep.yaml` | Hybrid gravity sweep (AISim pulse transfer + gravimeter phase law) |
-| `example_aisim_vibration_sweep.yaml` | Vibration sensitivity sweep (mirror-motion phase response) |
+| Model | Study | Scope |
+|-------|-------|-------|
+| `rabi_scan` | Rabi-oscillation π/2 calibration | FULLY_SIMULATED |
+| `mach_zehnder_phase_scan` | Three-pulse MZ fringe | FULLY_SIMULATED |
+| `gravity_sweep` (default) | Hybrid gravity response (AISim pulse + analytical k_eff g T²) | HYBRID |
+| `gravity_sweep` + `gravity_propagation: true` (**v1.0**) | Emergent gravity from ballistic trajectory + chirped laser | FULLY_SIMULATED |
+| `vibration_sensitivity_sweep` | Mirror-motion vibration response | HYBRID / FULLY_SIMULATED |
+| `multi_drop_cycle` (**v1.0**) | N independent drops with detection noise, servo, Allan deviation | FULLY_SIMULATED |
 
 ```bash
-# Run all three
+# Run the classic three studies (hybrid mode)
 scripts/run_aisim_gravimeter_studies.sh
 ```
 
-See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and limitations of each study.
+To enable fully-simulated mode, add `gravity_propagation: true` to the simulation block of any gravity_sweep or vibration_sensitivity_sweep YAML config.
+
+See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and limitations of each study, and [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) for the v1.0 emergent-physics design.
 
 ---
 
@@ -268,16 +317,24 @@ qgrav/
       sensitivity_function.py   #   MZ sensitivity function + vibration integrator (v0.8)
       _seismic_models.py        #   Peterson NLNM/NHNM noise floor models (v0.8)
     reporting/                  # HTML report generation (Jinja2)
-    sim_ai/                     # AISim adapter layer (study_scope labels)
+    sim_ai/                     # AISim adapter layer
+      aisim_adapter.py          #   gravity sweep, vibration sweep, multi-drop cycle,
+                                #   calibration (v1.0), wavefront wiring (v1.0)
     validation/                 # published references (12 entries), curve comparison
-    gui/                        # tkinter desktop application
-      widgets/                  # extracted MetricCards, ScrollableFrame
+                                # truth_checks expanded to handle simulated-gravity
+                                # and multi_drop_cycle (v1.0)
+    vendor/aisim/               # patched AISim core (v1.0)
+      prop.py                   #   GravityFreePropagator (v1.0), integrated-phase patch,
+                                #   AC Stark correction (v1.0)
+      beam.py                   #   Wavevectors with chirp_rate (v1.0)
+    gui/                        # tkinter desktop application (6 tabs incl. Validation)
+      widgets/                  # MetricCards, ScrollableFrame, Tooltip, CollapsibleSection
       app.py                    # main GUI application
     config.py                   # YAML loading, validation (incl. corrections keys)
     visuals.py                  # matplotlib figure builders
     pipeline.py                 # orchestrates the full run (corrections stage, output_format_version)
     cli.py                      # CLI entry point
-  tests/                        # 134 tests (pytest)
+  tests/                        # 253 tests (pytest) - up from 192 baseline
 ```
 
 ---
@@ -298,7 +355,17 @@ python -m pytest -q
 python -m pytest -v --tb=short
 ```
 
-**134 tests** covering: synthetic pipeline, AISim integration, GUI imports, visual generation, `.ggp` parsing, CSV conversion, real gravimetry pipeline, Allan deviation backends, noise identification (ACF + slope), shot-noise sensitivity, systematics, published references (12 entries + deprecation shims), physical constants regression, sensitivity function (time-domain + frequency-domain + integrator), tide/pressure corrections, unit conversions, study-scope labels, batch scripts, and float tau matching edge cases.
+**253 tests** covering everything in v0.9 (192) plus **61 new v1.0 tests**:
+
+- Gravity-free ballistic propagator (10)
+- Chirped-laser detuning (5)
+- Gravity-enabled MZ + cross-validation (9)
+- Time-domain vibration with NLNM/NHNM PSD (7)
+- Detection noise & spontaneous emission (6)
+- Multi-drop cycle, Allan deviation, study scope (10)
+- Fringe-locking servo (6)
+- AC Stark / light shift (3)
+- Wavefront aberrations (5)
 
 ---
 
@@ -308,6 +375,8 @@ python -m pytest -v --tb=short
 |----------|-------------|
 | [CHANGELOG.md](CHANGELOG.md) | Full change log with commit hashes |
 | [GUIDE.md](GUIDE.md) | User guide and workflow documentation |
+| [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) | **v1.0 emergent-physics design (start here for v1.0)** |
+| [docs/PHYSICS_REVIEW_PACKET.md](docs/PHYSICS_REVIEW_PACKET.md) | **Comprehensive review packet for external atom-interferometry experts** (with executable notebook `docs/reviewer_notebook.ipynb`) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture overview |
 | [docs/SCIENTIFIC_HARDENING.md](docs/SCIENTIFIC_HARDENING.md) | What is AISim-backed vs. hybrid vs. analytic |
 | [docs/AISIM_INTEGRATION.md](docs/AISIM_INTEGRATION.md) | AISim vendor integration details |
@@ -315,6 +384,24 @@ python -m pytest -v --tb=short
 | [docs/REAL_GRAVITY_DATA.md](docs/REAL_GRAVITY_DATA.md) | Real gravimetry data ingestion guide |
 | [docs/GUI.md](docs/GUI.md) | Desktop GUI documentation |
 | [docs/REPRODUCTION.md](docs/REPRODUCTION.md) | Reproducing pipeline runs |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Dev setup, tests, code style, PR flow |
+| [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Security policy · community standards |
+
+---
+
+## Contributing & citing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup,
+the test commands, and the project's guiding principles, and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Report bugs and request features via the
+GitHub issue templates; report vulnerabilities privately per [SECURITY.md](SECURITY.md).
+
+If you use qgrav in academic work, please cite it via the **"Cite this
+repository"** button on GitHub (backed by [CITATION.cff](CITATION.cff)).
+
+qgrav vendors [AISim](https://github.com/bleykauf/aisim) (GPL-3.0) and
+[allantools](https://github.com/aewallin/allantools) (LGPL-3.0); see
+[`src/qgrav/vendor/ATTRIBUTION.md`](src/qgrav/vendor/ATTRIBUTION.md).
 
 ---
 
@@ -327,6 +414,43 @@ python -m pytest -v --tb=short
 | pyyaml | >= 6.0 | Core |
 | jinja2 | >= 3.1 | Core (reporting) |
 | scipy | >= 1.6 | Vendored allantools and vendor/aisim only |
+
+---
+
+## What's new in v1.0.0
+
+**Full physics simulation upgrade.** Transforms qgrav from a hybrid analytical+AISim wrapper into a self-consistent numerical gravimeter simulation. **61 new tests** (192 → 253 passing). All previous tests pass unchanged.
+
+### Tier 1 — Emergent gravity physics
+
+- **`GravityFreePropagator`** (`vendor/aisim/prop.py`): exact ballistic kinematics under uniform gravity with optional linear gradient γ·(z − z_ref).
+- **Chirped laser** (`vendor/aisim/beam.py`): `Wavevectors` accepts `chirp_rate_rad_per_s2`, cancelling gravity-induced Doppler at α = −k_eff · g_chirp.
+- **Integrated-phase patch** (`vendor/aisim/prop.py`): replaces AISim's `exp(−i·δ·t₀)` with the physically correct `exp(−i·(−k_eff·z(t₀) + ½·chirp·t₀²))`. The MZ combination now produces the standard `k_eff·(g − g_chirp)·T²` gravity phase from first principles.
+- **Per-sweep calibration** (`_calibrate_gravity_phase_offset`): removes residual pulse-timing offsets so simulated and hybrid modes share the same fringe centre at `g = g_chirp`.
+- **`gravity_propagation: true`** in any `gravity_sweep` or `vibration_sensitivity_sweep` config promotes the run to `FULLY_SIMULATED`.
+
+### Tier 2 — Realistic noise sources
+
+- **Time-domain vibration generator** (`physics/noise_models.generate_vibration_timeseries`): Peterson NLNM/NHNM acceleration PSD + second-order isolation filter `H²(f) = f⁴/(f² + f_c²)²`. Returns acceleration, velocity and displacement time-series.
+- **Detection (shot) noise** (`physics/noise_models.add_detection_noise`): σ = 1/√N_detected per population fraction.
+- **Spontaneous emission probability** (`physics/noise_models.spontaneous_emission_loss_probability`): p_se = (Ω_eff/Δ)² · τ/τ_sp.
+
+### Tier 3 — Multi-drop measurement cycle
+
+- **`run_aisim_multi_drop_cycle`** (`sim_ai/aisim_adapter.py`): N independent drops, fresh ensemble per drop (seed + i), optional detection noise, optional integrator servo, overlapping Allan deviation.
+- **`servo_integrator_step`** (`physics/readout_models.py`): one-step digital integrator that drives P3 toward the mid-fringe setpoint.
+
+### Tier 4 — Advanced systematics
+
+- **AC Stark / light shift** (`vendor/aisim/prop.py`): `single_photon_detuning_hz` adds Ω_eff²/(4Δ) to the two-photon detuning, with position-dependence from Ω_eff(r).
+- **Wavefront aberrations** (`sim_ai/aisim_adapter._build_wavefront`): Zernike-polynomial wavefront wired into all three pulse propagators of the MZ sequence.
+
+### Phase 10 — Truth checks & versioning
+
+- `_check_gravity_sweep` now branches on `gravity_propagation`: hybrid runs check the analytical phase exactly; simulated runs check visibility > 0.3 and FULLY_SIMULATED scope.
+- New `_check_multi_drop_cycle` validates n_drops correctness, finite estimates, monotonic timestamps, |mean(g) − g_true| < 1e-5, and Allan-array consistency.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full breakdown and [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) for the design rationale and equations.
 
 ---
 
