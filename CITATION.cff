@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "qgrav: a software-first R&D platform for atom-interferometric gravimetry"
+abstract: >-
+  qgrav is a software-first research platform for atom-interferometric gravimetry.
+  It simulates a Mach-Zehnder atom interferometer with an emergent gravity phase
+  (from a ballistic atom trajectory under a chirped Raman laser), injects realistic
+  per-shot noise budgets and a fringe-lock servo over a multi-drop measurement
+  cycle, analyses the result (PSD, Allan deviation), and benchmarks against
+  published transportable-gravimeter measurements.
+type: software
+authors:
+  - family-names: Prakash
+    given-names: Aditya
+    affiliation: "Indian Institute of Technology Patna"
+    email: aditya_2312res46@iitp.ac.in
+version: "1.3.0"
+date-released: "2026-05-30"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/adityagit94/Quantum-Gravitometer"
+url: "https://github.com/adityagit94/Quantum-Gravitometer"
+keywords:
+  - atom interferometry
+  - gravimetry
+  - quantum sensors
+  - Mach-Zehnder interferometer
+  - Allan deviation
+  - simulation

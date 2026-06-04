@@ -1,14 +1,48 @@
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 dist/
 build/
 .venv/
+venv/
 .env
+
+# Notebooks
 .ipynb_checkpoints/
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Editor / agent tooling state
+.claude/
+.idea/
+.vscode/
+
+# Test / lint / type-checker caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Docs site build (mkdocs)
+site/
+
+# qgrav runtime artifacts
 runs/
-data/raw/
-data/processed/
+.qgrav_mpl/
+.qgrav_gui_*.yaml
 *.log
+
+# Local research datasets — NOT part of the package (often >100 MB, which
+# GitHub rejects). Keep these out of the repo; use external storage / git-lfs.
+Datasets/
+
+# User-provided datasets are not committed, but keep the small bundled
+# fixtures that the test suite and the GUI "Use sample" button depend on.
+data/raw/*
+data/processed/
+!data/raw/sg_sample/
+!data/raw/real_ifo_template.csv
