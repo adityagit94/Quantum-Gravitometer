@@ -71,6 +71,9 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
   (3.11+), so Python 3.9 and 3.10 were never actually supported.
   `requires-python`, classifiers, the CI matrix, README badge, and docs now
   state `>=3.11` (CI tests 3.11/3.12; verified locally through 3.14).
+- **Docs deploy is manual-only.** The `deploy` job in `docs.yml` now runs only on
+  `workflow_dispatch`, so a push no longer shows a red "Docs / deploy" check when
+  GitHub Pages is disabled. `docs/build` still validates the site on every push.
 
 ---
 
