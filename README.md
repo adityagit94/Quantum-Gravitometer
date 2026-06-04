@@ -420,57 +420,13 @@ qgrav vendors [AISim](https://github.com/bleykauf/aisim) (GPL-3.0) and
 
 ---
 
-## What's new in v1.0.0
+## What's new
 
-**Full physics simulation upgrade.** Transforms qgrav from a hybrid analytical+AISim wrapper into a self-consistent numerical gravimeter simulation. **61 new tests** (192 → 253 passing). All previous tests pass unchanged.
+The current release centres on **validation and usability**:
 
-### Tier 1 — Emergent gravity physics
+- **Multi-drop measurement cycles** with a realistic per-shot noise budget and a fringe-lock servo, producing ASD / Allan curves like a real instrument.
+- **One-click reproductions** of five published transportable gravimeters and an independent **QuTiP** cross-check, surfaced in a six-tab desktop **GUI**.
+- **Real IGETS** superconducting-gravimeter analysis and a refreshed documentation set.
+- **378 tests**, green on Python 3.11–3.12.
 
-- **`GravityFreePropagator`** (`vendor/aisim/prop.py`): exact ballistic kinematics under uniform gravity with optional linear gradient γ·(z − z_ref).
-- **Chirped laser** (`vendor/aisim/beam.py`): `Wavevectors` accepts `chirp_rate_rad_per_s2`, cancelling gravity-induced Doppler at α = −k_eff · g_chirp.
-- **Integrated-phase patch** (`vendor/aisim/prop.py`): replaces AISim's `exp(−i·δ·t₀)` with the physically correct `exp(−i·(−k_eff·z(t₀) + ½·chirp·t₀²))`. The MZ combination now produces the standard `k_eff·(g − g_chirp)·T²` gravity phase from first principles.
-- **Per-sweep calibration** (`_calibrate_gravity_phase_offset`): removes residual pulse-timing offsets so simulated and hybrid modes share the same fringe centre at `g = g_chirp`.
-- **`gravity_propagation: true`** in any `gravity_sweep` or `vibration_sensitivity_sweep` config promotes the run to `FULLY_SIMULATED`.
-
-### Tier 2 — Realistic noise sources
-
-- **Time-domain vibration generator** (`physics/noise_models.generate_vibration_timeseries`): Peterson NLNM/NHNM acceleration PSD + second-order isolation filter `H²(f) = f⁴/(f² + f_c²)²`. Returns acceleration, velocity and displacement time-series.
-- **Detection (shot) noise** (`physics/noise_models.add_detection_noise`): σ = 1/√N_detected per population fraction.
-- **Spontaneous emission probability** (`physics/noise_models.spontaneous_emission_loss_probability`): p_se = (Ω_eff/Δ)² · τ/τ_sp.
-
-### Tier 3 — Multi-drop measurement cycle
-
-- **`run_aisim_multi_drop_cycle`** (`sim_ai/aisim_adapter.py`): N independent drops, fresh ensemble per drop (seed + i), optional detection noise, optional integrator servo, overlapping Allan deviation.
-- **`servo_integrator_step`** (`physics/readout_models.py`): one-step digital integrator that drives P3 toward the mid-fringe setpoint.
-
-### Tier 4 — Advanced systematics
-
-- **AC Stark / light shift** (`vendor/aisim/prop.py`): `single_photon_detuning_hz` adds Ω_eff²/(4Δ) to the two-photon detuning, with position-dependence from Ω_eff(r).
-- **Wavefront aberrations** (`sim_ai/aisim_adapter._build_wavefront`): Zernike-polynomial wavefront wired into all three pulse propagators of the MZ sequence.
-
-### Phase 10 — Truth checks & versioning
-
-- `_check_gravity_sweep` now branches on `gravity_propagation`: hybrid runs check the analytical phase exactly; simulated runs check visibility > 0.3 and FULLY_SIMULATED scope.
-- New `_check_multi_drop_cycle` validates n_drops correctness, finite estimates, monotonic timestamps, |mean(g) − g_true| < 1e-5, and Allan-array consistency.
-
-See [CHANGELOG.md](CHANGELOG.md) for the full breakdown and [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) for the design rationale and equations.
-
----
-
-## What's new in v0.8.0
-
-Milestone 1 of the Physics PRD: scientific foundations. **55 new tests** (79 → 134 passing).
-
-**Physical constants (W1):** All hardcoded numerical literals (wavelengths, masses, Earth rotation rate, free-air gradient, gravity defaults) replaced with a frozen `PhysicalConstant` registry in `physics/constants.py`. Published references expanded from 4 to 12 entries with deprecation shims for renamed keys.
-
-**Sensitivity function (W2):** Mach-Zehnder time-domain sensitivity function g_s(t), laser-phase transfer function |G(2πf)|², acceleration-to-phase transfer function |H_a(2πf)|², and broadband vibration noise integrator. Peterson 1993 NLNM/NHNM seismic noise models bundled for vibration-limited noise budgets.
-
-**Corrections (W6):** Solid-earth tide correction (PyGTide or internal 20-constituent HW95 fallback) and atmospheric pressure correction (linear admittance). IGETS data product level auto-detection. Gated on `apply_corrections: true` for backwards compatibility.
-
-**ACF noise ID (W9):** Lag-1 autocorrelation noise identification (Riley 2004) as primary method, with legacy slope-fit preserved as cross-check.
-
-**Study scope labels (W10):** Every AISim simulation carries a `study_scope_category` (FULLY_SIMULATED / HYBRID / ANALYTICAL_ONLY) with colour-coded panels in the HTML report.
-
-**Pipeline:** `qgrav_output_format_version: "1.0"` in every `metrics.json`. Corrections stage runs between data load and Allan/PSD for real gravimetry. Level-banner warning when IGETS Level < 3.
-
-See [CHANGELOG.md](CHANGELOG.md) for the full breakdown.
+See **[CHANGELOG.md](CHANGELOG.md)** for the complete, version-by-version history.
