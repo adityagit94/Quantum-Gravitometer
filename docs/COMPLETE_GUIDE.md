@@ -146,7 +146,7 @@ SGs achieve noise floors below 1 nanoGal/√Hz — better than any atom interfer
 
 ### Requirements
 
-- **Python 3.10 to 3.12** (recommended: 3.12)
+- **Python 3.11 to 3.12** (recommended: 3.12)
 - Works on Windows, macOS, and Linux
 - No GPU required
 
@@ -1329,7 +1329,7 @@ public atom-gravimeter raw data exists).
 
 - **Performance:** single MZ ~1.3 ms, 60-pt sweep ~0.1–0.2 s, 100-drop cycle
   ~0.3 s. Harness: `pytest -m benchmark`; numbers in [PERFORMANCE.md](PERFORMANCE.md).
-- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.10–3.12),
+- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.11–3.12),
   nightly slow + QuTiP + benchmark runs, PyPI Trusted-Publishing release
   workflow, a Docker image, and this MkDocs site.
 
