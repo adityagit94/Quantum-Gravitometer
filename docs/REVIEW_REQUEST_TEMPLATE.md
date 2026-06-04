@@ -1,10 +1,10 @@
-# Template — Email / DM to a prospective physics reviewer
+# Template - Email / DM to a prospective physics reviewer
 
 Copy-paste the text below into an email / Slack DM / LinkedIn message. Fill in the bracketed parts.
 
 ---
 
-**Subject:** Quick physics review request — atom-interferometer simulation patches (~2 hours of your time)
+**Subject:** Quick physics review request - atom-interferometer simulation patches (~2 hours of your time)
 
 Dear [Dr / Prof / Name],
 
@@ -37,7 +37,7 @@ I would deeply value your time on this. Any of three outcomes would be useful:
 - **You spot a bug**: I'll fix it (or revert) and re-test. Without your feedback I'm likely to ship the bug to other users.
 - **You think the patches are partially correct but the calibration step is unphysical**: I'll relabel the study scope and continue working on a derivation that eliminates the calibration.
 
-If you don't have time, no pressure — but if you know a PhD student / postdoc who would, a forwarded copy of this email would be hugely helpful.
+If you don't have time, no pressure - but if you know a PhD student / postdoc who would, a forwarded copy of this email would be hugely helpful.
 
 I'm happy to do a 30-minute video call to walk through the packet first, or to answer questions over email. Reply to me at [your email] / on [your Slack / Twitter / LinkedIn].
 
@@ -76,7 +76,7 @@ Save the reply (anonymised if requested) into `docs/PHYSICS_REVIEW_RESPONSES.md`
 If you have rapport with any contacted group, consider adding this paragraph to
 the email. qgrav currently validates its *analysis chain* on real
 superconducting-gravimeter data (IGETS), but its atom-interferometer
-*simulation* is validated only against *published* numbers — because essentially
+*simulation* is validated only against *published* numbers - because essentially
 no raw atom-gravimeter fringe/phase data is public. A shared dataset would
 enable the first true hardware-vs-simulation closure test.
 
@@ -86,7 +86,7 @@ enable the first true hardware-vs-simulation closure test.
 > dataset you'd be willing to share (even a single fringe scan or a short
 > phase time series with the instrument parameters), it would let us run a
 > direct hardware-vs-simulation comparison and we would of course acknowledge
-> the contribution. No proprietary calibration details needed — just the raw
+> the contribution. No proprietary calibration details needed - just the raw
 > output and the basic sequence parameters (T, τ, cycle time, atom number)."*
 
 If a dataset arrives, drop it under `data/raw/<instrument>/` and we will add a

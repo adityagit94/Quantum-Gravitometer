@@ -6,7 +6,7 @@
 
 ---
 
-## 1. IGETS — International Geodynamics and Earth Tide Service
+## 1. IGETS - International Geodynamics and Earth Tide Service
 
 **TL;DR.** IGETS is the authoritative open archive of superconducting‑gravimeter (SG) time series. As of the IAG GGOS IGETS page (last modified 2025‑09‑22), "The observation network of today comprises 47 stations some of which recording continuously already several decades." Boy et al. (2020) cite "more than 40 stations and 60 different sensors." Data are in monthly ASCII files in GGP File Format V5 (`*.ggp`), at 1 s (SEC), 1 min (MIN), and 1 h (HOUR) cadence, served via SFTP (migrated from FTP in May 2025) on `igetsftp.gfz-potsdam.de` after free registration, with DOI landing pages on `dataservices.gfz-potsdam.de/igets/`. This is the single best public benchmark for cross‑validating an absolute/atom‑interferometric gravimeter against a co‑located reference (tides, hydrology, ocean loading).
 
@@ -65,7 +65,7 @@ From the GFZ ISDC table (https://isdc.gfz.de/igets-data-base/), highlights:
 | Larzac (LA) | iGrav#002 | 2011– | DOI 10.5880/igets.la.l1.001; **co‑located with Ménoret 2018 AQG‑A01 evaluation** (verbatim from the Larzac LA DOI page: "Research activities are aimed at both validate gravimeters (eg Gphone in Fores et al., 2019 or AQG-A in Menoret et al., 2018)") |
 | Membach (MB) | C021 | 1995–2024 | DOI 10.5880/igets.mb.l1.001; longest continuous SG record |
 | Wuhan | OSG 065 | 2013– | Co‑location with the **Hu/HUST cold‑atom group** |
-| Sutherland (SU), Bad Homburg, Potsdam, Apache Point, ~40 more | various | — | full table at https://isdc.gfz.de/igets-data-base/ |
+| Sutherland (SU), Bad Homburg, Potsdam, Apache Point, ~40 more | various | - | full table at https://isdc.gfz.de/igets-data-base/ |
 
 Boy et al. (2020) verbatim:
 > "IGETS collects, archives and distributes long time series from geodynamic sensor, in particular superconducting gravimeter data currently from more than 40 stations and 60 different sensors."
@@ -80,12 +80,12 @@ Luan et al. (2025) GJI 243, ggaf206 (DOI 10.1093/gji/ggaf206) verbatim status sn
 
 ## 2. GRACE‑FO Level‑2 Monthly Gravity Fields
 
-**TL;DR.** GRACE‑FO Level‑2 monthly spherical‑harmonic geopotential coefficients (GSM, plus GAA/GAB/GAC/GAD background) are openly distributed by NASA PO.DAAC (Earthdata) and GFZ ISDC, produced independently by CSR, JPL and GFZ; current release is **RL06.3** for JPL and GFZ. The native product is spherical‑harmonic coefficients up to degree/order 96; per the NASA GRACE Tellus FAQ (grace.jpl.nasa.gov/about/faq/), "The sensitivity of the measurement is such that we can resolve approx. 1 – 2 cm of water‑height changes across spatial scales of 300 km, which is the smallest 'native' spatial scale at which we can resolve a mass change signal." Cadence: monthly. **For a point absolute gravimeter, GRACE‑FO is *not* a point‑validation source** — it constrains regional mass change (basin‑averaged terrestrial water storage, ice mass, ocean bottom pressure), but it can validate the large‑spatial‑scale, slowly varying component of `qgrav` residuals after tides.
+**TL;DR.** GRACE‑FO Level‑2 monthly spherical‑harmonic geopotential coefficients (GSM, plus GAA/GAB/GAC/GAD background) are openly distributed by NASA PO.DAAC (Earthdata) and GFZ ISDC, produced independently by CSR, JPL and GFZ; current release is **RL06.3** for JPL and GFZ. The native product is spherical‑harmonic coefficients up to degree/order 96; per the NASA GRACE Tellus FAQ (grace.jpl.nasa.gov/about/faq/), "The sensitivity of the measurement is such that we can resolve approx. 1 – 2 cm of water‑height changes across spatial scales of 300 km, which is the smallest 'native' spatial scale at which we can resolve a mass change signal." Cadence: monthly. **For a point absolute gravimeter, GRACE‑FO is *not* a point‑validation source** - it constrains regional mass change (basin‑averaged terrestrial water storage, ice mass, ocean bottom pressure), but it can validate the large‑spatial‑scale, slowly varying component of `qgrav` residuals after tides.
 
 ### 2.1 Primary product (NASA PO.DAAC)
-- **GRACE‑FO Level‑2 Monthly Geopotential Spherical Harmonics JPL RL06.0** — landing page https://podaac.jpl.nasa.gov/dataset/GRACEFO_L2_JPL_MONTHLY_0060
-- **GRACE‑FO L2 Monthly JPL RL06.3** — DOI **10.5067/GFL20-MJ063** (current as of 2025)
-- **GRACE‑FO L2 Monthly GFZ RL06.3** — landing https://podaac.jpl.nasa.gov/dataset/GRACEFO_L2_GFZ_MONTHLY_0060 ; release notes https://isdc-data.gfz.de/grace-fo/DOCUMENTS/RELEASE_NOTES/GRACE-FO_GFZ_L2_Release_Notes_for_RL06.3.pdf
+- **GRACE‑FO Level‑2 Monthly Geopotential Spherical Harmonics JPL RL06.0** - landing page https://podaac.jpl.nasa.gov/dataset/GRACEFO_L2_JPL_MONTHLY_0060
+- **GRACE‑FO L2 Monthly JPL RL06.3** - DOI **10.5067/GFL20-MJ063** (current as of 2025)
+- **GRACE‑FO L2 Monthly GFZ RL06.3** - landing https://podaac.jpl.nasa.gov/dataset/GRACEFO_L2_GFZ_MONTHLY_0060 ; release notes https://isdc-data.gfz.de/grace-fo/DOCUMENTS/RELEASE_NOTES/GRACE-FO_GFZ_L2_Release_Notes_for_RL06.3.pdf
 - **PO.DAAC dataset description (verbatim):** "This dataset contains estimates of the total month-by-month geopotential of the Earth, derived from the Gravity Recovery and Climate Experiment Follow-On (GRACE-FO) mission measurements... The data are provided in spherical harmonic coefficients, averaged over approximately a month."
 
 ### 2.2 Products & file naming (GFZ release notes RL06.1/RL06.3, verbatim)
@@ -98,17 +98,17 @@ Luan et al. (2025) GJI 243, ggaf206 (DOI 10.1093/gji/ggaf206) verbatim status sn
 ### 2.3 Access methods
 - NASA Earthdata (login required for downloads, account free): https://podaac.jpl.nasa.gov + Earthdata `cmr` API, `podaac-data-subscriber`, and S3 buckets on AWS `us-west-2`.
 - GFZ ISDC FTP: `ftp://isdcftp.gfz-potsdam.de/grace-fo/Level-2/` (verbatim from RL06.1 release notes: "available here: ftp://isdcftp.gfz-potsdam.de/grace-fo/Level-2/GFZ/RL06.1_NEQs_SINEX/"); HTTPS mirror `https://isdc-data.gfz.de/grace-fo/Level-2/`.
-- **ICGEM** (http://icgem.gfz-potsdam.de/) provides a uniform `.gfc` (spherical harmonic coefficients) format with online evaluation of geoid, equivalent water height, and gravity anomalies on user grids — cite Ince et al. (2019) DOI **10.5194/essd-11-647-2019**, verbatim:
+- **ICGEM** (http://icgem.gfz-potsdam.de/) provides a uniform `.gfc` (spherical harmonic coefficients) format with online evaluation of geoid, equivalent water height, and gravity anomalies on user grids - cite Ince et al. (2019) DOI **10.5194/essd-11-647-2019**, verbatim:
 > "The International Centre for Global Earth Models (ICGEM, http://icgem.gfz-potsdam.de/...) hosted at the GFZ German Research Centre for Geosciences (GFZ) is one of the five services coordinated by the International Gravity Field Service (IGFS) of the International Association of Geodesy (IAG). The goal of the ICGEM service is to provide the scientific community with a state-of-the-art archive of static and temporal global gravity field models of the Earth, and develop and operate interactive calculation and visualization services of gravity field functionals on user-defined grids or at a list of particular points via its website."
 - **GravIS** (https://gravis.gfz.de/) provides user‑friendly Level‑3 (gridded mass anomaly) products. Reference: Dahle et al. (2025) ESSD DOI **10.5194/essd-17-611-2025**.
 
 ### 2.4 Units, spatial/temporal resolution
 - Native L2: dimensionless Stokes coefficients C̄ₗₘ, S̄ₗₘ to degree 96.
 - Practical spatial resolution (NASA GRACE Tellus FAQ, verbatim): "approx. 1 – 2 cm of water‑height changes across spatial scales of 300 km, which is the smallest 'native' spatial scale at which we can resolve a mass change signal."
-- Derived: equivalent water height (m or mm w.e.), geoid height (m or mm), gravity anomaly (mGal or m/s²). Conversion: 1 mGal = 1 × 10⁻⁵ m/s² = 10⁴ nm/s². Typical month‑to‑month gravity changes at basin scale are sub‑µGal (sub‑10 nm/s²) — well below SG noise floor of ~1 nm/s² but at the spatial scale (≥300 km) of GRACE‑FO.
+- Derived: equivalent water height (m or mm w.e.), geoid height (m or mm), gravity anomaly (mGal or m/s²). Conversion: 1 mGal = 1 × 10⁻⁵ m/s² = 10⁴ nm/s². Typical month‑to‑month gravity changes at basin scale are sub‑µGal (sub‑10 nm/s²) - well below SG noise floor of ~1 nm/s² but at the spatial scale (≥300 km) of GRACE‑FO.
 - Temporal: nominally one solution per calendar month; gaps during short‑repeat orbits.
 
-### 2.5 Relevance to `qgrav` — honest caveats
+### 2.5 Relevance to `qgrav` - honest caveats
 **Indirect.** A ground atom gravimeter at a single point measures local *g* with all wavelengths (mountain, terrain, ground water within metres). GRACE‑FO returns the **regionally averaged** time‑variable component over ≥300 km footprints. They agree only at long‑wavelength, long‑timescale common modes (continental hydrology, large ice sheets, polar motion). Do **not** treat GRACE‑FO as a point reference; use it (or its GravIS Level‑3 gridded mass anomalies) to model and subtract the expected hydrological signal at the atom gravimeter site, as in Freier 2016 cross‑validation campaigns at Wettzell.
 
 ---
@@ -123,13 +123,13 @@ Luan et al. (2025) GJI 243, ggaf206 (DOI 10.1093/gji/ggaf206) verbatim status sn
   This is the **only publicly available raw Raman‑fringe atom‑interferometer dataset** identified.
 - **Gautier et al. 2024**, *Science Advances* "Quantum sensing of acceleration and rotation by interfering magnetically launched atoms", DOI **10.1126/sciadv.adq4498**. Raw data: **https://zenodo.org/records/11241234** ("Raw data are available at the following repository").
 - **BIPM CCM Key Comparisons** (https://www.bipm.org/en/committees/cc/ccm/key-comparisons):
-  - CCM.G‑K1 (ICAG2009) — final report in KCDB; verbatim from abstract: "the data (raw absolute gravity measurements and their uncertainties) submitted by the participants ... are presented including the degrees of equivalence (DoE) of the absolute gravimeters and the key comparison reference values (KCRVs)."
-  - CCM.G‑K2 (2013) — Published 2015.
-  - CCM.G‑K2.2017 — Published 2020, full PDF: https://www.bipm.org/documents/20126/48150829/CCM.G-K2.2017.pdf — provides per‑instrument g‑values at site reference heights, expanded uncertainties, and DoE. Verbatim: "the FG5#228 showed a degree of equivalence of 3 nm s⁻² with the 12 other absolute gravimeters and 55 nm s⁻² uncertainty within 95 % confidence."
+  - CCM.G‑K1 (ICAG2009) - final report in KCDB; verbatim from abstract: "the data (raw absolute gravity measurements and their uncertainties) submitted by the participants ... are presented including the degrees of equivalence (DoE) of the absolute gravimeters and the key comparison reference values (KCRVs)."
+  - CCM.G‑K2 (2013) - Published 2015.
+  - CCM.G‑K2.2017 - Published 2020, full PDF: https://www.bipm.org/documents/20126/48150829/CCM.G-K2.2017.pdf - provides per‑instrument g‑values at site reference heights, expanded uncertainties, and DoE. Verbatim: "the FG5#228 showed a degree of equivalence of 3 nm s⁻² with the 12 other absolute gravimeters and 55 nm s⁻² uncertainty within 95 % confidence."
 - **Freier 2016 (J. Phys. Conf. Ser. 723 012050)** "Mobile quantum gravity sensor with unprecedented stability" reports the GAIN figures used as a regression target: "an uncertainty of 39 nm/s², a long-term stability of 0.5 nm/s² and a short-term noise of 96 nm s⁻²Hz⁻¹/² " (paraphrased by Schilling et al. 2025 *J. Geod.* DOI 10.1007/s00190-025-01995-x). **Underlying time series are not in any public repository identified.**
 - **Hu, Z.-K. et al. (2013) Phys. Rev. A 88, 043610**, DOI **10.1103/PhysRevA.88.043610**. Reports 4.2 µGal/√Hz = 42 nm/s²/√Hz short‑term sensitivity. **No public raw data**.
 - **Ménoret, V. et al. (2018)** *Sci. Rep.* 8, 12300, DOI **10.1038/s41598-018-30608-1**, arXiv **1809.04908**. AQG‑A01 evaluation; comparison with FG5#228 and iGrav#002 at Larzac. **No raw data deposited** (paper has no Data Availability link to a repository for the fringe data; only summary plots).
-- **Cooke et al. (2021)** *Geosci. Instrum. Method. Data Syst.* 10, 65–79, DOI **10.5194/gi-10-65-2021** — AQG‑B01 evaluation at Larzac; cites Larzac iGrav#002 (IGETS DOI 10.5880/igets.la.l1.001) and FG5#228 — again, no raw fringe data deposited.
+- **Cooke et al. (2021)** *Geosci. Instrum. Method. Data Syst.* 10, 65–79, DOI **10.5194/gi-10-65-2021** - AQG‑B01 evaluation at Larzac; cites Larzac iGrav#002 (IGETS DOI 10.5880/igets.la.l1.001) and FG5#228 - again, no raw fringe data deposited.
 
 ### 3.2 What clearly does NOT exist publicly (May 2026)
 - No public raw photodiode trace, MOT‑loading trace, or Raman‑pulse population fraction time series from Freier 2016 / Hauth 2013 (GAIN, Humboldt Berlin).
@@ -145,7 +145,7 @@ Luan et al. (2025) GJI 243, ggaf206 (DOI 10.1093/gji/ggaf206) verbatim status sn
 
 ## 4. PhysioNet‑Style Curated Benchmark for Gravimetry
 
-**TL;DR.** **No direct analog of PhysioNet exists for gravimetry or atom interferometry.** There is no openly licensed, versioned, challenge‑driven benchmark repository of gravimeter time series. The closest functional analogs — none of which combine all four PhysioNet features (curation, versioning, open licence, paired challenges) — are IGETS (curated, partial DOIs, registration‑gated), EarthScope/IRIS (curated seismic, CoreTrustSeal), ORFEUS/EIDA, PANGAEA, Zenodo communities, and the BIPM CCM Key Comparison Database.
+**TL;DR.** **No direct analog of PhysioNet exists for gravimetry or atom interferometry.** There is no openly licensed, versioned, challenge‑driven benchmark repository of gravimeter time series. The closest functional analogs - none of which combine all four PhysioNet features (curation, versioning, open licence, paired challenges) - are IGETS (curated, partial DOIs, registration‑gated), EarthScope/IRIS (curated seismic, CoreTrustSeal), ORFEUS/EIDA, PANGAEA, Zenodo communities, and the BIPM CCM Key Comparison Database.
 
 ### 4.1 PhysioNet reference (for contrast)
 Goldberger et al. (2000) *Circulation* 101(23): e215–e220 (RRID:SCR_007345). Verbatim from physionet.org: "PhysioNet provides free web access to over 50 collections of recorded physiologic signals and time series ... PhysioNet's annual open engineering challenges stimulate rapid progress on unsolved or poorly solved questions of basic or clinical interest, by focusing attention on achievable solutions that can be evaluated and compared objectively using freely available reference data."
@@ -169,7 +169,7 @@ For `qgrav`, **state explicitly in the project README that no PhysioNet equivale
 
 ## 5. Public Seismic / Ground‑Noise Data (IRIS / EarthScope / ORFEUS / USGS)
 
-**TL;DR.** Vibration / Newtonian‑noise benchmarks for `qgrav` should pull broadband seismic data via the **FDSN web services** (`fdsnws-dataselect`, `fdsnws-station`, `fdsnws-event`) from EarthScope (formerly IRIS DMC) and ORFEUS/EIDA, using ObsPy's `Client("IRIS"|"EARTHSCOPE"|...)` interface. The relevant noise band for atom‑gravimeter vibration rejection comprises the **primary microseism (~0.07 Hz peak) and secondary microseism (~0.14 Hz peak)** — per Teixidó et al. (2002) *Geophys. J. Int.* 149(3):589, citing Aki & Richards (1980): "two maxima of the power spectrum, at about 0.07 Hz, the primary peak, and 0.14 Hz, the secondary peak, are typical features of almost all the recordings at seismic stations." Cultural noise dominates above ~1 Hz. Reference noise model: **Peterson (1993) NLNM/NHNM**, DOI **10.3133/ofr93322**.
+**TL;DR.** Vibration / Newtonian‑noise benchmarks for `qgrav` should pull broadband seismic data via the **FDSN web services** (`fdsnws-dataselect`, `fdsnws-station`, `fdsnws-event`) from EarthScope (formerly IRIS DMC) and ORFEUS/EIDA, using ObsPy's `Client("IRIS"|"EARTHSCOPE"|...)` interface. The relevant noise band for atom‑gravimeter vibration rejection comprises the **primary microseism (~0.07 Hz peak) and secondary microseism (~0.14 Hz peak)** - per Teixidó et al. (2002) *Geophys. J. Int.* 149(3):589, citing Aki & Richards (1980): "two maxima of the power spectrum, at about 0.07 Hz, the primary peak, and 0.14 Hz, the secondary peak, are typical features of almost all the recordings at seismic stations." Cultural noise dominates above ~1 Hz. Reference noise model: **Peterson (1993) NLNM/NHNM**, DOI **10.3133/ofr93322**.
 
 ### 5.1 Peterson 1993 (canonical reference)
 Verbatim USGS catalog entry: "Peterson, J.R., 1993, Observations and modeling of seismic background noise: U.S. Geological Survey Open-File Report 93-322, 94 p., https://doi.org/10.3133/ofr93322." Landing page: https://pubs.usgs.gov/publication/ofr93322 . The report defines the **New Low Noise Model (NLNM)** and **New High Noise Model (NHNM)** as PSDs of ground acceleration in dB referenced to (m/s²)²/Hz, spanning 0.1 mHz to 10 Hz.
@@ -179,9 +179,9 @@ ObsPy 1.5.0 (current release March 13, 2026 per PyPI / Zenodo DOI **10.5281/zeno
 > "client = Client('IRIS') ... FDSN Webservice Client (base url: http://service.iris.edu) Available Services: 'dataselect' (v...), 'event' (v...), 'station' (v...), 'available_event_catalogs', 'available_event_contributors' ..."
 
 The three FDSN service endpoints:
-- `fdsnws-dataselect` — miniSEED waveform retrieval. Example: `client.get_waveforms("IU", "ANMO", "00", "LHZ", t1, t2)`.
-- `fdsnws-station` — StationXML inventories with response info. `client.get_stations(...)`.
-- `fdsnws-event` — earthquake catalog. `client.get_events(...)`.
+- `fdsnws-dataselect` - miniSEED waveform retrieval. Example: `client.get_waveforms("IU", "ANMO", "00", "LHZ", t1, t2)`.
+- `fdsnws-station` - StationXML inventories with response info. `client.get_stations(...)`.
+- `fdsnws-event` - earthquake catalog. `client.get_events(...)`.
 
 EarthScope service base URL: https://service.iris.edu (post‑2023 IRIS/UNAVCO merger). ORFEUS Federator: https://www.orfeus-eu.org/eidaws/routing/1/.
 
@@ -193,10 +193,10 @@ Verbatim from ORFEUS (https://www.orfeus-eu.org/data/eida/webservices/):
 
 ### 5.3 Relevant channels
 SEED channel naming (band code + instrument code + orientation):
-- `BHZ` — broadband, high‑gain, vertical (sampling 10–80 Hz)
-- `LHZ` — long‑period, high‑gain, vertical (1 Hz)
-- `VHZ` — very long‑period (0.1 Hz)
-- `HHZ` — high broadband (≥80 Hz) — best for vibration injection above the microseism
+- `BHZ` - broadband, high‑gain, vertical (sampling 10–80 Hz)
+- `LHZ` - long‑period, high‑gain, vertical (1 Hz)
+- `VHZ` - very long‑period (0.1 Hz)
+- `HHZ` - high broadband (≥80 Hz) - best for vibration injection above the microseism
 
 For Newtonian / vibration noise close to an atom gravimeter, prefer co‑located broadband (BHZ/HHZ) plus a tilt/strain channel if available.
 
@@ -221,9 +221,9 @@ Acceleration PSD in (m/s²)²/Hz, or dB referenced thereto (Peterson convention)
 **TL;DR.** **There is no curated public repository of atom‑interferometer photodiode I/Q signals or raw fringe time series**. The single ad hoc deposit identified is the SYRTE Zenodo record 11543715 (Raman population ratios, accelerometer/gyroscope streams, not photodiode‑level). The closest substitute analogs are LIGO open seismic noise data (gravitational‑wave‑detector context) and the SYRTE Zenodo deposits. Treat this as a known gap that `qgrav` should fill by publishing its own synthetic fringe benchmarks.
 
 ### 6.1 What exists
-- **Zenodo 10.5281/zenodo.11543715** — Sidorenkov, R.; et al. (LNE‑SYRTE) "Atom interferometry at arbitrary orientations and rotation rates" (linked to *Nat. Commun.* 2024 paper, DOI 10.1038/s41467-024-50804-0). Contents (verbatim): "Data corresponding to the interference fringes (population ratios, phases) are in folders called 'Raman'. Signals of the classical sensors (accelerometers and gyroscopes) are in folders called 'Streaming'." **This is at the population‑fraction level (i.e. post‑imaging), not raw photodiode counts.**
-- **Zenodo records/11241234** — Gautier et al. (2024) raw data for *Sci. Adv.* "Quantum sensing of acceleration and rotation by interfering magnetically launched atoms".
-- **LIGO Open Science Center / GWOSC** (gwosc.org) — seismic and auxiliary channel data for the LIGO interferometers (optical, not matter‑wave, but I/Q‑level photodetector signals with documented response).
+- **Zenodo 10.5281/zenodo.11543715** - Sidorenkov, R.; et al. (LNE‑SYRTE) "Atom interferometry at arbitrary orientations and rotation rates" (linked to *Nat. Commun.* 2024 paper, DOI 10.1038/s41467-024-50804-0). Contents (verbatim): "Data corresponding to the interference fringes (population ratios, phases) are in folders called 'Raman'. Signals of the classical sensors (accelerometers and gyroscopes) are in folders called 'Streaming'." **This is at the population‑fraction level (i.e. post‑imaging), not raw photodiode counts.**
+- **Zenodo records/11241234** - Gautier et al. (2024) raw data for *Sci. Adv.* "Quantum sensing of acceleration and rotation by interfering magnetically launched atoms".
+- **LIGO Open Science Center / GWOSC** (gwosc.org) - seismic and auxiliary channel data for the LIGO interferometers (optical, not matter‑wave, but I/Q‑level photodetector signals with documented response).
 
 ### 6.2 What does NOT exist
 - No raw photodiode trace from any cold‑atom gravimeter (Freier 2016, Hu 2013, Ménoret 2018, Bidel et al., Stanford, AOSense).
@@ -232,7 +232,7 @@ Acceleration PSD in (m/s²)²/Hz, or dB referenced thereto (Peterson convention)
 - No challenge competitions in this space (cf. §4).
 
 ### 6.3 Recommendation
-1. Generate `qgrav` synthetic photodiode I/Q traces with documented noise models (shot noise, Raman intensity noise, RIN, vibration mirror phase noise) and deposit a versioned bundle on Zenodo with a CC BY 4.0 licence and DOI — this *creates* the missing benchmark.
+1. Generate `qgrav` synthetic photodiode I/Q traces with documented noise models (shot noise, Raman intensity noise, RIN, vibration mirror phase noise) and deposit a versioned bundle on Zenodo with a CC BY 4.0 licence and DOI - this *creates* the missing benchmark.
 2. Where real data is required, use the SYRTE Zenodo deposit at the population‑ratio level and treat raw photodiode‑level validation as a synthetic‑only target.
 3. For inertial‑noise injection into the simulated photodiode signal, draw from the GWOSC auxiliary seismic channels or EarthScope BHZ traces (§5).
 
@@ -243,14 +243,14 @@ Acceleration PSD in (m/s²)²/Hz, or dB referenced thereto (Peterson convention)
 1. **Bench‑output validation:** download monthly IGETS L2 `.ggp` files for Wettzell (`we`), Onsala (`os`), Larzac (`la`), and Wuhan; build a Python reader (~50 lines) following the 7‑line header and `(i4,2i2,1x,3i2,2f10.6)` data format of GGP V5; compare `qgrav` residuals against L2 corrected gravity (nm/s²) and L3 residuals (geophysical‑correction‑applied).
 2. **Long‑wavelength sanity check:** subtract a GravIS Level‑3 hydrology mass‑anomaly time series (gridded equivalent water height at the gravimeter pixel) from `qgrav` residuals and verify residual variance reduction; do **not** demand point agreement with GRACE‑FO.
 3. **Vibration noise:** stream BHZ traces (10–40 Hz, miniSEED) through ObsPy 1.5.0 (`Client("EARTHSCOPE")`) from EarthScope `IU.WTZ`, ORFEUS for European sites; inject these as ground‑noise driving the simulated mirror.
-4. **Regression targets:** since Freier 2016, Hu 2013, Ménoret 2018 raw data are unavailable, regress against the **published summary metrics** (short‑term sensitivity, Allan deviation slopes, final uncertainty) — store those as YAML "spec" files in `tests/regression/`, not as time series.
+4. **Regression targets:** since Freier 2016, Hu 2013, Ménoret 2018 raw data are unavailable, regress against the **published summary metrics** (short‑term sensitivity, Allan deviation slopes, final uncertainty) - store those as YAML "spec" files in `tests/regression/`, not as time series.
 5. **Open the benchmark:** publish `qgrav`‑generated synthetic fringe + I/Q traces and a small replay of IGETS L2 segments (where the per‑station CC BY 4.0 licence permits redistribution; otherwise link, do not mirror) on Zenodo with a DOI, to establish the PhysioNet‑style resource that does not currently exist for atom‑interferometric gravimetry.
 
 ## Caveats & disagreements between sources
 
 - **Microseism band edges differ** between Tanimoto 2023 (0.1–0.4 Hz secondary; 0.05–0.07 Hz primary), PMC5713174 (0.1–1 Hz secondary; 0.02–0.1 Hz primary) and the canonical Aki & Richards spectral peaks at 0.07 / 0.14 Hz quoted by Teixidó et al. (2002). `qgrav` should default to a combined 0.05–0.5 Hz band with peaks at 0.07 and 0.14 Hz and document the choice.
-- **IGETS station count** in different sources: IAG GGOS IGETS page (2025‑09‑22) — "47 stations"; Boy et al. 2020 — ">40 stations and 60 different sensors"; Luan et al. 2025 — "59 SG time-series from 42 worldwide stations (status September 2024)". This reflects genuine growth and different counting conventions (stations vs sensors vs active series); cite the live ISDC table for the up‑to‑date number.
+- **IGETS station count** in different sources: IAG GGOS IGETS page (2025‑09‑22) - "47 stations"; Boy et al. 2020 - ">40 stations and 60 different sensors"; Luan et al. 2025 - "59 SG time-series from 42 worldwide stations (status September 2024)". This reflects genuine growth and different counting conventions (stations vs sensors vs active series); cite the live ISDC table for the up‑to‑date number.
 - **Hu 2013 sensitivity reporting:** PRA 88 043610 reports 4.2 µGal/√Hz = 42 nm/s²/√Hz (corrected from earlier "best reported value" by factor 2). One Chinese‑language secondary source rounds this; cite the PRA original.
 - **GRACE‑FO release version drift:** PO.DAAC currently shows JPL RL06.0, RL06.1, and RL06.3 with the latter (DOI 10.5067/GFL20-MJ063) as current; older versions are marked "Please Note: This dataset is retired".
 - **Atom‑gravimeter raw data:** the absence of public raw fringe data for the three regression targets is a hard limitation. Treat any "benchmark" against Freier/Hu/Ménoret as a regression against *published numbers*, never against series.
-- **No PhysioNet analog exists** — stated explicitly; do not invent one.
+- **No PhysioNet analog exists** - stated explicitly; do not invent one.

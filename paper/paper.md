@@ -25,16 +25,16 @@ pipeline that runs simulations, ingests real precision-gravity time series,
 computes standard sensitivity metrics (power spectral density, overlapping Allan
 deviation, shot-noise sensitivity), and emits a reproducible, versioned run
 folder with plots and an HTML report. Its distinguishing feature is that the
-gravimetric phase **emerges** from a self-consistent numerical simulation — a
-ballistic atom trajectory under a chirped Raman laser — rather than being
+gravimetric phase **emerges** from a self-consistent numerical simulation - a
+ballistic atom trajectory under a chirped Raman laser - rather than being
 injected analytically as $k_\mathrm{eff}\,g\,T^2$. Every simulation result
 carries an explicit *study-scope label* (`FULLY_SIMULATED` / `HYBRID` /
 `ANALYTICAL_ONLY`) so users can tell at a glance what is computed from first
 principles versus imposed by formula.
 
-The platform validates itself against five published atom-gravimeter results —
+The platform validates itself against five published atom-gravimeter results -
 Freier 2016 (GAIN) [@freier2016] as the primary regression target, plus Hu 2013
-[@hu2013], Ménoret 2018 [@menoret2018], Xu 2022, and Wu 2019 — and
+[@hu2013], Ménoret 2018 [@menoret2018], Xu 2022, and Wu 2019 - and
 independently cross-validates its core quantum dynamics against QuTiP [@qutip].
 
 # Statement of need
@@ -56,7 +56,7 @@ aberrations), (iii) a multi-drop measurement-cycle simulator with a
 fringe-locking servo and Allan-deviation output, and (iv) automated regressions
 that reproduce published instrument sensitivities. The honest study-scope
 labelling and an explicit physics-review packet make the platform's epistemic
-status auditable — a deliberate response to the reproducibility expectations of
+status auditable - a deliberate response to the reproducibility expectations of
 quantum-sensing R&D.
 
 # Functionality

@@ -1,4 +1,4 @@
-# Pulse-Timing Conventions and Finite-τ Corrections in Light-Pulse Atom Interferometry — Physics Validation Notes for qgrav / AISim
+# Pulse-Timing Conventions and Finite-τ Corrections in Light-Pulse Atom Interferometry - Physics Validation Notes for qgrav / AISim
 
 ## TL;DR
 - **Cheinet 2008's sensitivity-function formalism explicitly places the time origin at the middle of the central π pulse**, and gives an exact piecewise expression g(t) with sin(Ω_R t) ramps inside each rectangular Raman pulse; in the standard MZ literature (Kasevich–Chu, Peters–Chung–Chu, Le Gouët, Bertoldi, Fang/Mielec/Savoie/Altorio/Landragin/Geiger) the symbol T denotes the pulse-center to pulse-center separation, not the free-evolution time between pulse edges.
@@ -37,7 +37,7 @@ Le Gouët et al. 2008 (Appl. Phys. B 92, 133–144, DOI 10.1007/s00340-008-3088-
 
 > "ΔΦ = φ(0) − 2φ(T) + φ(2T) = −k_eff · a T² [16], where φ(0, T, 2T) is the difference of the phases of the lasers, **at the location of the center of the atomic wavepackets, for each of the three pulses**."
 
-This convention — T is the time between phase samples taken at the centers of the three pulses (which coincide with the centers of the atomic wavepacket positions at those instants) — is shared with the Cheinet 2008 sensitivity-function formalism: the symmetric durations τ_R − 2τ_R − τ_R imply the pulse centers are separated by exactly T, and the time origin sits at the middle of the central π pulse.
+This convention - T is the time between phase samples taken at the centers of the three pulses (which coincide with the centers of the atomic wavepacket positions at those instants) - is shared with the Cheinet 2008 sensitivity-function formalism: the symmetric durations τ_R − 2τ_R − τ_R imply the pulse centers are separated by exactly T, and the time origin sits at the middle of the central π pulse.
 
 Bertoldi, Minardi & Prevedelli (PRA 99, 033619 (2019), arXiv:1812.11890) is unusually explicit:
 
@@ -49,15 +49,15 @@ A complementary explicit statement is in Fang, Mielec, Savoie, Altorio, Landragi
 
 > "The pulse separation T denotes the time elapsed between the center of two consecutive light pulses, and τ is the duration of the rectangular pulse."
 
-A useful counterpoint is Dubetsky (arXiv:1810.04218 (2018)) which explicitly distinguishes "(a) T is the time separation between pulses [centers]" and "(b) T is the time delay between pulses' starting moments" in its Fig. 1 caption — showing that both conventions exist in the literature and have to be specified.
+A useful counterpoint is Dubetsky (arXiv:1810.04218 (2018)) which explicitly distinguishes "(a) T is the time separation between pulses [centers]" and "(b) T is the time delay between pulses' starting moments" in its Fig. 1 caption - showing that both conventions exist in the literature and have to be specified.
 
 ### 3. Finite-pulse-duration corrections to Φ = k_eff·g·T²
 
-**Kasevich & Chu, PRL 67, 181 (1991), DOI 10.1103/PhysRevLett.67.181** — the original gravimeter paper — treats pulses as instantaneous (ideal π/2−π−π/2) and quotes Δφ_grav = k_eff·g·T² without any finite-τ correction. No τ-dependent correction term is given in this paper.
+**Kasevich & Chu, PRL 67, 181 (1991), DOI 10.1103/PhysRevLett.67.181** - the original gravimeter paper - treats pulses as instantaneous (ideal π/2−π−π/2) and quotes Δφ_grav = k_eff·g·T² without any finite-τ correction. No τ-dependent correction term is given in this paper.
 
 **Le Gouët et al. 2008** retains the Φ = −k_eff·a·T² form for the leading inertial phase but, when computing the noise and transfer function, uses the sensitivity function g(t) **with the finite-τ_R ramps shown above** (their Eq. 3 is identical in form to Cheinet's Eq. 4). The paper does not write down a closed-form finite-τ scaling of the gravity formula; it uses the sensitivity function instead. Verbatim: "Even a short interrogation time of 100 ms allows our cold atom gravimeter to reach an excellent short term sensitivity to acceleration of 1.4 × 10⁻⁸ g at 1 s." Since 2T = 100 ms, T = 50 ms exactly. (SI conversion: 1.4 × 10⁻⁸ × 9.81 m·s⁻² ≈ 1.37 × 10⁻⁷ m·s⁻², ≈ 14 µGal·Hz^(−1/2) using 1 Gal = 10⁻² m·s⁻².) No explicit τ_R value was retrieved verbatim from the fetched sections of the paper.
 
-**Bertoldi, Minardi & Prevedelli 2019 (PRA 99, 033619; arXiv:1812.11890) Eq. 21 — exact closed form, verbatim**:
+**Bertoldi, Minardi & Prevedelli 2019 (PRA 99, 033619; arXiv:1812.11890) Eq. 21 - exact closed form, verbatim**:
 
 > "φ₂ = T²(kg − α − kγz₀)·[1 − ((2π − 4)/π) η] − kγT³{ v_m·[1 − ((2π − 4)/π) η] − gT·[7/12 − (4π − 8)/(3π) η] }, where η = τ/T."
 
@@ -83,7 +83,7 @@ For an ideal π/2 pulse area Ω_R·τ_R = π/2, this gives T + (2/Ω_R) = T + (4
 
 ### 4. Sub-pulse integration in simulators
 
-**AISim** (Leykauf & Vowe, github.com/bleykauf/aisim; documentation at aisim.readthedocs.io) is the publicly available Python package vendored as part of qgrav. Note that despite some informal "AISim by Kim et al." attributions, AISim's primary authors are **B. Leykauf** (Institut für Physik, Humboldt-Universität zu Berlin, associated with the GAIN — Gravimetric Atom Interferometer — project) and **S. Vowe** (contributions through 2020). The PyPI metadata is explicit: "Copyright © 2020-2025 B. Leykauf · Copyright © 2020 S. Vowe."
+**AISim** (Leykauf & Vowe, github.com/bleykauf/aisim; documentation at aisim.readthedocs.io) is the publicly available Python package vendored as part of qgrav. Note that despite some informal "AISim by Kim et al." attributions, AISim's primary authors are **B. Leykauf** (Institut für Physik, Humboldt-Universität zu Berlin, associated with the GAIN - Gravimetric Atom Interferometer - project) and **S. Vowe** (contributions through 2020). The PyPI metadata is explicit: "Copyright © 2020-2025 B. Leykauf · Copyright © 2020 S. Vowe."
 
 AISim **does not sub-step a Raman pulse into N pieces and integrate δ(t)·dt**. Instead it applies analytic 2×2 unitary propagators across the entire pulse duration. From the documentation:
 
@@ -93,13 +93,13 @@ AISim **does not sub-step a Raman pulse into N pieces and integrate δ(t)·dt**.
 
 > "class aisim.prop.FreePropagator(time_delta, **kwargs) … Propagator implementing free propagation without light-matter interaction."
 
-The Mach–Zehnder phase is then recovered in user code by computing the wavefront phase imprint at three discrete pulse times (the wavefront-aberrations example shows `phi1 = wf.get_value(det_atoms.calc_position(t1))`, `phi2 = ... t2`, `phi3 = ... t3` and `np.exp(1j*(phi1 − 2*phi2 + phi3))`) — i.e. evaluation at single pulse-center times, not integration through the pulse. No N-substep sub-pulse integration of g(t)·δφ(t) is implemented in AISim.
+The Mach–Zehnder phase is then recovered in user code by computing the wavefront phase imprint at three discrete pulse times (the wavefront-aberrations example shows `phi1 = wf.get_value(det_atoms.calc_position(t1))`, `phi2 = ... t2`, `phi3 = ... t3` and `np.exp(1j*(phi1 − 2*phi2 + phi3))`) - i.e. evaluation at single pulse-center times, not integration through the pulse. No N-substep sub-pulse integration of g(t)·δφ(t) is implemented in AISim.
 
 We did not find any published peer-reviewed atom-interferometer simulator that explicitly breaks each Raman pulse into N substeps and integrates the sensitivity function. Where simulators model finite-τ effects, they universally use either (a) the analytic two-level Rabi propagator (AISim, and most semi-classical codes), or (b) the analytic closed-form correction from Bertoldi et al. / Cheinet, applied as a scale-factor multiplier on T². The qgrav design choice to use sub-pulse Δt integration is therefore a **legitimate but non-standard approach**, and validation should benchmark it against both (a) the analytic Rabi propagator (AISim-style) and (b) the Bertoldi/Cheinet closed-form correction in the appropriate limit.
 
 ### 5. Closed-form finite-τ correction to the chirp-rate-to-g relation
 
-The Peters chirp method gives g = α/k_eff at lowest order. The finite-τ correction enters identically as the MZ scale-factor correction discussed above — because nulling the interferometer phase by α = k·g requires that the phase φ(t) = αt²/2 imprinted on the lasers, when sampled with the finite-τ sensitivity function, reproduce −k·g·T². With Bertoldi et al.'s scale factor T²·(1 − (2π−4)/π · τ/T), the chirp-to-g relation becomes
+The Peters chirp method gives g = α/k_eff at lowest order. The finite-τ correction enters identically as the MZ scale-factor correction discussed above - because nulling the interferometer phase by α = k·g requires that the phase φ(t) = αt²/2 imprinted on the lasers, when sampled with the finite-τ sensitivity function, reproduce −k·g·T². With Bertoldi et al.'s scale factor T²·(1 − (2π−4)/π · τ/T), the chirp-to-g relation becomes
 
 g = α/k_eff · (1 − (2π−4)/π · τ/T)^(−1)  ≈  (α/k_eff)·(1 + (2π−4)/π · τ/T).
 
@@ -133,11 +133,11 @@ No publication we located gives the chirp correction in a different form (e.g. n
 
 11. B. Fang, N. Mielec, D. Savoie, M. Altorio, A. Landragin, R. Geiger, "Improving the phase response of an atom interferometer by means of temporal pulse shaping," New J. Phys. **20**, 023020 (2018). DOI: 10.1088/1367-2630/aaa37c.
 
-12. B. Leykauf, S. Vowe et al., AISim — Python package for light-pulse atom interferometry simulation. URL: https://github.com/bleykauf/aisim. Documentation: https://aisim.readthedocs.io.
+12. B. Leykauf, S. Vowe et al., AISim - Python package for light-pulse atom interferometry simulation. URL: https://github.com/bleykauf/aisim. Documentation: https://aisim.readthedocs.io.
 
 13. B. Young, M. Kasevich, S. Chu, "Precision atom interferometry with light pulses," in P. R. Berman (ed.), Atom Interferometry (Academic Press, 1997), pp. 363–406. [Reference for the AISim TwoLevelTransitionPropagator.]
 
-14. B. Dubetsky, "Mach–Zehnder atom interferometer. Quantum and Doppler corrections caused by the finite pulses' durations," preprint arXiv:1810.04218 (2018). [Independent derivation; also includes both conventions for T (pulse center separation vs starting-time delay) — explicitly shown in Fig. 1 of that paper.]
+14. B. Dubetsky, "Mach–Zehnder atom interferometer. Quantum and Doppler corrections caused by the finite pulses' durations," preprint arXiv:1810.04218 (2018). [Independent derivation; also includes both conventions for T (pulse center separation vs starting-time delay) - explicitly shown in Fig. 1 of that paper.]
 
 ### Numerical conversions in SI
 
@@ -145,7 +145,7 @@ No publication we located gives the chirp correction in a different form (e.g. n
 - Cheinet 2008 gives explicit gyroscope parameters verbatim: "three interferometer pulses of duration τ_R − 2τ_R − τ_R with τ_R = 20 µs separated in time by T = 4.97 ms." The projected gravimeter noise floor of 1.5 × 10⁻⁸ m·s⁻²·Hz^(−1/2) ≈ 1.5 µGal·Hz^(−1/2) is quoted in the Conclusion but uses a different set of parameters that we did not retrieve verbatim.
 - Bertoldi finite-τ relative correction for T = 100 ms, τ = 10 µs: (2π − 4)/π × (10⁻⁵/10⁻¹) ≈ 7.27 × 10⁻⁵. On g ≈ 9.81 m·s⁻², that is ≈ 7.13 × 10⁻⁴ m·s⁻² (≈ 71 mGal).
 
-### Pulse-center vs pulse-edge convention — what to put in qgrav
+### Pulse-center vs pulse-edge convention - what to put in qgrav
 
 For consistency with the dominant convention (Cheinet, Le Gouët, Peters, Bertoldi, Fang/Geiger):
 - **T** = time between **pulse centers** of consecutive Raman pulses.
@@ -158,13 +158,13 @@ For consistency with the dominant convention (Cheinet, Le Gouët, Peters, Bertol
 1. **Adopt the pulse-center convention for T** in qgrav documentation, and label any internal pulse-start variables clearly (e.g. `t_pulse_start`, `t_pulse_center`). This matches Cheinet 2008, Le Gouët 2008, Bertoldi 2019, and Fang/Geiger 2018. Provide a small utility that converts between the two conventions because some user-supplied timing data (e.g. trigger-based instrument timing) is naturally pulse-start.
 
 2. **Validate the sub-pulse N-substep integration against two independent benchmarks**:
-   - (a) The analytic Cheinet g(t) closed form (Eq. 4 of arXiv:physics/0510197) — the residual after sub-pulse integration of g(t)·δφ(t) should converge to the exact integral as N → ∞.
+   - (a) The analytic Cheinet g(t) closed form (Eq. 4 of arXiv:physics/0510197) - the residual after sub-pulse integration of g(t)·δφ(t) should converge to the exact integral as N → ∞.
    - (b) The Bertoldi 2019 Eq. 21 closed-form scale-factor correction (1 − (2π−4)/π · τ/T) applied to Φ = k_eff·g·T². For T = 100 ms, τ = 10 µs, the correction is ≈ 7.3 × 10⁻⁵; qgrav should reproduce this to within 10⁻⁹ relative when using ≥ 100 sub-steps per pulse.
    - **Benchmark threshold**: If qgrav's sub-pulse integration disagrees with Bertoldi's closed form by more than 10⁻⁶ relative at N = 1000 substeps for τ/T = 10⁻⁴, investigate sign conventions and time-origin placement before increasing N.
 
 3. **Adopt N ≥ 50 sub-steps per pulse as a default** if sub-pulse integration is the chosen numerical method; convergence to the analytic Rabi propagator is exponential in N for rectangular pulses, but realistic Gaussian-shaped pulses or intensity inhomogeneities can require N ≥ 200. Provide a convergence test in the validation suite.
 
-4. **For chirp-method gravimeters**, document explicitly that g = α/k_eff is only the leading-order relation, and the finite-τ-corrected relation is g = (α/k_eff)·(1 + (2π−4)/π · τ/T + O(τ²/T²)). For T = 50 ms and τ_R on the order of 10 µs, this is approximately a 1.5 × 10⁻⁴ relative correction — three orders of magnitude above the 10⁻⁹ accuracy target.
+4. **For chirp-method gravimeters**, document explicitly that g = α/k_eff is only the leading-order relation, and the finite-τ-corrected relation is g = (α/k_eff)·(1 + (2π−4)/π · τ/T + O(τ²/T²)). For T = 50 ms and τ_R on the order of 10 µs, this is approximately a 1.5 × 10⁻⁴ relative correction - three orders of magnitude above the 10⁻⁹ accuracy target.
 
 5. **Cite Bertoldi, Minardi & Prevedelli 2019 (PRA 99, 033619)** as the canonical closed-form reference in the validation document, and flag the known Li–Shao–Hu 2015 (JOSA B 32, 248) numerical-coefficient disagreement so users are not confused.
 

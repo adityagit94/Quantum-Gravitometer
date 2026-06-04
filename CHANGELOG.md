@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — GUI integration
+## Unreleased - GUI integration
 
 Brings the full v1.0–v1.3 simulation/validation engine into the desktop
 workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 regressions.**
@@ -10,9 +10,9 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
   was implemented in the engine since v1.0 but unreachable from the GUI).
 - Two new collapsible sections expose the previously YAML-only physics surface,
   each control carrying a hover **tooltip**:
-  - *Advanced physics* — seed, single-photon detuning, gravity propagation,
+  - *Advanced physics* - seed, single-photon detuning, gravity propagation,
     lock-to-mid-fringe, gravity gradient, Zernike wavefront (coeffs + radius).
-  - *Multi-drop noise budget & servo* — drops/cycle, cycle time, true *g*,
+  - *Multi-drop noise budget & servo* - drops/cycle, cycle time, true *g*,
     detection σ_p, Raman phase noise, correlated seismic vibration (NLNM/NHNM) +
     isolation cut-off, visibility fitting, and a fringe-lock servo (`integrator`
     or full `pid`).
@@ -21,12 +21,12 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
   `run_simulation_from_config`.
 
 ### New "Validation" tab
-- **Published reference library** — browses the 14-entry `REFERENCES` registry
+- **Published reference library** - browses the 14-entry `REFERENCES` registry
   (value, unit, year, source, DOI, tolerance).
 - **One-click reproductions** for Freier 2016, Hu 2013, Ménoret 2018, Xu 2022,
-  Wu 2019 — each builds a runnable `multi_drop_cycle` config from that paper's
+  Wu 2019 - each builds a runnable `multi_drop_cycle` config from that paper's
   `multi_drop_kwargs()` and shows published vs predicted ASD + within-band status.
-- **Independent cross-check** panel — runs the AISim-vs-analytic Rabi check (no
+- **Independent cross-check** panel - runs the AISim-vs-analytic Rabi check (no
   deps) and the full QuTiP Schrödinger cross-check, in a worker thread, degrading
   gracefully when QuTiP is absent.
 
@@ -39,7 +39,7 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
 ### Bug fix
 - **Bundled assets never loaded in a source checkout.** The GUI resolved
   `configs/`, `data/`, and the guide docs via `Path(__file__).parents[2]`, which
-  points at `src/`, not the repo root — so the Examples menu, sample dataset, and
+  points at `src/`, not the repo root - so the Examples menu, sample dataset, and
   Guides doc links silently did nothing. Now resolved via `find_project_root`
   (9 call sites). New widgets: `Tooltip`, `CollapsibleSection`. New bundled
   config: `configs/example_aisim_multi_drop.yaml`.
@@ -56,7 +56,7 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
 ### Repo hygiene & packaging
 - **`.gitignore`:** the bundled test fixtures (`data/raw/sg_sample/`,
   `data/raw/real_ifo_template.csv`) are now tracked while user datasets stay
-  ignored — previously `data/raw/` was fully ignored, so the IGETS real-data
+  ignored - previously `data/raw/` was fully ignored, so the IGETS real-data
   tests would have failed on a fresh clone / in CI. Also ignore `site/`,
   `.pytest_cache/`, `.ruff_cache/`, `.qgrav_mpl/`, and coverage output.
 - **`pyproject.toml`:** added `[project.urls]`, `keywords`, trove `classifiers`,
@@ -83,18 +83,18 @@ Documentation, real-data validation, and JOSS-readiness release. **362 → 371 t
 
 ### Real-data validation of the analysis chain (resolves C8, scoped)
 
-- **`tests/test_real_data_igets_validation.py`** (3 tests): ingests the bundled real IGETS superconducting-gravimeter station (`ap046`) through the existing `bench_ifo/real_gravity` pipeline, computes the overlapping Allan deviation, and asserts it is finite, positive, structurally bounded by the sample std, and physically plausible — cross-referenced to the `sg_noise_floor` instrument-floor reference. Hermetic (uses bundled data, no network).
+- **`tests/test_real_data_igets_validation.py`** (3 tests): ingests the bundled real IGETS superconducting-gravimeter station (`ap046`) through the existing `bench_ifo/real_gravity` pipeline, computes the overlapping Allan deviation, and asserts it is finite, positive, structurally bounded by the sample std, and physically plausible - cross-referenced to the `sg_noise_floor` instrument-floor reference. Hermetic (uses bundled data, no network).
 - **Honest scope:** this validates the *analysis chain* on real precision-gravity data; it does **not** validate the atom-interferometer *simulation* against hardware, because essentially no public atom-gravimeter raw data exists. A real-AI-data outreach ask was added to `docs/REVIEW_REQUEST_TEMPLATE.md` for the user-owned collaboration track.
 
 ### JOSS paper + MkDocs site
 
-- **`paper/paper.md` + `paper/paper.bib`** — JOSS submission draft (~600 words; Summary, Statement of need, Functionality, AI-assistance disclosure) citing AISim, QuTiP, Freier/Hu/Ménoret, Bertoldi, Cheinet, Peterson.
-- **`mkdocs.yml` + `docs/index.md` + `.github/workflows/docs.yml`** — MkDocs site (readthedocs theme, builds with bare `mkdocs`) deployed to GitHub Pages on push. Verified `mkdocs build` succeeds.
+- **`paper/paper.md` + `paper/paper.bib`** - JOSS submission draft (~600 words; Summary, Statement of need, Functionality, AI-assistance disclosure) citing AISim, QuTiP, Freier/Hu/Ménoret, Bertoldi, Cheinet, Peterson.
+- **`mkdocs.yml` + `docs/index.md` + `.github/workflows/docs.yml`** - MkDocs site (readthedocs theme, builds with bare `mkdocs`) deployed to GitHub Pages on push. Verified `mkdocs build` succeeds.
 - **`tests/test_docs_build.py`** (6 tests): mkdocs nav targets all exist, JOSS paper has the required sections + word count in the JOSS 250–1750 range + an AI-usage disclosure.
 
 ### Documentation refresh
 
-- `docs/COMPLETE_GUIDE.md` header bumped to v1.2.3 and a new **§16 "What's new since v1.0 (capabilities map)"** added — a single index into the emergent-gravity, multi-drop, AC-Stark/wavefront, published-reference, QuTiP, real-data, performance, and CI capabilities, each linking to its detailed doc. (A full line-by-line rewrite of the 1186-line v0.8 body is deferred; the §16 map + the dedicated v1.x docs cover the new material.)
+- `docs/COMPLETE_GUIDE.md` header bumped to v1.2.3 and a new **§16 "What's new since v1.0 (capabilities map)"** added - a single index into the emergent-gravity, multi-drop, AC-Stark/wavefront, published-reference, QuTiP, real-data, performance, and CI capabilities, each linking to its detailed doc. (A full line-by-line rewrite of the 1186-line v0.8 body is deferred; the §16 map + the dedicated v1.x docs cover the new material.)
 
 ### Version
 
@@ -108,7 +108,7 @@ Performance benchmarking (resolves C15). **361 → 362 tests** (+1 guard; the 4 
 
 - **`tests/benchmark_aisim.py`** (pytest-benchmark, `-m benchmark`): single MZ sequence, 60-point gravity sweep (hybrid + emergent), 100-drop multi-drop cycle. Excluded from the default suite by filename (not `test_*.py`); run via `pip install .[benchmark] && pytest tests/benchmark_aisim.py -m benchmark`.
 - **Representative timings** (Win11 / Py3.14 / NumPy 2.4): single MZ **~1.3 ms** (1000 atoms), 60-pt hybrid sweep **~0.09 s**, 60-pt emergent sweep **~0.20 s**, 100-drop emergent cycle **~0.30 s**. Documented in **`docs/PERFORMANCE.md`** with scaling notes.
-- **Profiling found no bottleneck worth optimising** — the MZ matrix ops are already vectorised over atoms (NumPy einsum on the block-diagonal propagator); the per-drop ensemble creation is a small fraction of the per-drop MZ cost. No O(n²) hot paths.
+- **Profiling found no bottleneck worth optimising** - the MZ matrix ops are already vectorised over atoms (NumPy einsum on the block-diagonal propagator); the per-drop ensemble creation is a small fraction of the per-drop MZ cost. No O(n²) hot paths.
 - **`tests/test_performance_guard.py`** (runs in the normal suite, no plugin): a single MZ sequence must complete under a 200 ms ceiling (~150× the ~1.3 ms representative time), catching an accidental algorithmic regression without flakiness.
 - Nightly CI installs `[test,qutip,benchmark]` and runs the slow regressions, QuTiP cross-check, and benchmarks.
 
@@ -132,7 +132,7 @@ Full gravity-sweep YAML exposure + quantitative wavefront-curvature validation. 
 
 - Replaced the weak qualitative wavefront tests with quantitative, physically-grounded ones in `tests/test_wavefront.py`:
   - **Static-ensemble cancellation:** with ~zero transverse temperature, even a strong tilt+defocus wavefront leaves the MZ output unchanged (per-atom wavefront phase is identical at all three pulses and cancels in `−φ₁+2φ₂−φ₃`). This is an exact analytical prediction the simulation reproduces.
-  - **Curvature, second-order-in-drift:** the MZ combination is a discrete second-difference (curvature) operator, so the *linear* parts of tilt and defocus cancel for ballistic motion; only the wavefront curvature survives, scaling as `(v·T)²·coeff` (the well-known wavefront-curvature systematic). The test asserts a real nonzero deviation that grows linearly with the defocus coefficient — the honest signature, rather than a large contrast loss that the curvature scaling makes second-order-small.
+  - **Curvature, second-order-in-drift:** the MZ combination is a discrete second-difference (curvature) operator, so the *linear* parts of tilt and defocus cancel for ballistic motion; only the wavefront curvature survives, scaling as `(v·T)²·coeff` (the well-known wavefront-curvature systematic). The test asserts a real nonzero deviation that grows linearly with the defocus coefficient - the honest signature, rather than a large contrast loss that the curvature scaling makes second-order-small.
 
 ### Version
 
@@ -144,10 +144,10 @@ Full gravity-sweep YAML exposure + quantitative wavefront-curvature validation. 
 
 QuTiP independent cross-validation backend + honest scientific-package evaluation. **348 → 353 tests** (5 new, QuTiP-gated).
 
-### QuTiP cross-validation (partial C14 — independent validation)
+### QuTiP cross-validation (partial C14 - independent validation)
 
-- **New `src/qgrav/validation/qutip_crosscheck.py`**: qgrav computes the single-pulse Raman evolution from a closed-form 2×2 matrix; QuTiP integrates the *same* physics numerically (`sesolve` for the unitary, `mesolve`/Lindblad for spontaneous emission) — a genuinely independent code path.
-- **Result:** qgrav's matrix matches the analytic Rabi formula to **3×10⁻¹⁶** (machine precision) and QuTiP's numerical integrator agrees to **1.6×10⁻⁶** across a grid of (Ω_eff, δ, τ). The QuTiP 3-level Lindblad model reproduces the analytic spontaneous-emission loss to within an order of magnitude (ratio ~0.16). This is the first *independent-simulator* evidence that qgrav's core quantum dynamics are correct (partial mitigation of the "no independent review" caveat — a second engine agrees, pending human expert review).
+- **New `src/qgrav/validation/qutip_crosscheck.py`**: qgrav computes the single-pulse Raman evolution from a closed-form 2×2 matrix; QuTiP integrates the *same* physics numerically (`sesolve` for the unitary, `mesolve`/Lindblad for spontaneous emission) - a genuinely independent code path.
+- **Result:** qgrav's matrix matches the analytic Rabi formula to **3×10⁻¹⁶** (machine precision) and QuTiP's numerical integrator agrees to **1.6×10⁻⁶** across a grid of (Ω_eff, δ, τ). The QuTiP 3-level Lindblad model reproduces the analytic spontaneous-emission loss to within an order of magnitude (ratio ~0.16). This is the first *independent-simulator* evidence that qgrav's core quantum dynamics are correct (partial mitigation of the "no independent review" caveat - a second engine agrees, pending human expert review).
 - **Optional dependency** (`pip install qgrav[qutip]`); tests gated with `pytest.importorskip("qutip")` so the core suite is unaffected when QuTiP is absent. Nightly CI installs `[test,qutip]` and runs the cross-check.
 
 ### Honest scientific-package evaluation
@@ -167,9 +167,9 @@ Physics-rigor release: pulse-center-timing investigation, the finite-ensemble-fl
 ### Pulse-center timing investigation (partial C1)
 
 - Added a `pulse_center_timing` flag to `IntegratedPhaseTwoLevelTransitionPropagator` / `...SpatialSuperposition...` (`_aisim_overrides.py`). When True the chirp term `0.5·chirp·t²` is evaluated at the pulse centre (`atoms.time + time_delta/2`) to match `atoms.position` (already mid-pulse after the base half-step); when False (default) at the pulse start.
-- **Empirical finding:** pulse-centre timing does **not** reduce the constant g-independent calibration residual at `g=g_chirp` — it *enlarges* it (≈1.1 → ≈5.0 rad for GAIN parameters). The residual is a finite-pulse *discretisation* artefact of evaluating one rotation matrix over the whole pulse, not a time/position asymmetry. It is gravity-independent and removed exactly by the calibration, so it never biases the measured g. Default stays pulse-start (= v1.1); the flag is retained for reproducibility and for the future sub-pulse-integration path.
+- **Empirical finding:** pulse-centre timing does **not** reduce the constant g-independent calibration residual at `g=g_chirp` - it *enlarges* it (≈1.1 → ≈5.0 rad for GAIN parameters). The residual is a finite-pulse *discretisation* artefact of evaluating one rotation matrix over the whole pulse, not a time/position asymmetry. It is gravity-independent and removed exactly by the calibration, so it never biases the measured g. Default stays pulse-start (= v1.1); the flag is retained for reproducibility and for the future sub-pulse-integration path.
 
-### The factor-2 mystery solved — finite-ensemble projection floor
+### The factor-2 mystery solved - finite-ensemble projection floor
 
 - Decomposing the v1.1 Freier simulation (which landed at factor 2.1) showed the dominant term was **not** a noise-injection bug but the **finite-ensemble projection floor** of the test ensemble: `σ_g_floor ∝ 1/√N_atoms` (148 / 92 / 52 nm/s² at N = 300 / 1000 / 3000). Real GAIN uses ~2×10⁷ atoms, so its floor is negligible; the 300-atom test ensemble's floor swamped the injected GAIN budget.
 - **Methodological fix:** the published-reference simulation regressions now run at **N = 4000 atoms** (floor ≈ 57 nm/s², below the ~104 nm/s²/√Hz injected budget), so `ASD = √(floor² + budget²)` is genuinely budget-limited. Runtime stays <1 s (MZ matrix ops are vectorised over atoms).
@@ -190,7 +190,7 @@ Physics-rigor release: pulse-center-timing investigation, the finite-ensemble-fl
 
 The published-reference release. Lands the v1.0→v1.1 roadmap (`docs/ROADMAP_V1_TO_V2.md`) end-to-end with all 14 research topics applied (`docs/research/FINDINGS_SUMMARY.md`). **312 → 344 tests** (+32). Highlights:
 
-- **Five automated published-reference regressions**: Freier 2016 (PRIMARY, 96 nm/s²/√Hz), Hu 2013 (4.2 µGal/√Hz, HUST short fountain — research correction: NOT the 10-m tower), Ménoret 2018 (750 nm/s²/√Hz Larzac, T=60 ms NOT 80 ms), Xu 2022 (24 µGal/√Hz, first HUST per-effect systematic budget, NEW), Wu 2019 (37 µGal/√Hz Berkeley mobile, NEW). Marked `@pytest.mark.slow` and run nightly.
+- **Five automated published-reference regressions**: Freier 2016 (PRIMARY, 96 nm/s²/√Hz), Hu 2013 (4.2 µGal/√Hz, HUST short fountain - research correction: NOT the 10-m tower), Ménoret 2018 (750 nm/s²/√Hz Larzac, T=60 ms NOT 80 ms), Xu 2022 (24 µGal/√Hz, first HUST per-effect systematic budget, NEW), Wu 2019 (37 µGal/√Hz Berkeley mobile, NEW). Marked `@pytest.mark.slow` and run nightly.
 - **Vendor subclass refactor (resolves C4)**: the v1.0 physics extensions moved out of vendored AISim into `qgrav/sim_ai/_aisim_overrides.py`. Re-vendoring upstream AISim is now trivial. Guard test enforces no `[LOCAL PATCH]` markers in `vendor/aisim/{prop,beam}.py`.
 - **Multi-drop realism (resolves C5, C6, C9)**: PID servo with anti-windup, correlated NLNM/NHNM seismic vibration with optional isolation filter, fitted visibility for the P3→g inversion, explicit technical detection-noise floor (for instruments that are technically-limited not projection-limited, e.g., GAIN).
 - **Bertoldi 2019 closed-form finite-τ predictor (resolves partial C1)**: `bertoldi_finite_tau_scale_factor` is reported alongside the empirical calibration so the latter is the empirical confirmation of an analytical prediction, not an unjustified workaround.
@@ -212,7 +212,7 @@ The detailed per-phase entries (Phase 12 vendor refactor; Phase 13 Freier regres
 
 ---
 
-### Phase 12 — Subclass refactor of vendor patches (resolves C4)
+### Phase 12 - Subclass refactor of vendor patches (resolves C4)
 
 - The v1.0 physics extensions (`GravityFreePropagator`, chirped `Wavevectors`, integrated-phase + AC-Stark propagators) were moved out of the vendored AISim source and into **`src/qgrav/sim_ai/_aisim_overrides.py`** as subclasses. The vendored `prop.py` and `beam.py` are now byte-for-byte upstream-clean, so re-vendoring a newer AISim release no longer requires manually re-applying physics patches.
 - The integrated-phase spatial propagator uses a deliberate MRO (`SpatialSuperposition → IntegratedPhaseTwoLevel → TwoLevel`) so the top-level `_prop_matrix` builds the block-diagonal matrix while its internal `super()._prop_matrix` resolves to the integrated-phase two-level matrix.
@@ -221,53 +221,53 @@ The detailed per-phase entries (Phase 12 vendor refactor; Phase 13 Freier regres
 - Behaviour-preserving: all previous tests pass unchanged (286 → 294 with the new guard tests).
 - Note: `vendor/aisim/atoms.py` retains one intentional `assert→ValueError` validation hardening from v0.9.3 (documented there); it is a robustness fix, not a physics extension, and is out of scope for this refactor.
 
-### Phase 15 — Multi-drop realism (resolves C5, C6, C9)
+### Phase 15 - Multi-drop realism (resolves C5, C6, C9)
 
 - **PID servo with anti-windup** (`physics/readout_models.servo_pid_step` + `PIDServoState`): proportional + integral + derivative fringe-lock with an integrator clamp. The multi-drop cycle gained `servo_type="integrator"|"pid"` (the original I-only servo remains the default).
-- **Correlated drop-to-drop seismic vibration**: `run_aisim_multi_drop_cycle(correlated_vibration=True, ...)` generates one Peterson NLNM/NHNM displacement time-series for the whole campaign (via `generate_vibration_timeseries`, with optional `vibration_isolation_cutoff_hz`) and injects the per-drop vibration phase `k_eff·[z(0) − 2z(T) + z(2T)]`. Unlike per-drop white noise this produces realistic low-frequency (random-walk/flicker) Allan-deviation structure — verified by a test that the long-τ/short-τ Allan ratio exceeds the white-noise case.
+- **Correlated drop-to-drop seismic vibration**: `run_aisim_multi_drop_cycle(correlated_vibration=True, ...)` generates one Peterson NLNM/NHNM displacement time-series for the whole campaign (via `generate_vibration_timeseries`, with optional `vibration_isolation_cutoff_hz`) and injects the per-drop vibration phase `k_eff·[z(0) − 2z(T) + z(2T)]`. Unlike per-drop white noise this produces realistic low-frequency (random-walk/flicker) Allan-deviation structure - verified by a test that the long-τ/short-τ Allan ratio exceeds the white-noise case.
 - **Visibility fit** (`fit_visibility=True`): the calibration scan now also fits the fringe contrast (`_calibrate_gravity_phase_and_visibility`), used in the P3→g inversion instead of assuming an ideal contrast of 1.
-- **Technical / Raman noise knobs**: `detection_sigma_p` (explicit technical detection σ_P, overriding 1/√N — needed because GAIN-class instruments are technically-limited, not projection-limited) and `raman_phase_noise_rad` (per-shot Gaussian Raman-laser phase noise).
+- **Technical / Raman noise knobs**: `detection_sigma_p` (explicit technical detection σ_P, overriding 1/√N - needed because GAIN-class instruments are technically-limited, not projection-limited) and `raman_phase_noise_rad` (per-shot Gaussian Raman-laser phase noise).
 - New result fields: `n_detected_effective`, `detection_sigma_p`, `raman_phase_noise_rad`, `correlated_vibration`, `visibility_estimate`, `servo_type`, `vibration_phase_rad`.
 - New tests (`tests/test_multi_drop_realism.py`, 12 tests). Backward-compatible: all defaults preserve prior behaviour (294 → 306 tests).
 
-### Phase 13 — Freier 2016 PRIMARY published-reference regression (resolves partial C10)
+### Phase 13 - Freier 2016 PRIMARY published-reference regression (resolves partial C10)
 
-- **`src/qgrav/validation/freier_2016_setup.py`** — curated GAIN parameters (T=260 ms, T_cycle=1.5 s, τ_π/2=17 µs, single-photon detuning −700 MHz, beam radius 15 mm, etc.) and the documented per-shot noise budget (technical detection σ_P=6×10⁻³, Raman-phase 40 nm/s²/shot, vibration 71 nm/s²/shot). Every value sourced verbatim in `docs/research/RESEARCH_FREIER_2016.md`.
-- **Critical research correction:** the budget reflects that GAIN is technically-limited, not projection-limited — the 96 nm/s²/√Hz is dominated by vibration + Raman-phase + technical detection noise, *not* by √N atomic projection noise (which is ~10× smaller). The simulation is driven by `detection_sigma_p` and `raman_phase_noise_rad` rather than `n_atoms`.
-- **`tests/test_published_validation_freier_2016.py`** — 6-test regression: curated-parameter sanity (2), analytical noise-budget reproduction within factor 2 (2), `@pytest.mark.slow` end-to-end multi-drop simulation reproduces 96 nm/s²/√Hz within factor 3 (2). The `slow` marker is registered in `pyproject.toml`.
+- **`src/qgrav/validation/freier_2016_setup.py`** - curated GAIN parameters (T=260 ms, T_cycle=1.5 s, τ_π/2=17 µs, single-photon detuning −700 MHz, beam radius 15 mm, etc.) and the documented per-shot noise budget (technical detection σ_P=6×10⁻³, Raman-phase 40 nm/s²/shot, vibration 71 nm/s²/shot). Every value sourced verbatim in `docs/research/RESEARCH_FREIER_2016.md`.
+- **Critical research correction:** the budget reflects that GAIN is technically-limited, not projection-limited - the 96 nm/s²/√Hz is dominated by vibration + Raman-phase + technical detection noise, *not* by √N atomic projection noise (which is ~10× smaller). The simulation is driven by `detection_sigma_p` and `raman_phase_noise_rad` rather than `n_atoms`.
+- **`tests/test_published_validation_freier_2016.py`** - 6-test regression: curated-parameter sanity (2), analytical noise-budget reproduction within factor 2 (2), `@pytest.mark.slow` end-to-end multi-drop simulation reproduces 96 nm/s²/√Hz within factor 3 (2). The `slow` marker is registered in `pyproject.toml`.
 - Verified: simulated ASD ≈ 2×10⁻⁷ m/s²/√Hz vs target 9.6×10⁻⁸ (factor 2.1, residual driven by ensemble V≈0.6 vs ideal V=1 on the inversion). Every release post-v1.1 must continue to pass these tests.
 
-### Phase 16 — Hu / Ménoret / Xu / Wu published-reference regressions (resolves rest of C10)
+### Phase 16 - Hu / Ménoret / Xu / Wu published-reference regressions (resolves rest of C10)
 
 Four new curated setups, each with verbatim parameter provenance in `docs/research/`:
 
-- **`hu_2013_setup.py`** — HUST short atomic fountain (NOT the 10 m drop tower, contrary to v1.0 assumption). T=300 ms, contrast 0.15, per-effect noise budget from the HUST 2015 review (detection 3.3 µGal/√Hz + vibration 1.2 + Raman 0.8 → 3.6 in quadrature vs published 4.2 µGal/√Hz).
-- **`menoret_2018_setup.py`** — Muquans AQG-A01 Larzac campaign. T=60 ms, cycle 500 ms (2 Hz), feed-forward Raman-phase correction (NO mechanical isolation), contrast 0.40. Targets the as-operated Larzac value of 750 nm/s²/√Hz.
-- **`xu_2022_setup.py`** *(NEW 2020+ target)* — HUST-QG transportable. First HUST instrument with a published per-effect systematic budget (3 µGal combined uncertainty, 1.3 µGal ICAG equivalence).
-- **`wu_2019_setup.py`** *(NEW 2020+ target)* — Berkeley mobile gravimeter. 37 µGal/√Hz, <2 µGal in ~30 min.
+- **`hu_2013_setup.py`** - HUST short atomic fountain (NOT the 10 m drop tower, contrary to v1.0 assumption). T=300 ms, contrast 0.15, per-effect noise budget from the HUST 2015 review (detection 3.3 µGal/√Hz + vibration 1.2 + Raman 0.8 → 3.6 in quadrature vs published 4.2 µGal/√Hz).
+- **`menoret_2018_setup.py`** - Muquans AQG-A01 Larzac campaign. T=60 ms, cycle 500 ms (2 Hz), feed-forward Raman-phase correction (NO mechanical isolation), contrast 0.40. Targets the as-operated Larzac value of 750 nm/s²/√Hz.
+- **`xu_2022_setup.py`** *(NEW 2020+ target)* - HUST-QG transportable. First HUST instrument with a published per-effect systematic budget (3 µGal combined uncertainty, 1.3 µGal ICAG equivalence).
+- **`wu_2019_setup.py`** *(NEW 2020+ target)* - Berkeley mobile gravimeter. 37 µGal/√Hz, <2 µGal in ~30 min.
 
-- **`tests/test_published_validation_secondary.py`** — 12 tests: per-setup parameter-integrity (4), parametrised noise-budget reproduction (4), parametrised `@pytest.mark.slow` end-to-end simulation regressions (4). Fixed seeds per setup for order-independence. Simulation envelope is factor 4.5 (vs Freier's factor 3 for the primary target) to absorb the 1/V scaling on the mid-fringe inversion at test-ensemble contrast levels; Phase 18 will tighten this once the Bertoldi finite-τ closed form is wired in.
+- **`tests/test_published_validation_secondary.py`** - 12 tests: per-setup parameter-integrity (4), parametrised noise-budget reproduction (4), parametrised `@pytest.mark.slow` end-to-end simulation regressions (4). Fixed seeds per setup for order-independence. Simulation envelope is factor 4.5 (vs Freier's factor 3 for the primary target) to absorb the 1/V scaling on the mid-fringe inversion at test-ensemble contrast levels; Phase 18 will tighten this once the Bertoldi finite-τ closed form is wired in.
 - Cumulative: **324 tests** (306 → +18: 6 Freier + 12 secondary). All four published references now have automated regression coverage.
 
-### Phase 14 — YAML wiring for the multi-drop noise machinery (resolves C7, C8 partial)
+### Phase 14 - YAML wiring for the multi-drop noise machinery (resolves C7, C8 partial)
 
 - `run_simulation_from_config` now exposes the full Phase-15 multi-drop knob set: `detection_sigma_p`, `raman_phase_noise_rad`, `correlated_vibration`, `seismic_model`, `vibration_isolation_cutoff_hz`, `vibration_seed`, `fit_visibility`, `servo_type`, `servo_kp/ki/kd`. Each defaults to off / backward-compatible behaviour.
 - New `tests/test_yaml_multi_drop_config.py` (6 tests) verifies each knob round-trips through the YAML entrypoint and lands in the result dict.
-- 324 → **330 tests**. AC-Stark + wavefront YAML exposure for the *gravity-sweep* path is deferred to v1.2 (still accessible programmatically as before; the multi-drop noise machinery — needed for Freier 2016 — is the v1.1 priority).
+- 324 → **330 tests**. AC-Stark + wavefront YAML exposure for the *gravity-sweep* path is deferred to v1.2 (still accessible programmatically as before; the multi-drop noise machinery - needed for Freier 2016 - is the v1.1 priority).
 
-### Phase 18 — Bertoldi 2019 closed-form finite-τ correction (resolves partial C1)
+### Phase 18 - Bertoldi 2019 closed-form finite-τ correction (resolves partial C1)
 
 - **New public function `qgrav.sim_ai.bertoldi_finite_tau_scale_factor(tau_pi_half_s, interferometer_time_s)`**: returns the multiplicative finite-τ correction `1 - (2π-4)/π · (τ/T) ≈ 1 - 0.7268·η` to the MZ gravity phase, per Bertoldi, Minardi & Prevedelli, *Phys. Rev. A* 99, 033619 (2019), Eq. 21. The Cheinet 2008 / Le Gouët 2008 / Fang-Mielec 2018 / Bertoldi 2019 pulse-CENTER-to-pulse-CENTER convention for T is documented and consistent across the literature (`docs/research/RESEARCH_FINITE_TAU_FORMULAS.md`).
-- The gravity sweep result now reports **both** `empirical_phase_offset_rad` (the calibrated residual the simulation removes numerically) **and** `bertoldi_finite_tau_scale_factor` (the analytical prediction for what that residual *should* be from finite-pulse-duration physics). The calibration is no longer an unjustified workaround — it is the *empirical confirmation of an analytical prediction* from the published literature. This is the credibility upgrade C1 asked for.
+- The gravity sweep result now reports **both** `empirical_phase_offset_rad` (the calibrated residual the simulation removes numerically) **and** `bertoldi_finite_tau_scale_factor` (the analytical prediction for what that residual *should* be from finite-pulse-duration physics). The calibration is no longer an unjustified workaround - it is the *empirical confirmation of an analytical prediction* from the published literature. This is the credibility upgrade C1 asked for.
 - 7 new tests (`tests/test_bertoldi_finite_tau.py`) verify the closed form (zero-τ limit, canonical coefficient, parameter-specific values for Freier and Ménoret, error handling) and that the result dict surfaces both diagnostics. 330 → **337 tests**.
 - Note: pulse-center timing adjustment (the other Phase 18 sub-option) is deferred to v1.2 because it requires modifying the integrated-phase override; the Bertoldi predictor alone is enough to restore credibility of the calibration approach.
 
-### Phase 17 — CI / packaging scaffolding (resolves C11, JOSS hard gate)
+### Phase 17 - CI / packaging scaffolding (resolves C11, JOSS hard gate)
 
-- **`.github/workflows/test.yml`** — pytest matrix on Ubuntu + Windows × Python 3.9 / 3.11 / 3.12 with `MPLBACKEND=Agg`, runs the fast suite (`-m "not slow"`) on every push and PR.
-- **`.github/workflows/nightly.yml`** — runs the `@slow` published-reference simulation regressions (Freier + Hu + Ménoret + Xu + Wu) once per night.
-- **`.github/workflows/release.yml`** — builds wheel + sdist and publishes to PyPI via Trusted Publishing on every `v*` tag (no API token stored in this repo; the repo owner configures qgrav as a trusted publisher in their PyPI project settings before the first release).
-- **`Dockerfile` + `.dockerignore`** — minimal headless Python 3.11 container, ENTRYPOINT `qgrav`, mounts host `configs/` and `runs/` directories.
+- **`.github/workflows/test.yml`** - pytest matrix on Ubuntu + Windows × Python 3.9 / 3.11 / 3.12 with `MPLBACKEND=Agg`, runs the fast suite (`-m "not slow"`) on every push and PR.
+- **`.github/workflows/nightly.yml`** - runs the `@slow` published-reference simulation regressions (Freier + Hu + Ménoret + Xu + Wu) once per night.
+- **`.github/workflows/release.yml`** - builds wheel + sdist and publishes to PyPI via Trusted Publishing on every `v*` tag (no API token stored in this repo; the repo owner configures qgrav as a trusted publisher in their PyPI project settings before the first release).
+- **`Dockerfile` + `.dockerignore`** - minimal headless Python 3.11 container, ENTRYPOINT `qgrav`, mounts host `configs/` and `runs/` directories.
 - New `tests/test_ci_packaging.py` (7 tests) smoke-checks the workflow YAML, Dockerfile and `.dockerignore` so a typo doesn't ship.
 - 337 → **344 tests**. This phase resolves the v1.0 caveat C11 (no CI / packaging / DockerHub) and clears the JOSS hard pre-review gate that requires automated tests in CI. MkDocs site generation is deferred to v1.2 (the markdown docs in `docs/` are already structured for it).
 
@@ -277,13 +277,13 @@ Four new curated setups, each with verbatim parameter provenance in `docs/resear
 
 **Reference-registry audit release.** A full audit of all remaining registry values (Topic 13 of the internet-research brief, `docs/research/RESEARCH_REFERENCE_AUDIT.md`) found **three unit-category errors** and **two ambiguous entries** that survived v1.0.1. All are fixed. **10 new regression tests** (276 → 286 passing). The registry grew 12 → 14 entries (two mis-typed quantities were split into separate correctly-labelled keys).
 
-### Fixed — unit-category errors (a correct number tagged with the wrong physical quantity)
+### Fixed - unit-category errors (a correct number tagged with the wrong physical quantity)
 
 - **`kasevich_chu_1991_first_demo`**: value `3e-6` was tagged `m/s²/√Hz` but the Kasevich & Chu 1991 abstract reports it as a **dimensionless Δg/g resolution after 1000 s integration** (and used **sodium**, not Rb). Re-typed to `unit="dimensionless (delta_g/g at 1000 s)"`. As an ASD it would be ≈ 9e-4 m/s²/√Hz.
-- **`bidel_2018_marine`**: was `1.7e-6 m/s²/√Hz` — that number is the **0.17 mGal static measurement uncertainty** (a bias, no /√Hz), not the sensitivity. Corrected to the paper's actual static sensitivity **0.8 mGal/√Hz = 8e-6 m/s²/√Hz**. The 0.17 mGal figure is preserved in a new key `bidel_2018_marine_static_uncertainty` (1.7e-6 m/s², no /√Hz).
-- **`sg_noise_floor`**: was `1e-11 m/s²/√Hz` — that is the **1 nGal frequency-domain detectability** mislabeled as an ASD. Corrected to the true superconducting-gravimeter ASD floor **1.8e-9 m/s²/√Hz** (LSBB best site at 1 mHz, Van Camp et al. 2017) — ~100–300× higher. The 1 nGal detectability is preserved in a new key `sg_detectability_nGal` (1e-11 m/s²).
+- **`bidel_2018_marine`**: was `1.7e-6 m/s²/√Hz` - that number is the **0.17 mGal static measurement uncertainty** (a bias, no /√Hz), not the sensitivity. Corrected to the paper's actual static sensitivity **0.8 mGal/√Hz = 8e-6 m/s²/√Hz**. The 0.17 mGal figure is preserved in a new key `bidel_2018_marine_static_uncertainty` (1.7e-6 m/s², no /√Hz).
+- **`sg_noise_floor`**: was `1e-11 m/s²/√Hz` - that is the **1 nGal frequency-domain detectability** mislabeled as an ASD. Corrected to the true superconducting-gravimeter ASD floor **1.8e-9 m/s²/√Hz** (LSBB best site at 1 mHz, Van Camp et al. 2017) - ~100–300× higher. The 1 nGal detectability is preserved in a new key `sg_detectability_nGal` (1e-11 m/s²).
 
-### Fixed — ambiguous entries
+### Fixed - ambiguous entries
 
 - **`nlnm_low_freq`**: was `7e-10 m/s²/√Hz` (≈ −183 dB), ~4 dB too high. Corrected to the true NLNM acceleration-ASD minimum **4e-10 m/s²/√Hz** (−187.5 dB) at ~30–100 s period. Description now flags the strong frequency dependence.
 - **`mz_visibility`**: value `0.5` retained but **could not be verified** in the cited Peters 2001 text (paywalled figure). Re-labelled as the idealised two-output Mach–Zehnder maximum, no longer attributed to Peters 2001. (A verified real-instrument contrast is C = 0.3, Bidel et al. 2018.)
@@ -295,7 +295,7 @@ Four new curated setups, each with verbatim parameter provenance in `docs/resear
 
 ### Audit verdict (all 12 original entries checked)
 
-6 CORRECT (Freier ×3, Ménoret long-term, Peters accuracy, Hu — already fixed in v1.0.1), 3 WRONG (now fixed), 2 AMBIGUOUS (now re-labelled), plus the v1.0.1 Hu/Ménoret short-term fixes. The registry is now believed fully audited against primary sources.
+6 CORRECT (Freier ×3, Ménoret long-term, Peters accuracy, Hu - already fixed in v1.0.1), 3 WRONG (now fixed), 2 AMBIGUOUS (now re-labelled), plus the v1.0.1 Hu/Ménoret short-term fixes. The registry is now believed fully audited against primary sources.
 
 ### Version
 
@@ -342,7 +342,7 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 
 ---
 
-### Phase 1 — `GravityFreePropagator` (Tier 1a)
+### Phase 1 - `GravityFreePropagator` (Tier 1a)
 
 - New AISim propagator `GravityFreePropagator` performs exact ballistic
   kinematics under uniform gravity with optional linear gravity gradient
@@ -352,14 +352,14 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 10 new tests covering position/velocity updates, gradient, two-half-step
   equivalence, state preservation, time update.
 
-### Phase 2 — Chirped laser detuning (Tier 1b)
+### Phase 2 - Chirped laser detuning (Tier 1b)
 
 - `Wavevectors` accepts `chirp_rate_rad_per_s2` and adds `chirp_rate·t` to
   the Doppler shift, enabling cancellation of gravity-induced Doppler.
 - 5 new tests covering chirp=0 backward-compatibility, gravity-Doppler
   cancellation, dimensional consistency, linear time scaling.
 
-### Phase 3 — Gravity-enabled MZ sequence (Tier 1c)
+### Phase 3 - Gravity-enabled MZ sequence (Tier 1c)
 
 - `_run_mach_zehnder_sequence_with_gravity` runs the three-pulse MZ with
   `GravityFreePropagator` and chirped `Wavevectors`.
@@ -375,7 +375,7 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 9 new cross-validation tests verifying simulated and hybrid modes track
   the same fringe within finite-pulse-duration physics differences.
 
-### Phase 4 — Time-domain vibration noise (Tier 2a)
+### Phase 4 - Time-domain vibration noise (Tier 2a)
 
 - `generate_vibration_timeseries` produces a real acceleration time-series
   matching the Peterson NLNM/NHNM PSD, with optional second-order
@@ -384,14 +384,14 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 7 new tests for PSD shape, isolation attenuation, determinism, output
   shape, and double-integral self-consistency.
 
-### Phase 5 — Detection noise & spontaneous emission (Tier 2b)
+### Phase 5 - Detection noise & spontaneous emission (Tier 2b)
 
 - `add_detection_noise` adds Gaussian noise with σ = 1/√N_detected, clipped
   to [0, 1].
 - `spontaneous_emission_loss_probability` returns p_se = (Ω/Δ)²·τ/τ_sp.
 - 6 new tests for scaling laws, clipping, determinism, and order-of-magnitude.
 
-### Phase 6 — Multi-drop measurement cycle (Tier 3a)
+### Phase 6 - Multi-drop measurement cycle (Tier 3a)
 
 - `run_aisim_multi_drop_cycle` runs N independent drops, each with a fresh
   ensemble (seed + i), full MZ sequence, optional detection noise, optional
@@ -403,7 +403,7 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 10 new tests covering n_drops, mean accuracy, Allan-deviation arrays,
   independence, study-scope classification, and config passthrough.
 
-### Phase 7 — Fringe-locking servo (Tier 3b)
+### Phase 7 - Fringe-locking servo (Tier 3b)
 
 - `servo_integrator_step(population, phase_estimate, setpoint, gain)`
   performs one step of a digital integrator servo on the phase bias.
@@ -411,7 +411,7 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 6 new tests for sign conventions, mid-fringe lock, g-estimate
   convergence, and open-loop behaviour.
 
-### Phase 8 — AC Stark / light shift (Tier 4a)
+### Phase 8 - AC Stark / light shift (Tier 4a)
 
 - `TwoLevelTransitionPropagator` and `SpatialSuperpositionTransitionPropagator`
   gained `single_photon_detuning_hz`. When non-zero, the two-photon
@@ -420,7 +420,7 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 3 new tests for zero-detuning backward compatibility, fringe shift, and
   contrast reduction.
 
-### Phase 9 — Wavefront aberrations (Tier 4b)
+### Phase 9 - Wavefront aberrations (Tier 4b)
 
 - `_build_wavefront` constructs an AISim Wavefront from a Zernike
   coefficient dict.
@@ -430,7 +430,7 @@ than being injected via the closed-form k_eff·g·T² formula. **61 new tests**
 - 5 new tests for None backward compatibility, defocus-driven contrast
   reduction, and tilt-driven fringe shift.
 
-### Phase 10 — Truth checks
+### Phase 10 - Truth checks
 
 - `_check_gravity_sweep` now branches on `gravity_propagation`: hybrid
   mode keeps the strict analytical-phase match; simulated mode checks
@@ -453,31 +453,31 @@ Codebase audit fix release. Addresses 15 issues found in a rigorous three-pronge
 
 ### Numerical & Correctness Fixes
 
-- **`equivalent_gravity_error_m_s2`** — replaced unsafe `max(..., 1e-30)` denominator floor (which produced ~1e22 results on zero input) with proper input validation: `k_eff > 0`, `T > 0`
-- **`interpolate_psd`** — added guard against `log10(0)` / `log10(negative)` which produced -inf/nan propagation. Now raises `ValueError` for non-positive frequencies
-- **Empty tide RMS** — `apply_tide_correction` with empty arrays now returns `NaN` instead of `0.0` (semantically correct: no data ≠ zero error)
+- **`equivalent_gravity_error_m_s2`** - replaced unsafe `max(..., 1e-30)` denominator floor (which produced ~1e22 results on zero input) with proper input validation: `k_eff > 0`, `T > 0`
+- **`interpolate_psd`** - added guard against `log10(0)` / `log10(negative)` which produced -inf/nan propagation. Now raises `ValueError` for non-positive frequencies
+- **Empty tide RMS** - `apply_tide_correction` with empty arrays now returns `NaN` instead of `0.0` (semantically correct: no data ≠ zero error)
 
 ### Error Handling
 
-- **CLI error handling** — all CLI commands now wrapped in `_safe_dispatch()`: prints clean `Error (ExceptionName): message` instead of raw tracebacks. Added `--verbose / -v` flag to show full tracebacks during development
-- **Systematics errors** — promoted swallowed `logger.debug("Systematics computation skipped")` to `logger.warning` in both gravity and interferometer pipelines
-- **Array length mismatch** — interferometer pipeline now warns when input arrays have mismatched lengths before truncating
-- **Pipeline config validation** — `cfg["bench_real_gravity"]` and `cfg["bench_real_ifo"]` replaced with `.get()` + explicit `ValueError` with context (was bare `KeyError`)
+- **CLI error handling** - all CLI commands now wrapped in `_safe_dispatch()`: prints clean `Error (ExceptionName): message` instead of raw tracebacks. Added `--verbose / -v` flag to show full tracebacks during development
+- **Systematics errors** - promoted swallowed `logger.debug("Systematics computation skipped")` to `logger.warning` in both gravity and interferometer pipelines
+- **Array length mismatch** - interferometer pipeline now warns when input arrays have mismatched lengths before truncating
+- **Pipeline config validation** - `cfg["bench_real_gravity"]` and `cfg["bench_real_ifo"]` replaced with `.get()` + explicit `ValueError` with context (was bare `KeyError`)
 
 ### Robustness & Code Quality
 
-- **PSD plot guards** — all `psd["f_hz"][1:]` slicing in `_plots.py` and `visuals.py` now guarded with length checks to prevent empty loglog on tiny datasets
-- **Vendored AISim validation** — `assert shape[1] == 6` replaced with `ValueError` so validation survives `python -O`. Documented as local patch for re-vendoring
-- **`_jsonable()` extended types** — handles `np.datetime64` → str, `np.timedelta64` → float seconds (sub-second precision preserved), `np.str_`/`np.bytes_` → str. Fixed isinstance ordering for NumPy 2.x where `timedelta64` inherits from `signedinteger`
-- **Run directory uniqueness** — appended `uuid4().hex[:8]` to run_id to prevent collisions on concurrent runs within the same microsecond
-- **Dead pyplot cleanup** — removed `import matplotlib.pyplot as plt` and `plt.close("all")` from pipeline `__init__.py` (dead code after OO migration)
-- **PEP 561 marker** — added `py.typed` for typed package support
+- **PSD plot guards** - all `psd["f_hz"][1:]` slicing in `_plots.py` and `visuals.py` now guarded with length checks to prevent empty loglog on tiny datasets
+- **Vendored AISim validation** - `assert shape[1] == 6` replaced with `ValueError` so validation survives `python -O`. Documented as local patch for re-vendoring
+- **`_jsonable()` extended types** - handles `np.datetime64` → str, `np.timedelta64` → float seconds (sub-second precision preserved), `np.str_`/`np.bytes_` → str. Fixed isinstance ordering for NumPy 2.x where `timedelta64` inherits from `signedinteger`
+- **Run directory uniqueness** - appended `uuid4().hex[:8]` to run_id to prevent collisions on concurrent runs within the same microsecond
+- **Dead pyplot cleanup** - removed `import matplotlib.pyplot as plt` and `plt.close("all")` from pipeline `__init__.py` (dead code after OO migration)
+- **PEP 561 marker** - added `py.typed` for typed package support
 
 ### Test Fixes
 
-- **Allan edge-case assertion** — `assert len(result["adev"]) >= 0` (always true) → `>= 1`
-- **CLI test** — `pytest.raises(Exception)` → `pytest.raises(SystemExit)` to match `_safe_dispatch` behavior
-- **New test file:** `tests/test_audit_fixes.py` — 15 tests covering input validation, empty-data edge cases, CLI error handling, `_jsonable` extended types, PSD short-data guard, and pipeline config validation
+- **Allan edge-case assertion** - `assert len(result["adev"]) >= 0` (always true) → `>= 1`
+- **CLI test** - `pytest.raises(Exception)` → `pytest.raises(SystemExit)` to match `_safe_dispatch` behavior
+- **New test file:** `tests/test_audit_fixes.py` - 15 tests covering input validation, empty-data edge cases, CLI error handling, `_jsonable` extended types, PSD short-data guard, and pipeline config validation
 
 ### Version
 
@@ -527,8 +527,8 @@ Robustness and testing improvements. **22 new tests** (148 → 170 passing).
 ### Thread-safe Matplotlib (Phase 3.1)
 
 - **Replaced all `plt.*` global API calls with OO `Figure`/`Axes` API** across the entire pipeline package
-  - `_plots.py`: Rewritten — `Figure()` + `ax.plot()` instead of `plt.figure()` + `plt.plot()`
-  - `_simulation.py`: Rewritten — same OO pattern, removed `plt.close("all")` cleanup
+  - `_plots.py`: Rewritten - `Figure()` + `ax.plot()` instead of `plt.figure()` + `plt.plot()`
+  - `_simulation.py`: Rewritten - same OO pattern, removed `plt.close("all")` cleanup
   - `_common.py`: Removed unused `import matplotlib.pyplot as plt`
 - All plotting is now thread-safe for concurrent pipeline runs
 
@@ -564,29 +564,29 @@ Robustness and testing improvements. **22 new tests** (148 → 170 passing).
 
 ## v0.9.0 (2026-05-22)
 
-Architecture refactoring. **No new tests** in this phase — all 140 tests pass unchanged.
+Architecture refactoring. **No new tests** in this phase - all 140 tests pass unchanged.
 
 ---
 
 ### Pipeline Package (Phase 2)
 
 - **Split `pipeline.py` (933 lines) into `pipeline/` package** with 6 focused modules:
-  - `__init__.py` (44 lines) — `run_pipeline()` entry point
-  - `_common.py` (264 lines) — `RunPaths`, helpers, summary writer
-  - `_gravity.py` (259 lines) — real-gravity pipeline stage
-  - `_interferometer.py` (204 lines) — virtual/real interferometer pipeline stage
-  - `_plots.py` (172 lines) — matplotlib plot generation
-  - `_simulation.py` (77 lines) — AISim integration
+  - `__init__.py` (44 lines) - `run_pipeline()` entry point
+  - `_common.py` (264 lines) - `RunPaths`, helpers, summary writer
+  - `_gravity.py` (259 lines) - real-gravity pipeline stage
+  - `_interferometer.py` (204 lines) - virtual/real interferometer pipeline stage
+  - `_plots.py` (172 lines) - matplotlib plot generation
+  - `_simulation.py` (77 lines) - AISim integration
 - All public imports (`from qgrav.pipeline import run_pipeline`) remain unchanged
 - Internal test imports updated (`_match_taus` moved to `_common`)
 
 ### Type Definitions
 
 - Created `src/qgrav/types.py` with TypedDicts:
-  - `GravityDataset` — return type of `load_real_gravity_dataset`
-  - `AllanResult` — return type of `allan_deviation_overlapping`
-  - `PSDResult` — return type of `compute_psd`
-  - `AiSimResult` — return type of `run_aisim_*` functions
+  - `GravityDataset` - return type of `load_real_gravity_dataset`
+  - `AllanResult` - return type of `allan_deviation_overlapping`
+  - `PSDResult` - return type of `compute_psd`
+  - `AiSimResult` - return type of `run_aisim_*` functions
 
 ---
 
@@ -598,7 +598,7 @@ Critical bug fixes and licensing compliance. **6 new tests** (134 → 140 passin
 
 ### Licensing (Phase 0)
 
-- **Relicensed to GPL-3.0-or-later** — resolves incompatibility with vendored AISim (GPL-3.0) and AllanTools (LGPL-3.0)
+- **Relicensed to GPL-3.0-or-later** - resolves incompatibility with vendored AISim (GPL-3.0) and AllanTools (LGPL-3.0)
 - Created `LICENSE` file at project root with full GPL-3.0 text
 - Replaced placeholder `docs/THIRD_PARTY_LICENSES/AISim-LICENSE.txt` with actual GPL-3.0 text
 - Moved vendored AllanTools from `src/allantools/` to `src/qgrav/vendor/allantools/` for proper namespacing
@@ -607,12 +607,12 @@ Critical bug fixes and licensing compliance. **6 new tests** (134 → 140 passin
 
 ### Bug Fixes (Phase 1)
 
-- **AISim global random state**: replaced `np.random.seed()` with `np.random.default_rng()` in `atoms.py`, `dist.py`, and `beam.py` — AISim no longer mutates global NumPy random state
+- **AISim global random state**: replaced `np.random.seed()` with `np.random.default_rng()` in `atoms.py`, `dist.py`, and `beam.py` - AISim no longer mutates global NumPy random state
 - **Raw data preservation**: pipeline now saves `gravity_residual_raw`, `gravity_residual_full_raw`, and `tide_subtracted` arrays in `data.npz` when corrections are applied
 - **Raw vs corrected plot**: new `raw_vs_corrected` plot kind in `visuals.py` overlays pre- and post-correction series
-- **Gap detection tolerance**: `_gap_report` and `_select_longest_contiguous_segment` now use configurable `gap_tolerance_fraction` (default 0.1) instead of exact `dt != expected_dt_s` comparison — prevents spurious segment fragmentation from timing jitter
+- **Gap detection tolerance**: `_gap_report` and `_select_longest_contiguous_segment` now use configurable `gap_tolerance_fraction` (default 0.1) instead of exact `dt != expected_dt_s` comparison - prevents spurious segment fragmentation from timing jitter
 - **Corrections warnings**: pipeline now emits `corrections_warnings` in `metrics.json` and shows a red warning banner in the HTML report when corrections are skipped (e.g., missing station coordinates) or partially applied
-- **Pressure bounds checking**: pressure correction now validates temporal coverage before interpolation — skips correction if overlap < 50%, warns if < 95%
+- **Pressure bounds checking**: pressure correction now validates temporal coverage before interpolation - skips correction if overlap < 50%, warns if < 95%
 - **HTML autoescape**: verified and tested that Jinja2 `autoescape=True` correctly escapes `<script>` and similar payloads in config text and warnings
 
 ---
@@ -625,7 +625,7 @@ Milestone 1 of the Physics PRD: scientific foundations. Adds a physical constant
 
 ### Physical Constants Module (W1)
 
-New `src/qgrav/physics/constants.py` — single source of truth for all physical constants used across the codebase.
+New `src/qgrav/physics/constants.py` - single source of truth for all physical constants used across the codebase.
 
 - Frozen `PhysicalConstant` dataclass with `value`, `unit`, `source`, `uncertainty`, `note` fields
 - CODATA fundamentals: speed of light, Planck constant, Boltzmann constant
@@ -637,25 +637,25 @@ New `src/qgrav/physics/constants.py` — single source of truth for all physical
 
 ### Sensitivity Function Module (W2)
 
-New `src/qgrav/physics/sensitivity_function.py` — three-pulse Mach-Zehnder sensitivity function and vibration transfer function (Cheinet 2008).
+New `src/qgrav/physics/sensitivity_function.py` - three-pulse Mach-Zehnder sensitivity function and vibration transfer function (Cheinet 2008).
 
-- `sensitivity_function_time_domain(t, *, interferometer_time_s, pulse_duration_s=0)` — instantaneous and finite-pulse g_s(t)
-- `transfer_function_vibration(f_hz, ...)` — laser-phase transfer function |G(2πf)|² = 16 sin⁴(πfT) / (2πf)²
-- `acceleration_to_phase_transfer_function_sq(f_hz, *, ..., k_eff_rad_per_m)` — acceleration-to-phase |H_a|² = 16 k_eff² sin⁴(πfT) / (2πf)⁴
+- `sensitivity_function_time_domain(t, *, interferometer_time_s, pulse_duration_s=0)` - instantaneous and finite-pulse g_s(t)
+- `transfer_function_vibration(f_hz, ...)` - laser-phase transfer function |G(2πf)|² = 16 sin⁴(πfT) / (2πf)²
+- `acceleration_to_phase_transfer_function_sq(f_hz, *, ..., k_eff_rad_per_m)` - acceleration-to-phase |H_a|² = 16 k_eff² sin⁴(πfT) / (2πf)⁴
 - `integrate_vibration_noise(psd_acceleration, f_hz, ...)` → `{sigma_phi_rad, sigma_g_m_s2, sigma_g_ugal}` via trapezoidal integration
 
-New `src/qgrav/physics/_seismic_models.py` — Peterson 1993 NLNM/NHNM seismic noise floor models as (f_hz, psd) pairs with log-log interpolation.
+New `src/qgrav/physics/_seismic_models.py` - Peterson 1993 NLNM/NHNM seismic noise floor models as (f_hz, psd) pairs with log-log interpolation.
 
 ### Corrections Module (W6)
 
-New `src/qgrav/datasets/corrections.py` — tide and atmospheric pressure corrections for IGETS gravimetry data.
+New `src/qgrav/datasets/corrections.py` - tide and atmospheric pressure corrections for IGETS gravimetry data.
 
-- `detect_igets_level(data)` — heuristic from sample rate (1 Hz → L1, 1/60 Hz → L2, 1/3600 Hz → L3)
-- `apply_tide_correction(timestamps, values, *, latitude_deg, longitude_deg, backend="auto")` — PyGTide preferred, internal HW95 fallback
-- `apply_pressure_correction(timestamps, gravity, pressure, *, admittance_nm_s2_per_hpa=-3.0)` — Crossley 1995 linear admittance
+- `detect_igets_level(data)` - heuristic from sample rate (1 Hz → L1, 1/60 Hz → L2, 1/3600 Hz → L3)
+- `apply_tide_correction(timestamps, values, *, latitude_deg, longitude_deg, backend="auto")` - PyGTide preferred, internal HW95 fallback
+- `apply_pressure_correction(timestamps, gravity, pressure, *, admittance_nm_s2_per_hpa=-3.0)` - Crossley 1995 linear admittance
 - Returns corrected series plus `{backend_used, rms_subtracted_ugal}` metadata
 
-New `src/qgrav/datasets/_tides_hw95.py` — simplified 20-constituent Wenzel HW95 tidal catalogue.
+New `src/qgrav/datasets/_tides_hw95.py` - simplified 20-constituent Wenzel HW95 tidal catalogue.
 
 - Constituents: M2, S2, N2, K2, K1, O1, P1, Q1, Mf, Mm, plus 10 smaller
 - Doodson-argument computation from UTC timestamps (GMST, lunar/solar longitudes)
@@ -666,7 +666,7 @@ New `src/qgrav/datasets/_tides_hw95.py` — simplified 20-constituent Wenzel HW9
 ### ACF Noise Identification (W9)
 
 - New `identify_noise_type_acf()` in `metrics/allan.py` wrapping `allantools.ci.autocorr_noise_id`
-- Lag-1 autocorrelation method (Riley 2004) — more robust than slope-fitting for mixed noise
+- Lag-1 autocorrelation method (Riley 2004) - more robust than slope-fitting for mixed noise
 - Returns `{method, noise_type, alpha_int, alpha, d, rho, description}`
 - ACF is now the primary noise-ID method in the pipeline; legacy slope method preserved under `noise_identification.legacy_slope_method`
 
@@ -715,7 +715,7 @@ New keys under `bench_real_gravity`:
 | `apply_corrections` | bool | `false` | Enable tide + pressure correction stage |
 | `igets_level` | string | `"auto"` | Force IGETS level: auto, 1, 2, 3 |
 | `tide_backend` | string | `"auto"` | Tide model: auto, pygtide, internal_hw95 |
-| `pressure_csv_path` | string | — | Path to pressure CSV |
+| `pressure_csv_path` | string | - | Path to pressure CSV |
 | `pressure_admittance_nm_s2_per_hpa` | float | `-3.0` | Barometric admittance |
 
 ### HTML Report
@@ -760,36 +760,36 @@ Upgrade from v0.5.0 covering 22 commits across 3 tracks: stabilization, scientif
 
 | Task | Commit | Description |
 |------|--------|-------------|
-| A1 | `fbe3996` | **Fix dashboard rendering bug** — nested `for ax in axes.flat` loop in `visuals.py` shadowed the axis variable and caused premature `return`. Replaced with explicit subplot assignments. |
-| A2 | `de40cea` | **Reformat semicolon-joined lines** — split 10+ semicolon-joined matplotlib calls in `pipeline.py` plot functions onto separate lines. |
-| A3 | `6ca0cfe` | **Track dropped rows** — `real_ifo.py` CSV loader now counts rows dropped due to NaN/malformed data and stores `dropped_rows` in output dict. |
-| A4 | `1eaa825` | **Fix float tau matching** — replaced fragile `np.intersect1d` on float64 arrays with `_match_taus()` using `np.searchsorted` and relative tolerance (`rtol=1e-9`). |
-| A5 | `719e55c` | **Clean up temp configs** — GUI now tracks temporary config files in `_temp_config_paths` list and deletes them on window close via `WM_DELETE_WINDOW` protocol. |
-| A6 | `8f40a87` | **AISim license placeholder** — added `docs/THIRD_PARTY_LICENSES/AISim-LICENSE.txt` and referenced it in `AISIM_INTEGRATION.md`. |
-| A7 | `c5d54b3` | **Document R-squared asymmetry** — expanded `curve_correlation` docstring explaining R-squared is asymmetric, can be negative, and how it differs from Pearson correlation. |
-| A8 | `fc0a5e2` | **Clarify scipy dependency** — added comment in `pyproject.toml` noting scipy is only required by vendored allantools and vendor/aisim, not qgrav core. |
+| A1 | `fbe3996` | **Fix dashboard rendering bug** - nested `for ax in axes.flat` loop in `visuals.py` shadowed the axis variable and caused premature `return`. Replaced with explicit subplot assignments. |
+| A2 | `de40cea` | **Reformat semicolon-joined lines** - split 10+ semicolon-joined matplotlib calls in `pipeline.py` plot functions onto separate lines. |
+| A3 | `6ca0cfe` | **Track dropped rows** - `real_ifo.py` CSV loader now counts rows dropped due to NaN/malformed data and stores `dropped_rows` in output dict. |
+| A4 | `1eaa825` | **Fix float tau matching** - replaced fragile `np.intersect1d` on float64 arrays with `_match_taus()` using `np.searchsorted` and relative tolerance (`rtol=1e-9`). |
+| A5 | `719e55c` | **Clean up temp configs** - GUI now tracks temporary config files in `_temp_config_paths` list and deletes them on window close via `WM_DELETE_WINDOW` protocol. |
+| A6 | `8f40a87` | **AISim license placeholder** - added `docs/THIRD_PARTY_LICENSES/AISim-LICENSE.txt` and referenced it in `AISIM_INTEGRATION.md`. |
+| A7 | `c5d54b3` | **Document R-squared asymmetry** - expanded `curve_correlation` docstring explaining R-squared is asymmetric, can be negative, and how it differs from Pearson correlation. |
+| A8 | `fc0a5e2` | **Clarify scipy dependency** - added comment in `pyproject.toml` noting scipy is only required by vendored allantools and vendor/aisim, not qgrav core. |
 
 ### Track B: Scientific Validation
 
 | Task | Commit | Description |
 |------|--------|-------------|
-| B1 | `8a2296a` | **Shot-noise sensitivity function** — `shot_noise_sensitivity_m_s2_per_sqrt_hz()` implementing `1/(C * k_eff * T^2 * sqrt(N/T_cycle))` with full input validation. Also added `sensitivity_ugal_per_sqrt_hz()` wrapper. |
-| B2 | `72fd328` | **Sensitivity in AISim outputs** — all three Mach-Zehnder simulation functions (`phase_scan`, `gravity_sweep`, `vibration_sweep`) now compute and report shot-noise sensitivity using fringe visibility as contrast. |
-| B3 | `758b375` | **Noise type identification** — `identify_noise_type()` classifies Allan deviation curves via log-log slope fitting into 5 noise types (white PM, flicker PM, white FM, flicker FM, random walk FM). |
-| B4 | `5f66832` | **Noise ID in pipeline** — both pipeline paths (interferometer and real gravity) now compute noise identification and Allan minimum, storing results in `metrics.json` and `SUMMARY.md`. |
-| B5 | `758b375` | **Allan minimum finder** — `allan_minimum()` locates the optimal averaging time (tau at minimum ADEV) with index. |
-| B6 | `b403aa2` | **Systematic effects module** — new `physics/systematics.py` with `gravity_gradient_shift_m_s2()`, `coriolis_shift_m_s2()`, and `systematics_summary()`. All clearly documented as order-of-magnitude estimates not included in AISim. |
-| B7 | `38b1dc8` | **Published references module** — frozen `PublishedReference` dataclass with DOI links, `REFERENCES` registry (Freier 2016, Menoret 2018, SG noise floor, MZ visibility), and `compare_to_reference()` helper. |
+| B1 | `8a2296a` | **Shot-noise sensitivity function** - `shot_noise_sensitivity_m_s2_per_sqrt_hz()` implementing `1/(C * k_eff * T^2 * sqrt(N/T_cycle))` with full input validation. Also added `sensitivity_ugal_per_sqrt_hz()` wrapper. |
+| B2 | `72fd328` | **Sensitivity in AISim outputs** - all three Mach-Zehnder simulation functions (`phase_scan`, `gravity_sweep`, `vibration_sweep`) now compute and report shot-noise sensitivity using fringe visibility as contrast. |
+| B3 | `758b375` | **Noise type identification** - `identify_noise_type()` classifies Allan deviation curves via log-log slope fitting into 5 noise types (white PM, flicker PM, white FM, flicker FM, random walk FM). |
+| B4 | `5f66832` | **Noise ID in pipeline** - both pipeline paths (interferometer and real gravity) now compute noise identification and Allan minimum, storing results in `metrics.json` and `SUMMARY.md`. |
+| B5 | `758b375` | **Allan minimum finder** - `allan_minimum()` locates the optimal averaging time (tau at minimum ADEV) with index. |
+| B6 | `b403aa2` | **Systematic effects module** - new `physics/systematics.py` with `gravity_gradient_shift_m_s2()`, `coriolis_shift_m_s2()`, and `systematics_summary()`. All clearly documented as order-of-magnitude estimates not included in AISim. |
+| B7 | `38b1dc8` | **Published references module** - frozen `PublishedReference` dataclass with DOI links, `REFERENCES` registry (Freier 2016, Menoret 2018, SG noise floor, MZ visibility), and `compare_to_reference()` helper. |
 
 ### Track C: GUI Refactor & Infrastructure
 
 | Task | Commit | Description |
 |------|--------|-------------|
-| C1 | `f74455f` | **GUI module split** — moved `gui.py` to `gui/` package. Extracted `MetricCards` to `gui/widgets/metric_cards.py` and `ScrollableFrame` to `gui/widgets/scrollable_frame.py`. `gui/__init__.py` re-exports `QGravApp` and `main`. |
-| C2 | `0d70853` | **Allan plot noise annotation** — all 4 Allan deviation plot locations in `visuals.py` now show noise type and slope annotation via `_annotate_noise_type()`, wrapped in try/except to never break plots. |
-| C3 | `9633b22` | **Systematics in HTML report** — Jinja2 template gains a systematic effects table showing gravity gradient, Coriolis, and total in both m/s^2 and uGal. Pipeline computes systematics for both bench types. |
-| C4 | `60ece53` | **Batch processing scripts** — `scripts/batch_scan_stations.py` scans all stations and writes quality metrics to CSV. `scripts/multi_station_comparison.py` produces overlaid Allan/PSD plots with bar chart. |
-| C5 | `330cd18` | **IGETS unit format expansion** — `gravimetry.py` now recognizes `nm/s**2`, `nm s-2`, `nanometers/second**2`, `nm/s2` as valid unit variants. |
+| C1 | `f74455f` | **GUI module split** - moved `gui.py` to `gui/` package. Extracted `MetricCards` to `gui/widgets/metric_cards.py` and `ScrollableFrame` to `gui/widgets/scrollable_frame.py`. `gui/__init__.py` re-exports `QGravApp` and `main`. |
+| C2 | `0d70853` | **Allan plot noise annotation** - all 4 Allan deviation plot locations in `visuals.py` now show noise type and slope annotation via `_annotate_noise_type()`, wrapped in try/except to never break plots. |
+| C3 | `9633b22` | **Systematics in HTML report** - Jinja2 template gains a systematic effects table showing gravity gradient, Coriolis, and total in both m/s^2 and uGal. Pipeline computes systematics for both bench types. |
+| C4 | `60ece53` | **Batch processing scripts** - `scripts/batch_scan_stations.py` scans all stations and writes quality metrics to CSV. `scripts/multi_station_comparison.py` produces overlaid Allan/PSD plots with bar chart. |
+| C5 | `330cd18` | **IGETS unit format expansion** - `gravimetry.py` now recognizes `nm/s**2`, `nm s-2`, `nanometers/second**2`, `nm/s2` as valid unit variants. |
 
 ### Version Bump
 
@@ -811,7 +811,7 @@ After implementation, a comprehensive line-by-line audit was performed. Two fix 
 | 2 | `shot_noise_sensitivity` accepted `cycle_time_s <= 0` (NaN/RuntimeWarning) | Added `ValueError` for non-positive `cycle_time_s` |
 | 3 | `systematics_summary` had dead `k_eff_rad_per_m` parameter (accepted but unused) | Removed from function signature and all callers |
 | 4 | `coriolis_shift_m_s2` returned negative values for latitude > 90 degrees | Clamped latitude to [-90, 90] with `np.clip`, added `abs()` on output |
-| 5 | `_match_taus` was O(n^2) — 3.5 seconds for 5000 elements | Rewrote with `np.searchsorted` — 0.015s (230x speedup) |
+| 5 | `_match_taus` was O(n^2) - 3.5 seconds for 5000 elements | Rewrote with `np.searchsorted` - 0.015s (230x speedup) |
 | 6 | `_match_taus` allowed duplicate target matches (two sources mapping to same target) | Added `used[]` boolean array preventing duplicate assignments |
 | 7 | `_write_summary` format string `:.3f` crashed if slope key was missing | Safe float cast: `float(ni.get("slope", float("nan")))` |
 | 8 | `_annotate_noise_type` swallowed all exceptions with bare `except: pass` | Changed to `logger.debug("...", exc_info=True)` |

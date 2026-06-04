@@ -1,4 +1,4 @@
-# V1.0 Physics Upgrade — Design Reference
+# V1.0 Physics Upgrade - Design Reference
 
 This document is the design rationale, equations, and module-by-module reference for the v0.9.3 → v1.0.0 upgrade. It complements `CHANGELOG.md` (what changed) by explaining **why** each change was needed and **how** the new physics fits together.
 
@@ -16,7 +16,7 @@ final_phase_rad = phase_bias + k_eff * g * T**2
 bs2 = SpatialSuperpositionTransitionPropagator(..., phase_scan=final_phase_rad)
 ```
 
-This was honest — the report study scope was `HYBRID_AISIM_PLUS_ANALYTICAL` — but it meant the simulation could never disagree with the closed-form formula. Effects that distort the formula in a real instrument (chirp residuals during finite pulses, position-dependent AC Stark, wavefront aberrations sampled by drifting atoms, finite Rabi-frequency rotations under time-varying detuning) were inaccessible.
+This was honest - the report study scope was `HYBRID_AISIM_PLUS_ANALYTICAL` - but it meant the simulation could never disagree with the closed-form formula. Effects that distort the formula in a real instrument (chirp residuals during finite pulses, position-dependent AC Stark, wavefront aberrations sampled by drifting atoms, finite Rabi-frequency rotations under time-varying detuning) were inaccessible.
 
 v1.0 makes the gravity phase **emerge** from the propagation matrix multiplication rather than be imposed on it, while keeping the hybrid path available for fast checks and exact analytical matching.
 
@@ -30,7 +30,7 @@ A real atom gravimeter chirps its Raman laser at `α = k_eff·g` so the laser tr
 
 ## 3. Phase-by-phase implementation
 
-### 3.1 Tier 1 — Emergent gravity phase
+### 3.1 Tier 1 - Emergent gravity phase
 
 #### 3.1.1 `GravityFreePropagator` (`vendor/aisim/prop.py`)
 
@@ -52,7 +52,7 @@ class GravityFreePropagator(Propagator):
         return atoms
 ```
 
-Conventions: `g_m_s2 > 0` is downward (so `v_z` becomes more negative). The optional linear gradient `γ·(z − z_ref)` makes `g` a function of altitude. The quantum state is an identity rotation — gravity does not couple internal states during free fall.
+Conventions: `g_m_s2 > 0` is downward (so `v_z` becomes more negative). The optional linear gradient `γ·(z − z_ref)` makes `g` a function of altitude. The quantum state is an identity rotation - gravity does not couple internal states during free fall.
 
 Tests: `tests/test_gravity_propagation.py` (10 cases) verify exact ballistic kinematics, x/y invariance, gradient, additive composition (two τ/2 steps = one τ step), state preservation, time update, immutability.
 
@@ -136,7 +136,7 @@ The `+` sign (rather than `−`) is derived from `total_phase = natural(g_chirp)
 
 - `chirp_rate = -k_eff * gravity_center_m_s2`.
 - `Wavevectors(..., chirp_rate_rad_per_s2=chirp_rate)`.
-- `phase_bias_rad = π/2` when `lock_to_midfringe` (the gravity term that the hybrid path subtracts is no longer needed — the simulation handles it).
+- `phase_bias_rad = π/2` when `lock_to_midfringe` (the gravity term that the hybrid path subtracts is no longer needed - the simulation handles it).
 - `_calibrate_gravity_phase_offset` runs once before the main loop.
 - Each `g`-value calls `_run_mach_zehnder_sequence_with_gravity(...)`, which uses `GravityFreePropagator(T, g_m_s2=g, gravity_gradient_per_m=...)` between pulses.
 - `study_scope = "fully_simulated_gravity_sweep"` → category `FULLY_SIMULATED` after classification.
@@ -159,7 +159,7 @@ The cross-validation tests in `tests/test_gravity_mz_sequence.py` set the tolera
 - `test_normalized_diff_agrees`: `atol = 0.30`.
 - `test_fringe_visibility_preserved`: `|V_sim − V_hybrid| < 0.10`.
 
-### 3.2 Tier 2 — Realistic noise sources
+### 3.2 Tier 2 - Realistic noise sources
 
 #### 3.2.1 Time-domain vibration generator
 
@@ -196,7 +196,7 @@ def spontaneous_emission_loss_probability(*, rabi_freq_rad_s, single_photon_detu
 
 For Rb-87 D2 typical parameters (Ω_eff ≈ 2π·15 kHz, Δ = 1 GHz, τ = 25 μs, τ_sp = 26.24 ns) this returns ~2·10⁻⁷ per pulse, the right order of magnitude. Tests verify the scaling laws (`p_se ∝ 1/Δ²`, `p_se ∝ τ`).
 
-### 3.3 Tier 3 — Multi-drop cycle
+### 3.3 Tier 3 - Multi-drop cycle
 
 #### 3.3.1 `run_aisim_multi_drop_cycle`
 
@@ -250,7 +250,7 @@ def servo_integrator_step(*, population, phase_estimate, setpoint=0.5, gain=1.0)
 
 Simple I-only loop. The sign is negative because P₃ increases with phase on the rising slope; to drive P₃ down we lower the phase bias. The loop cannot suppress per-drop ensemble noise (each drop is uncorrelated by construction); it can suppress slow drifts that persist between drops. With detection noise disabled, the mean P₃ across drops locks to 0.5 within a few drops at `gain = 0.5`.
 
-### 3.4 Tier 4 — Advanced systematics
+### 3.4 Tier 4 - Advanced systematics
 
 #### 3.4.1 AC Stark / light shift
 
@@ -280,7 +280,7 @@ def _build_wavefront(*, wavefront_zernike_coeffs, wavefront_radius_m):
 
 In a fully simulated MZ with thermal-velocity drift between pulses, the wavefront is sampled at different `(x, y)` at each pulse, producing a real per-atom dephasing. Tests verify NaN-free behaviour for sufficient `r_wf`, no-op for empty coefficients, and a measurable visibility reduction for strong defocus + sufficient drift.
 
-### 3.5 Phase 10 — Truth checks and version bump
+### 3.5 Phase 10 - Truth checks and version bump
 
 `_check_gravity_sweep` now branches:
 
@@ -310,11 +310,11 @@ src/qgrav/
     prop.py
       Propagator                       (upstream)
       FreePropagator                   (upstream)
-      GravityFreePropagator            (v1.0 NEW) — ballistic kinematics
-      TwoLevelTransitionPropagator     (v1.0 PATCHED) — integrated laser phase, AC Stark
+      GravityFreePropagator            (v1.0 NEW) - ballistic kinematics
+      TwoLevelTransitionPropagator     (v1.0 PATCHED) - integrated laser phase, AC Stark
       SpatialSuperpositionTransitionPropagator (v1.0 PATCHED forwards AC Stark)
     beam.py
-      Wavevectors                      (v1.0 PATCHED) — chirp_rate_rad_per_s2
+      Wavevectors                      (v1.0 PATCHED) - chirp_rate_rad_per_s2
       IntensityProfile                 (upstream)
       Wavefront                        (upstream, now wired)
     __init__.py                        (v1.0 exports GravityFreePropagator)

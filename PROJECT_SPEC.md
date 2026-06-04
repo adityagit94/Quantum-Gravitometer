@@ -28,7 +28,7 @@ Accuracy metric:
 
 In hybrid mode (`gravity_propagation: false`) the AISim adapter literally evaluates this formula and feeds it as the final beamsplitter phase scan. The benchmark is therefore exact (< 1e-10 rad) and is enforced by the truth check `analytic_phase_match` in `_check_gravity_sweep`.
 
-**v1.0 — fully simulated reference:**
+**v1.0 - fully simulated reference:**
 
 When `gravity_propagation: true`, the gravity phase is no longer evaluated from a closed form. Instead it emerges from the AISim matrix-element multiplication after the patched integrated-phase formula. The new benchmark is a **cross-validation** between the two modes:
 

@@ -2,8 +2,8 @@
 
 The repository includes a **patched** vendored `aisim` package and a wrapper module:
 
-- `src/qgrav/vendor/aisim/` — vendored upstream AISim with local v1.0 physics patches
-- `src/qgrav/sim_ai/aisim_adapter.py` — high-level qgrav-side wrapper
+- `src/qgrav/vendor/aisim/` - vendored upstream AISim with local v1.0 physics patches
+- `src/qgrav/sim_ai/aisim_adapter.py` - high-level qgrav-side wrapper
 
 ## Available models
 
@@ -19,11 +19,11 @@ The repository includes a **patched** vendored `aisim` package and a wrapper mod
 
 Three local patches in the vendored AISim:
 
-1. **`GravityFreePropagator`** (`vendor/aisim/prop.py`) — new class. Performs exact ballistic kinematics under uniform gravity with optional linear gradient. Sibling of upstream `FreePropagator`. Exported through `vendor/aisim/__init__.py`.
+1. **`GravityFreePropagator`** (`vendor/aisim/prop.py`) - new class. Performs exact ballistic kinematics under uniform gravity with optional linear gradient. Sibling of upstream `FreePropagator`. Exported through `vendor/aisim/__init__.py`.
 
-2. **Chirped `Wavevectors`** (`vendor/aisim/beam.py`) — adds `chirp_rate_rad_per_s2` parameter. The `doppler_shift` method returns `-v_z*k_eff + chirp_rate*atoms.time`. For `chirp_rate=0` (the default) the function is byte-identical to upstream.
+2. **Chirped `Wavevectors`** (`vendor/aisim/beam.py`) - adds `chirp_rate_rad_per_s2` parameter. The `doppler_shift` method returns `-v_z*k_eff + chirp_rate*atoms.time`. For `chirp_rate=0` (the default) the function is byte-identical to upstream.
 
-3. **Integrated laser phase + AC Stark** in `TwoLevelTransitionPropagator._prop_matrix` (`vendor/aisim/prop.py`) — replaces `exp(-i*delta*t0)` with `exp(-i*(-k_eff*z(t0) + 0.5*chirp*t0**2))` as the laser-phase imprint at each pulse. Adds optional `single_photon_detuning_hz` for AC Stark `Ω_eff²/(4Δ)`. `SpatialSuperpositionTransitionPropagator` forwards both kwargs to the base class.
+3. **Integrated laser phase + AC Stark** in `TwoLevelTransitionPropagator._prop_matrix` (`vendor/aisim/prop.py`) - replaces `exp(-i*delta*t0)` with `exp(-i*(-k_eff*z(t0) + 0.5*chirp*t0**2))` as the laser-phase imprint at each pulse. Adds optional `single_photon_detuning_hz` for AC Stark `Ω_eff²/(4Δ)`. `SpatialSuperpositionTransitionPropagator` forwards both kwargs to the base class.
 
 For atoms at z=0 with constant velocity and zero chirp, the new imprint reduces exactly to the old `delta*t0`. The change matters only for time-varying detuning (falling atoms with a chirped laser), where the upstream formula double-counts gravity and chirp phases.
 
@@ -35,7 +35,7 @@ The vendored AISim code is derived from the upstream `aisim` package (GPL-3.0). 
 
 ## See also
 
-- `docs/V1_PHYSICS_UPGRADE.md` — full design rationale and equations for the v1.0 patches.
-- `docs/AISIM_GRAVIMETER_STUDIES.md` — scientific meaning of each AISim study.
-- `docs/SCIENTIFIC_HARDENING.md` — what is fully simulated vs hybrid.
-- `docs/ARCHITECTURE.md` — module map and dependency rules.
+- `docs/V1_PHYSICS_UPGRADE.md` - full design rationale and equations for the v1.0 patches.
+- `docs/AISIM_GRAVIMETER_STUDIES.md` - scientific meaning of each AISim study.
+- `docs/SCIENTIFIC_HARDENING.md` - what is fully simulated vs hybrid.
+- `docs/ARCHITECTURE.md` - module map and dependency rules.

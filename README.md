@@ -1,11 +1,11 @@
-# qgrav — Software-first R&D pipeline for atom-interferometric gravimetry
+# qgrav - Software-first R&D pipeline for atom-interferometric gravimetry
 
 [![Tests](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml/badge.svg)](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-> **Highlights** — a gravity phase that **emerges** from a simulated ballistic
+> **Highlights** - a gravity phase that **emerges** from a simulated ballistic
 > trajectory under a chirped Raman laser (not injected analytically);
 > **multi-drop measurement cycles** with a per-shot noise budget and a
 > fringe-lock servo that yield ASD / Allan curves like a real instrument;
@@ -15,7 +15,7 @@
 > six-tab desktop **GUI**. **378 tests, green on Python 3.11–3.12.**
 > See [CHANGELOG.md](CHANGELOG.md) and [docs/ROADMAP_V1_TO_V2.md](docs/ROADMAP_V1_TO_V2.md).
 
-**qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim) with **emergent gravity-phase physics**, a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), multi-drop measurement cycles, and an auto-generated HTML report — all driven from a single YAML config.
+**qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim) with **emergent gravity-phase physics**, a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), multi-drop measurement cycles, and an auto-generated HTML report - all driven from a single YAML config.
 
 ### What this is
 
@@ -48,7 +48,7 @@ See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.m
 
 qgrav is checked against the published literature and an independent solver, not only against itself:
 
-- **Published-instrument regressions.** The automated suite reproduces the short-term sensitivity of five transportable atom gravimeters from their documented parameters and noise budgets — **Freier 2016 (GAIN)** as the primary target, plus **Hu 2013**, **Ménoret 2018**, **Xu 2022**, and **Wu 2019** — each within its documented tolerance band. One-click reproductions ship in the GUI's **Validation** tab.
+- **Published-instrument regressions.** The automated suite reproduces the short-term sensitivity of five transportable atom gravimeters from their documented parameters and noise budgets - **Freier 2016 (GAIN)** as the primary target, plus **Hu 2013**, **Ménoret 2018**, **Xu 2022**, and **Wu 2019** - each within its documented tolerance band. One-click reproductions ship in the GUI's **Validation** tab.
 - **Independent cross-validation.** The single-pulse Raman dynamics are reproduced by an independent **QuTiP** Schrödinger integration to ~1.6×10⁻⁶, and match the closed-form Rabi solution to ~1×10⁻¹⁵.
 - **Real precision-gravity data.** The analysis chain is validated on bundled real **IGETS** superconducting-gravimeter data against the published instrument noise floor.
 - **Emergent physics.** In fully-simulated mode the `k_eff·g·T²` gravity phase emerges from first principles (ballistic free-fall + chirped laser), confirmed against the analytical result and the **Bertoldi 2019** finite-pulse closed form.
@@ -81,7 +81,7 @@ pip install -e .
 qgrav run --config configs/example.yaml
 ```
 
-This creates a timestamped folder under `runs/` — open `report.html` in your browser for the full results.
+This creates a timestamped folder under `runs/` - open `report.html` in your browser for the full results.
 
 ### More examples
 
@@ -92,10 +92,10 @@ qgrav run --config configs/example_aisim.yaml
 # AISim Mach-Zehnder phase scan
 qgrav run --config configs/example_aisim_phase_scan.yaml
 
-# AISim gravity sweep — hybrid mode (analytical gravity phase)
+# AISim gravity sweep - hybrid mode (analytical gravity phase)
 qgrav run --config configs/example_aisim_gravity_sweep.yaml
 
-# AISim gravity sweep — fully simulated (v1.0: gravity phase EMERGES from simulation)
+# AISim gravity sweep - fully simulated (v1.0: gravity phase EMERGES from simulation)
 # Add `gravity_propagation: true` to the simulation block of any AISim config.
 
 # AISim vibration sensitivity sweep
@@ -105,7 +105,7 @@ qgrav run --config configs/example_aisim_vibration_sweep.yaml
 qgrav run --config configs/example_real_gravity.yaml
 ```
 
-### Programmatic use — multi-drop measurement cycle (v1.0)
+### Programmatic use - multi-drop measurement cycle (v1.0)
 
 ```python
 from qgrav.sim_ai.aisim_adapter import run_aisim_multi_drop_cycle
@@ -177,12 +177,12 @@ runs/<name>_<timestamp>/
 - Error statistics (RMSE, MAE, bias, SNR) with baseline vs. improved comparison
 - PSD via periodogram or Welch method
 - Overlapping Allan deviation with backend cross-validation
-- **Noise type identification** — via lag-1 autocorrelation (primary, ACF) or legacy log-log slope fit
-- **Allan minimum** — optimal averaging time
-- **Shot-noise sensitivity** — `1/(C * k_eff * T^2 * sqrt(N/T_cycle))` in m/s^2/sqrt(Hz) and uGal/sqrt(Hz)
-- **Systematic effects** — gravity gradient shift, Coriolis shift (order-of-magnitude estimates)
-- **Output format version** — `qgrav_output_format_version: "1.0"` for downstream consumers
-- **Corrections metadata** — `data_product_level_at_analysis`, `corrections_applied`, `correction_metrics` (when corrections enabled)
+- **Noise type identification** - via lag-1 autocorrelation (primary, ACF) or legacy log-log slope fit
+- **Allan minimum** - optimal averaging time
+- **Shot-noise sensitivity** - `1/(C * k_eff * T^2 * sqrt(N/T_cycle))` in m/s^2/sqrt(Hz) and uGal/sqrt(Hz)
+- **Systematic effects** - gravity gradient shift, Coriolis shift (order-of-magnitude estimates)
+- **Output format version** - `qgrav_output_format_version: "1.0"` for downstream consumers
+- **Corrections metadata** - `data_product_level_at_analysis`, `corrections_applied`, `correction_metrics` (when corrections enabled)
 - Gap report (for real gravity data)
 
 ---
@@ -202,8 +202,8 @@ Available as `shot_noise_sensitivity_m_s2_per_sqrt_hz()` and `sensitivity_ugal_p
 
 Two complementary methods:
 
-- **ACF method (primary, v0.8)** — lag-1 autocorrelation (Riley 2004) applied directly to the time series. More robust for mixed noise types. Uses `allantools.ci.autocorr_noise_id`.
-- **Slope method (legacy)** — fits the log-log slope of the Allan deviation curve. Classifies into 5 standard noise types:
+- **ACF method (primary, v0.8)** - lag-1 autocorrelation (Riley 2004) applied directly to the time series. More robust for mixed noise types. Uses `allantools.ci.autocorr_noise_id`.
+- **Slope method (legacy)** - fits the log-log slope of the Allan deviation curve. Classifies into 5 standard noise types:
 
 | Slope | Noise type |
 |-------|-----------|
@@ -217,17 +217,17 @@ Both methods are stored in `metrics.json`. The ACF result is under `noise_identi
 
 ### Systematic effects
 Order-of-magnitude analytical estimates of the leading systematic shifts:
-- **Gravity gradient** — vertical free-air gradient effect during free fall
-- **Coriolis** — Earth rotation coupling with horizontal atomic velocity
+- **Gravity gradient** - vertical free-air gradient effect during free fall
+- **Coriolis** - Earth rotation coupling with horizontal atomic velocity
 
 ### Sensitivity function and vibration transfer function
 
 The three-pulse Mach-Zehnder sensitivity function g_s(t) (Cheinet 2008) quantifies how laser-phase or mirror-vibration perturbations translate into interferometer phase shift. Available functions:
 
-- `sensitivity_function_time_domain()` — time-domain g_s(t) for instantaneous or finite-duration pulses
-- `transfer_function_vibration()` — |G(2πf)|² with notches at f = n/T and 1/f² rolloff
-- `acceleration_to_phase_transfer_function_sq()` — |H_a(2πf)|² for acceleration PSD input
-- `integrate_vibration_noise()` — broadband integrator returning equivalent gravity noise σ_g
+- `sensitivity_function_time_domain()` - time-domain g_s(t) for instantaneous or finite-duration pulses
+- `transfer_function_vibration()` - |G(2πf)|² with notches at f = n/T and 1/f² rolloff
+- `acceleration_to_phase_transfer_function_sq()` - |H_a(2πf)|² for acceleration PSD input
+- `integrate_vibration_noise()` - broadband integrator returning equivalent gravity noise σ_g
 
 Built-in Peterson 1993 NLNM/NHNM seismic noise models are available as reference acceleration PSDs for vibration-limited noise budgets.
 
@@ -235,8 +235,8 @@ Built-in Peterson 1993 NLNM/NHNM seismic noise models are available as reference
 
 For IGETS Level 1 or Level 2 data, enable `apply_corrections: true` in `bench_real_gravity` to subtract:
 
-1. **Solid-earth body tide** — PyGTide (if installed) or internal 20-constituent HW95 model (~50 nGal RMS truncation error)
-2. **Atmospheric pressure loading** — linear admittance model (-3 nm/s²/hPa default, Crossley 1995)
+1. **Solid-earth body tide** - PyGTide (if installed) or internal 20-constituent HW95 model (~50 nGal RMS truncation error)
+2. **Atmospheric pressure loading** - linear admittance model (-3 nm/s²/hPa default, Crossley 1995)
 
 The pipeline auto-detects the IGETS data product level from sample rate, applies corrections before Allan/PSD computation, and records what was applied in `metrics.json`. This makes Allan deviation comparisons against published SG noise floors meaningful for un-corrected input data.
 
@@ -305,38 +305,32 @@ See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the
 ```
 qgrav/
   configs/                      # YAML pipeline configurations
-  data/raw/sg_sample/           # bundled sample station for testing
+  data/raw/sg_sample/           # bundled sample station for tests
   docs/                         # detailed documentation
+  paper/                        # JOSS paper draft
   scripts/                      # batch processing and utility scripts
   src/qgrav/
-    algorithms/                 # signal processing algorithms
+    algorithms/                 # baseline + improved signal-processing algorithms
     bench_ifo/                  # interferometer bench (virtual, real, real_gravity)
-    datasets/                   # data loaders (IGETS/GGP, CSV)
-      corrections.py            #   tide + pressure corrections (v0.8)
-      _tides_hw95.py            #   20-constituent HW95 internal tide model
-    metrics/                    # PSD, Allan deviation, noise ID (ACF + slope), error stats
-    physics/                    # phase models, sensitivity, systematics
-      constants.py              #   physical constants registry (v0.8)
-      sensitivity_function.py   #   MZ sensitivity function + vibration integrator (v0.8)
-      _seismic_models.py        #   Peterson NLNM/NHNM noise floor models (v0.8)
+    datasets/                   # IGETS/GGP + CSV loaders, tide + pressure corrections
+    metrics/                    # PSD, Allan deviation, noise ID (ACF + slope), summaries
+    physics/                    # constants, phase models, sensitivity function,
+                                # noise models, readout/servo models, systematics, sources
+    pipeline/                   # run orchestration (interferometer, gravity, plots)
     reporting/                  # HTML report generation (Jinja2)
     sim_ai/                     # AISim adapter layer
-      aisim_adapter.py          #   gravity sweep, vibration sweep, multi-drop cycle,
-                                #   calibration (v1.0), wavefront wiring (v1.0)
-    validation/                 # published references (14 entries), curve comparison
-                                # truth_checks expanded to handle simulated-gravity
-                                # and multi_drop_cycle (v1.0)
-    vendor/aisim/               # patched AISim core (v1.0)
-      prop.py                   #   GravityFreePropagator (v1.0), integrated-phase patch,
-                                #   AC Stark correction (v1.0)
-      beam.py                   #   Wavevectors with chirp_rate (v1.0)
+      aisim_adapter.py          #   Rabi, MZ, gravity sweep, multi-drop cycle, wavefront
+      _aisim_overrides.py       #   integrated-phase propagator, chirped wavevectors
+    validation/                 # published references (14 entries), per-paper setups,
+                                # QuTiP cross-check, truth checks, curve comparison
+    vendor/aisim/               # vendored AISim atom-optics core
+    vendor/allantools/          # vendored Allan-deviation statistics
     gui/                        # tkinter desktop application (6 tabs incl. Validation)
       widgets/                  # MetricCards, ScrollableFrame, Tooltip, CollapsibleSection
       app.py                    # main GUI application
-    config.py                   # YAML loading, validation (incl. corrections keys)
+    config.py                   # YAML loading + validation
     visuals.py                  # matplotlib figure builders
-    pipeline.py                 # orchestrates the full run (corrections stage, output_format_version)
-    cli.py                      # CLI entry point
+    cli.py                      # CLI entry point (run, gui, convert-ggp, validate-data)
   tests/                        # 378 tests (pytest)
 ```
 
@@ -394,7 +388,7 @@ python -m pytest -v --tb=short
 
 ## Contributing & citing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup,
+Contributions are welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup,
 the test commands, and the project's guiding principles, and
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Report bugs and request features via the
 GitHub issue templates; report vulnerabilities privately per [SECURITY.md](SECURITY.md).
