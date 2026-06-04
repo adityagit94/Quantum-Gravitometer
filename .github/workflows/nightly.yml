@@ -1,0 +1,29 @@
+name: Nightly slow tests
+
+on:
+  schedule:
+    # Run at 03:30 UTC every night.
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  slow:
+    name: Slow / published-reference regressions
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[test,qutip,benchmark]"
+      - name: Run @slow tests (Freier 2016 + Hu/Menoret/Xu/Wu)
+        run: pytest tests -q -m slow
+      - name: Run QuTiP cross-validation
+        run: pytest tests/test_qutip_crosscheck.py -q
+      - name: Run performance benchmarks
+        run: pytest tests/benchmark_aisim.py -m benchmark -q

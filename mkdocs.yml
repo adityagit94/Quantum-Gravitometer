@@ -1,0 +1,31 @@
+site_name: qgrav
+site_description: Software-first R&D platform for atom-interferometric gravimetry
+docs_dir: docs
+# Use the built-in 'readthedocs' theme so the site builds with only `mkdocs`
+# installed (no extra theme dependency required for CI).
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - User guide:
+      - Complete guide: COMPLETE_GUIDE.md
+      - Architecture: ARCHITECTURE.md
+      - Real gravity data: REAL_GRAVITY_DATA.md
+      - GUI: GUI.md
+      - Reproduction: REPRODUCTION.md
+  - Physics & validation:
+      - v1.0 physics upgrade: V1_PHYSICS_UPGRADE.md
+      - Scientific hardening: SCIENTIFIC_HARDENING.md
+      - AISim gravimeter studies: AISIM_GRAVIMETER_STUDIES.md
+      - AISim integration: AISIM_INTEGRATION.md
+      - Physics review packet: PHYSICS_REVIEW_PACKET.md
+      - Scientific-package evaluation: SCIENTIFIC_PACKAGE_EVALUATION.md
+      - Performance: PERFORMANCE.md
+  - Project:
+      - Roadmap v1→v2: ROADMAP_V1_TO_V2.md
+      - AI usage disclosure: AI_USAGE_DISCLOSURE.md
+
+# mkdocstrings (API docs from docstrings) is optional; enable when the plugin
+# is installed.  Kept out of the default plugin list so `mkdocs build` works
+# with a bare `pip install mkdocs`.

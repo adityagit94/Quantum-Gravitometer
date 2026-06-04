@@ -67,7 +67,9 @@ def test_compare_unknown_key():
 
 
 def test_compare_result_keys():
-    result = compare_to_reference("sg_noise_floor", 1e-11)
+    # v1.0.2: sg_noise_floor corrected to 1.8e-9 m/s^2/sqrt(Hz); use a value
+    # in-band so the result dict is populated normally.
+    result = compare_to_reference("sg_noise_floor", 1.8e-9)
     for k in ("key", "measured", "reference_value", "unit", "source", "within_tolerance", "deviation_pct", "tolerance_pct"):
         assert k in result
 

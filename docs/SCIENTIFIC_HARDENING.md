@@ -16,22 +16,34 @@ A research-quality simulation platform should not hide the important scientific 
 
 ## What is fully simulated and what is hybrid
 
-### Fully AISim-backed
+> **v1.0 update:** `gravity_sweep` and `vibration_sensitivity_sweep` now have an optional **fully simulated** mode via `gravity_propagation: true`. A new `multi_drop_cycle` model is also fully simulated. The legacy hybrid behaviour is still the default for backward compatibility.
+
+### Fully AISim-backed (all versions)
 - `rabi_scan`
 - `mach_zehnder_phase_scan`
 
-These use AISim directly for the atom source, pulse propagation, and measured populations.
+### Optionally fully simulated (v1.0)
+- `gravity_sweep` with `gravity_propagation: true`
+- `vibration_sensitivity_sweep` with `gravity_propagation: true`
+- `multi_drop_cycle` (always uses the emergent path when `gravity_propagation: true`)
 
-### Hybrid studies
-- `gravity_sweep`
-- `vibration_sensitivity_sweep`
+In these v1.0 modes:
+- A new **`GravityFreePropagator`** performs exact ballistic kinematics between Raman pulses.
+- A **chirped Raman laser** (`Wavevectors.chirp_rate_rad_per_s2 = −k_eff · g_center`) cancels the common gravity Doppler.
+- The locally patched `TwoLevelTransitionPropagator` uses the **integrated laser phase** `−k_eff·z(t₀) + ½·α·t₀²` instead of `δ·t₀`. The MZ combination then produces the standard `k_eff·(g − g_chirp)·T²` gravity phase from first principles.
+- A **per-sweep empirical calibration** at `g = g_chirp` removes a residual pulse-timing offset.
+- The resulting `study_scope_category` is `FULLY_SIMULATED`.
 
-These keep the AISim three-pulse sequence for pulse-transfer/contrast behavior, but inject the inertial phase analytically:
+### Hybrid studies (default)
+- `gravity_sweep` with `gravity_propagation: false` (default)
+- `vibration_sensitivity_sweep` with `gravity_propagation: false` (default)
+
+These keep the AISim three-pulse sequence for pulse-transfer/contrast behaviour, but inject the inertial phase analytically:
 
 - gravity phase: `k_eff * g * T^2`
 - vibration phase: `k_eff [z(0) - 2 z(T) + z(2T)]`
 
-This is deliberate and should be stated honestly in reports.
+This is deliberate (it is faster and reproduces the analytical formula exactly), and the HTML report still flags it as `HYBRID` with an amber-coded panel.
 
 ## Ground-truth validation
 
@@ -118,3 +130,46 @@ The HTML report renders a colour-coded panel (green for full, amber for hybrid) 
 
 ### Expanded published references
 The reference registry grew from 4 to 12 entries. Two values were corrected: `freier_2016_sensitivity` (was 5e-8, should be 9.6e-8 m/s^2/sqrt(Hz)) and `menoret_2018_accuracy` (was mislabeled 2.5e-8, the real long-term stability is 1e-8 m/s^2). The old keys remain importable via deprecation shims emitting `DeprecationWarning`. New entries include Hu 2013, Peters 2001, Kasevich & Chu 1991, Bidel 2018 marine, and Peterson NLNM.
+
+## Additions in v1.0.0
+
+### Emergent gravity physics (Tier 1)
+
+The previous-version hybrid studies imposed the gravity phase analytically through `k_eff * g * T^2`. v1.0 removes that limitation. With `gravity_propagation: true`, the gravity phase **emerges** from a self-consistent semiclassical simulation:
+
+1. **`GravityFreePropagator`** (`vendor/aisim/prop.py`) replaces `FreePropagator` between Raman pulses. Exact ballistic kinematics: `z(t+dt) = z + v_z·dt − ½g·dt²`, `v_z(t+dt) = v_z − g·dt`. An optional linear gradient `γ·(z − z_ref)` is supported.
+
+2. **Chirped Raman laser** (`vendor/aisim/beam.py`): `Wavevectors` accepts `chirp_rate_rad_per_s2`. The chirp `α = −k_eff · gravity_center_m_s2` cancels the common gravity-induced Doppler so atoms remain near Raman resonance throughout the fall.
+
+3. **Integrated-phase patch** (`vendor/aisim/prop.py`): the upstream `TwoLevelTransitionPropagator._prop_matrix` uses `exp(−i·δ·t₀)` for the imprinted laser phase. This double-counts gravity and chirp when the detuning is time-varying. The local patch replaces it with the physically correct `exp(−i·(−k_eff·z(t₀) + ½·α·t₀²))`. For atoms at z=0 with constant velocity and zero chirp this reduces exactly to the upstream formula; only the time-varying-detuning case is changed.
+
+4. **Per-sweep empirical calibration** (`_calibrate_gravity_phase_offset`): at `g = g_chirp`, the analytical gravity phase vanishes. Any residual fringe shift is therefore a numerical artefact of finite-duration pulses. The calibration runs one fringe scan at `g = g_chirp`, fits a sinusoid, and subtracts the peak phase from every subsequent run in that sweep. Cost: O(1) per sweep, no per-drop overhead.
+
+The MZ phase in the fully simulated mode comes out as `k_eff · (g − g_chirp) · T²`, matching the standard atom-interferometry result, with a remaining ~atol=0.15 population mismatch versus the hybrid mode arising from finite-pulse-duration physics that the hybrid mode does not model.
+
+### Multi-drop cycle (Tier 3)
+
+The `multi_drop_cycle` study simulates an N-drop gravimeter measurement campaign. Each drop:
+
+- creates a **fresh** atom ensemble (`seed = base_seed + i + 1`),
+- runs a full MZ sequence with the calibrated phase offset,
+- optionally adds detection noise (σ = 1/√N_detected),
+- inverts the mid-fringe linearisation to obtain a gravity estimate,
+- optionally updates a digital integrator servo for the next drop.
+
+Overlapping Allan deviation is computed across octave averaging windows. A truth check verifies `|mean(g) − g_true| < 1e-5 m/s²`, `len(g_estimates) == n_drops`, monotonic timestamps, and that Allan deviation either decreases with τ (white noise) or holds within a 1.2× slack (random walk).
+
+### Advanced systematics (Tier 4)
+
+- **AC Stark / light shift** (`single_photon_detuning_hz` on `TwoLevelTransitionPropagator`): adds `Ω_eff² / (4Δ)` to the two-photon detuning. Because `Ω_eff(r)` depends on the atom's distance from the beam axis through the Gaussian profile, the AC Stark contribution is position-dependent and reduces ensemble contrast as well as shifting the fringe centre.
+
+- **Wavefront aberrations** (`_build_wavefront`): the upstream AISim `Wavefront` class is now wired through `_run_mach_zehnder_sequence`. Wavefront imprints add a position-dependent phase at each pulse; for atoms with non-trivial xy thermal velocity the wavefront sampled at successive pulses differs, producing a real per-atom dephasing that reduces visibility.
+
+### Truth-check evolution
+
+`_check_gravity_sweep` now branches on `gravity_propagation`:
+
+- **hybrid** (default): preserves the strict checks `analytic_phase_match < 1e-10 rad` and `phase_linearity ≥ 0.999999`.
+- **simulated** (v1.0): replaces those with `fringe_visibility > 0.3` and `study_scope_fully_simulated` (the scope category must contain `FULLY` or `SIMULATED`).
+
+New `_check_multi_drop_cycle` validates the multi-drop study output: array-length consistency, finite estimates, monotonic timestamps, mean-close-to-true-gravity (`< 1e-5 m/s²`), Allan-deviation array consistency, and decreasing Allan deviation (with a small slack for finite-N statistical fluctuation).
