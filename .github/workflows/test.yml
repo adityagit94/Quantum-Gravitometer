@@ -16,8 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        # Match qgrav's stated requires-python (>=3.9) — sample three versions.
-        python: ["3.9", "3.11", "3.12"]
+        # Match qgrav's requires-python (>=3.10). The vendored AISim uses
+        # match/case (3.10+), so 3.9 is not supported.
+        python: ["3.10", "3.11", "3.12"]
     env:
       MPLBACKEND: Agg  # headless matplotlib for fringe-scan tests
     steps:

@@ -66,6 +66,10 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
   `src/qgrav/vendor/ATTRIBUTION.md` (AISim GPL-3.0, allantools LGPL-3.0).
 - **README:** status/license/python/CI badges, a Contributing & citing section,
   and the test-count corrected (371 → 378).
+- **Python floor raised to 3.10.** The first CI run revealed the vendored AISim
+  (`vendor/aisim/zern.py`) uses `match`/`case` (3.10+), so Python 3.9 was never
+  actually supported. `requires-python`, classifiers, the CI matrix, README
+  badge, and docs now state `>=3.10` (CI tests 3.10/3.11/3.12).
 
 ---
 

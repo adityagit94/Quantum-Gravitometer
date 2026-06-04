@@ -34,7 +34,7 @@ ruff check . && black --check .
 ```
 
 Use type hints where practical, and `from __future__ import annotations` in
-modules that use `X | Y` syntax (the project supports Python 3.9+).
+modules that use `X | Y` syntax (the project supports Python 3.10+).
 
 ## Guiding principles
 
