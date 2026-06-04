@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml/badge.svg)](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 > **v1.2–v1.3 hardening highlights** (on top of the v1.1 published-reference
@@ -37,7 +37,7 @@
 
 See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.md` for the v1.0 emergent-physics design, and `CHANGELOG.md` for the v0.9 → v1.0 changes.
 
-**Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.10
+**Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.11
 
 ---
 

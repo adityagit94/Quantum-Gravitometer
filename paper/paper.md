@@ -81,7 +81,7 @@ quantum-sensing R&D.
   independent numerical integration; real superconducting-gravimeter data
   ingest (IGETS) for the analysis chain.
 - **Pipeline.** Single-YAML configuration, versioned run folders, HTML reports,
-  CI (Linux + Windows × Python 3.10–3.12), and a Docker image.
+  CI (Linux + Windows × Python 3.11–3.12), and a Docker image.
 
 # AI-assistance disclosure
 
