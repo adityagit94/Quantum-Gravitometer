@@ -6,13 +6,13 @@ This stage restructures the gravimeter simulation code so that the physics and v
 
 A research-quality simulation platform should not hide the important scientific assumptions inside one large adapter or pipeline function. The simulation layer is now separated into explicit pieces:
 
-- `src/qgrav/physics/atom_source.py` — source and detector description
-- `src/qgrav/physics/pulse_sequence.py` — Rabi and Mach–Zehnder sequence helpers
-- `src/qgrav/physics/phase_models.py` — gravity and vibration phase models
-- `src/qgrav/physics/noise_models.py` — reusable stochastic perturbation functions
-- `src/qgrav/physics/readout_models.py` — population/readout helpers
-- `src/qgrav/physics/ground_truth.py` — reference relationships used for truth checking
-- `src/qgrav/validation/truth_checks.py` — per-study pass/fail checks
+- `src/qgrav/physics/atom_source.py` - source and detector description
+- `src/qgrav/physics/pulse_sequence.py` - Rabi and Mach–Zehnder sequence helpers
+- `src/qgrav/physics/phase_models.py` - gravity and vibration phase models
+- `src/qgrav/physics/noise_models.py` - reusable stochastic perturbation functions
+- `src/qgrav/physics/readout_models.py` - population/readout helpers
+- `src/qgrav/physics/ground_truth.py` - reference relationships used for truth checking
+- `src/qgrav/validation/truth_checks.py` - per-study pass/fail checks
 
 ## What is fully simulated and what is hybrid
 
@@ -122,9 +122,9 @@ New `identify_noise_type_acf()` in `metrics/allan.py` wraps `allantools.ci.autoc
 ### Study scope labels
 Every `run_aisim_*()` function now returns a `study_scope_category` and `study_scope_description` in its result dictionary. Categories are:
 
-- `FULLY_SIMULATED` — Rabi scan, Mach-Zehnder phase scan (all physics from AISim)
-- `HYBRID_AISIM_PLUS_ANALYTICAL` — gravity sweep, vibration sweep (AISim for pulse transfer + analytical inertial phase)
-- `ANALYTICAL_ONLY` — reserved for future pure-analytical studies
+- `FULLY_SIMULATED` - Rabi scan, Mach-Zehnder phase scan (all physics from AISim)
+- `HYBRID_AISIM_PLUS_ANALYTICAL` - gravity sweep, vibration sweep (AISim for pulse transfer + analytical inertial phase)
+- `ANALYTICAL_ONLY` - reserved for future pure-analytical studies
 
 The HTML report renders a colour-coded panel (green for full, amber for hybrid) above each simulation block. This replaces the previous informal text convention with a machine-readable enum enforced by tests.
 

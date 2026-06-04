@@ -1,4 +1,4 @@
-# Physics Review Packet — qgrav v1.0 AISim Patches
+# Physics Review Packet - qgrav v1.0 AISim Patches
 
 **Document version**: 1.0
 **Code version**: qgrav 1.0.0
@@ -14,9 +14,9 @@
 2. [Quick-start reference frame](#2-quick-start-reference-frame)
 3. [The upstream AISim model](#3-the-upstream-aisim-model)
 4. [The problem with `δ·t₀` for time-varying detuning](#4-the-problem-with-δt-for-time-varying-detuning)
-5. [Patch A — `GravityFreePropagator` (new class)](#5-patch-a--gravityfreepropagator-new-class)
-6. [Patch B — chirped `Wavevectors`](#6-patch-b--chirped-wavevectors)
-7. [Patch C — integrated laser phase in `TwoLevelTransitionPropagator`](#7-patch-c--integrated-laser-phase-in-twoleveltransitionpropagator)
+5. [Patch A - `GravityFreePropagator` (new class)](#5-patch-a--gravityfreepropagator-new-class)
+6. [Patch B - chirped `Wavevectors`](#6-patch-b--chirped-wavevectors)
+7. [Patch C - integrated laser phase in `TwoLevelTransitionPropagator`](#7-patch-c--integrated-laser-phase-in-twoleveltransitionpropagator)
 8. [The empirical calibration step](#8-the-empirical-calibration-step)
 9. [Cross-validation results](#9-cross-validation-results)
 10. [Known finite-τ residuals](#10-known-finite-τ-residuals)
@@ -143,7 +143,7 @@ The **physically meaningful** quantity for the matrix element `u_eg` is the inte
               = −k_eff · ( z(t₀) − z(0) ) + ½ · α · t₀².
 ```
 
-We adopt `z(0) = 0` for the atom's reference position (any constant `z(0)` cancels in a closed MZ loop — see §4.3 invariant 2). Then:
+We adopt `z(0) = 0` for the atom's reference position (any constant `z(0)` cancels in a closed MZ loop - see §4.3 invariant 2). Then:
 
 ```
 φ_imprint(t₀) = −k_eff · z(t₀) + ½ · α · t₀².          (3)
@@ -230,10 +230,10 @@ We ran a single-atom diagnostic (`vz = 0`, `z₀ = 0`, T = 0.26 s, g = 9.81 m/s�
 | `dg` (µg) | Hybrid peak phi (rad) | Simulated peak phi (pre-patch, rad) | Ratio sim/hybrid |
 |-----------|----------------------:|------------------------------------:|-----------------:|
 | −2 | 2.18 | (out of cycle, ~5π) | ~2.5× |
-| 0 | 0.00 | 2.53 (constant offset) | — |
+| 0 | 0.00 | 2.53 (constant offset) | - |
 | +2 | −2.18 | (out of cycle, ~5π) | ~2.5× |
 
-Pre-patch, with the upstream `δ·t₀` formula, the simulated fringe oscillated 2.5–3× faster than the analytical hybrid fringe — consistent with the factor-of-2 prediction plus a τ-related residual.
+Pre-patch, with the upstream `δ·t₀` formula, the simulated fringe oscillated 2.5–3× faster than the analytical hybrid fringe - consistent with the factor-of-2 prediction plus a τ-related residual.
 
 Post-patch (with equation 3 applied):
 
@@ -248,7 +248,7 @@ The simulated and hybrid fringe rates match to 0.2%. A constant ~2.5 rad offset 
 
 ---
 
-## 5. Patch A — `GravityFreePropagator` (new class)
+## 5. Patch A - `GravityFreePropagator` (new class)
 
 ### 5.1 Code (verbatim)
 
@@ -293,7 +293,7 @@ class GravityFreePropagator(Propagator):
 ### 5.2 Physical content
 
 - Sign convention: `g_m_s2 > 0` is downward. An atom released at rest accelerates to `v_z = −g · t` (becoming more negative).
-- Linear gradient: `g(z) = g₀ + γ·(z − z_ref)`. For γ > 0, gravity *increases* with altitude relative to `z_ref` — which is non-physical for the Earth (real free-air gradient is −3.086 × 10⁻⁶ s⁻². Users supply the sign they want.
+- Linear gradient: `g(z) = g₀ + γ·(z − z_ref)`. For γ > 0, gravity *increases* with altitude relative to `z_ref` - which is non-physical for the Earth (real free-air gradient is −3.086 × 10⁻⁶ s⁻². Users supply the sign they want.
 - Quantum matrix is the identity, so internal states are unchanged. This is the *exact* result for free fall in absence of laser interaction (a uniform gravitational potential adds a global phase to each internal state but doesn't mix them).
 
 ### 5.3 Tests
@@ -321,7 +321,7 @@ All 10 pass.
 
 ---
 
-## 6. Patch B — chirped `Wavevectors`
+## 6. Patch B - chirped `Wavevectors`
 
 ### 6.1 Code (verbatim)
 
@@ -374,7 +374,7 @@ See questions B.1–B.2 in §11.
 
 ---
 
-## 7. Patch C — integrated laser phase in `TwoLevelTransitionPropagator`
+## 7. Patch C - integrated laser phase in `TwoLevelTransitionPropagator`
 
 ### 7.1 Code (verbatim, diff format)
 
@@ -407,7 +407,7 @@ Patched (full new context):
 
     u_eg = np.exp(-1j * (imprint_phase + phase)) * -1j * sin_theta * np.sin(Omega_R*tau/2)
     u_ge = np.exp(+1j * (imprint_phase + phase)) * -1j * sin_theta * np.sin(Omega_R*tau/2)
-    # (The Omega_R · τ/2 and exp(-iδ·τ/2) factors are unchanged — those are
+    # (The Omega_R · τ/2 and exp(-iδ·τ/2) factors are unchanged - those are
     # the rotating-frame pulse-duration corrections, not the imprint.)
 ```
 
@@ -524,7 +524,7 @@ Since the offset is (a) gravity-independent, (b) reproducible to <1e-3 rad acros
 
 ### 8.5 The honest interpretation
 
-The offset is a real numerical artefact of how AISim discretises the Raman pulse (a single `_prop_matrix` evaluation at `atoms.time` for a finite-duration `τ` pulse). A "true" first-principles simulation would sub-step inside the pulse with infinitesimal time steps and integrate `δ(t)·dt` properly through the τ window. Our calibration is therefore not strictly wrong — it cancels a discretisation artefact in the existing AISim machinery — but it *is* an empirical removal of a numerical residual rather than a physics derivation.
+The offset is a real numerical artefact of how AISim discretises the Raman pulse (a single `_prop_matrix` evaluation at `atoms.time` for a finite-duration `τ` pulse). A "true" first-principles simulation would sub-step inside the pulse with infinitesimal time steps and integrate `δ(t)·dt` properly through the τ window. Our calibration is therefore not strictly wrong - it cancels a discretisation artefact in the existing AISim machinery - but it *is* an empirical removal of a numerical residual rather than a physics derivation.
 
 ### 8.6 Reviewer asks for the calibration
 
@@ -615,7 +615,7 @@ After the integrated-phase patch and the empirical calibration, three residual e
 
 ### 10.1 Velocity at pulse center vs pulse start
 
-In `_prop_matrix`, `Omega_R = √(Ω_eff² + δ²)` uses `δ = δ(atoms.time)`, evaluated at pulse start. For a falling atom, the velocity changes by `g · τ ≈ 2.5 mm/s` per τ. The two-photon detuning therefore drifts by `k_eff · g · τ ≈ 4 kHz` during the pulse — small compared to Ω_eff but not zero. This slightly distorts the rotation angle `Ω_R · τ/2` compared to a strictly constant-δ pulse.
+In `_prop_matrix`, `Omega_R = √(Ω_eff² + δ²)` uses `δ = δ(atoms.time)`, evaluated at pulse start. For a falling atom, the velocity changes by `g · τ ≈ 2.5 mm/s` per τ. The two-photon detuning therefore drifts by `k_eff · g · τ ≈ 4 kHz` during the pulse - small compared to Ω_eff but not zero. This slightly distorts the rotation angle `Ω_R · τ/2` compared to a strictly constant-δ pulse.
 
 The hybrid mode (which uses `FreePropagator`, no velocity change) is not affected by this. The simulated mode is. **This is a real physical effect** captured by the simulated mode and ignored by the hybrid mode.
 
@@ -627,7 +627,7 @@ Same idea: the chirp `α·t` grows by `α·τ ≈ −4 kHz` during τ. The hybri
 
 Atoms drift in xy during the free-evolution intervals. After T = 260 ms with thermal velocity ~10 mm/s, x and y shift by ~2.6 mm. If the beam radius is ~15 mm, the position-dependent Ω_eff changes by a few percent across pulses, broadening the rotation-angle distribution within the ensemble.
 
-This is the same in hybrid and simulated modes (both call the same `IntensityProfile`), but the **z**-drift (which differs between modes — hybrid: no z change; simulated: atoms fall by `½gT²·n` per period) does not affect Ω_eff because the beam profile is xy-only.
+This is the same in hybrid and simulated modes (both call the same `IntensityProfile`), but the **z**-drift (which differs between modes - hybrid: no z change; simulated: atoms fall by `½gT²·n` per period) does not affect Ω_eff because the beam profile is xy-only.
 
 ### 10.4 Net effect
 
@@ -644,18 +644,18 @@ A future Tier-5 patch could:
 
 Please answer **yes / no / unclear / needs more info** for each, with a 1–3 sentence justification.
 
-### Patch A — `GravityFreePropagator`
+### Patch A - `GravityFreePropagator`
 
 - **A.1** Is the sign convention `g_m_s2 > 0 → downward` and `v_z -= g·dt` correct (i.e., a positive `g_m_s2` causes a stationary atom to gain *negative* `v_z` and reach *negative* `z`)?
 - **A.2** Is the linear-gradient formula `g(z) = g₀ + γ·(z − z_ref)` the right form for a small altitude variation around `z_ref`, and is the sign of γ free for the user to set (i.e., we don't impose Earth's `γ < 0` convention)?
 - **A.3** Is it physically correct that the quantum state is unchanged (identity matrix) during gravity free-fall, in the standard semiclassical atom-interferometer treatment?
 
-### Patch B — chirped `Wavevectors`
+### Patch B - chirped `Wavevectors`
 
 - **B.1** Is `δ(t) = −v·k_eff + α·t` the correct two-photon detuning in the rotating frame of the laser when the laser is chirped at rate α (in rad/s²)?
 - **B.2** Is `α = −k_eff · g_chirp` (with the negative sign) the correct choice to cancel the gravity-induced Doppler shift of a falling atom in our sign convention?
 
-### Patch C — integrated laser phase
+### Patch C - integrated laser phase
 
 - **C.1** Is equation (3) `φ_imprint(t₀) = −k_eff · z(t₀) + ½ · α · t₀²` the correct expression for the laser phase imprinted on a |g⟩→|e⟩ Raman transition at time `t₀`, in the rotating frame of the laser, assuming the atom's reference position is at `z = 0` when `t = 0`?
 - **C.2** Is the factor of 1/2 in the chirp term `½ · α · t₀²` correct (i.e., it is the time integral of the linear chirp `α·t` from 0 to `t₀`)?

@@ -2,7 +2,7 @@
 
 Background research compiled by the user (Aditya Prakash) per the research brief in `docs/INTERNET_RESEARCH_PROMPT.md`. Each file in this folder corresponds to one of the 14 research topics in that brief.
 
-## Index — Topics 1–9 (researched, May 2026)
+## Index - Topics 1–9 (researched, May 2026)
 
 | # | Topic | File | Used by phase |
 |---|-------|------|---------------|
@@ -16,14 +16,14 @@ Background research compiled by the user (Aditya Prakash) per the research brief
 | 8 | Real-instrument and public data sources | [`RESEARCH_REAL_DATA_SOURCES.md`](RESEARCH_REAL_DATA_SOURCES.md) | v2.0 hardware integration |
 | 9 | Finite-τ pulse-timing corrections | [`RESEARCH_FINITE_TAU.md`](RESEARCH_FINITE_TAU.md) | Phase 18 (eliminate empirical calibration) |
 
-## Index — Topics 10–11 (researched, May 2026 — second batch)
+## Index - Topics 10–11 (researched, May 2026 - second batch)
 
 | # | Topic | File | Used by phase |
 |---|-------|------|---------------|
 | 10 | Atom-interferometry expert contacts (for review packet) | [`RESEARCH_REVIEWER_CONTACTS.md`](RESEARCH_REVIEWER_CONTACTS.md) | Physics-review distribution (user-owned) |
 | 11 | Hardware vendor specifications | [`RESEARCH_HARDWARE_VENDORS.md`](RESEARCH_HARDWARE_VENDORS.md) | v2.0 hardware integration |
 
-## Index — Topics 12, 13, 14 (researched, May 2026 — third/final batch)
+## Index - Topics 12, 13, 14 (researched, May 2026 - third/final batch)
 
 | # | Topic | File | Used by phase |
 |---|-------|------|---------------|

@@ -1,4 +1,4 @@
-# qgrav — The Complete Guide
+# qgrav - The Complete Guide
 
 **Quantum Gravimeter R&D Platform v1.2.3**
 
@@ -8,7 +8,7 @@
 **License:** GPL-3.0
 
 > **Reader's note (v1.2):** sections 1–15 below describe the v0.8 base feature
-> set and remain accurate — those workflows are unchanged. The v1.0–v1.2
+> set and remain accurate - those workflows are unchanged. The v1.0–v1.2
 > capabilities (emergent-gravity simulation, multi-drop cycle with servo &
 > correlated noise, AC Stark, wavefront aberrations, published-reference
 > validation, QuTiP cross-check, performance harness) are summarised in
@@ -23,11 +23,11 @@
 ## Table of Contents
 
 1. [What Is This Software?](#1-what-is-this-software)
-2. [The Science — Explained Simply](#2-the-science--explained-simply)
+2. [The Science - Explained Simply](#2-the-science--explained-simply)
 3. [Installation](#3-installation)
-4. [Quick Start — Your First Run in 2 Minutes](#4-quick-start--your-first-run-in-2-minutes)
+4. [Quick Start - Your First Run in 2 Minutes](#4-quick-start--your-first-run-in-2-minutes)
 5. [The Three Modes of Operation](#5-the-three-modes-of-operation)
-6. [The GUI — Screen by Screen](#6-the-gui--screen-by-screen)
+6. [The GUI - Screen by Screen](#6-the-gui--screen-by-screen)
 7. [The Command Line Interface](#7-the-command-line-interface)
 8. [Configuration Reference](#8-configuration-reference)
 9. [Understanding the Output](#9-understanding-the-output)
@@ -42,7 +42,7 @@
 
 ## 1. What Is This Software?
 
-qgrav is a desktop research platform that lets you **design, simulate, and validate quantum gravity sensors** — entirely in software, before you ever build hardware.
+qgrav is a desktop research platform that lets you **design, simulate, and validate quantum gravity sensors** - entirely in software, before you ever build hardware.
 
 It answers questions like:
 
@@ -68,22 +68,22 @@ You configure everything in a single YAML file (or through the GUI), click "Run 
 
 ---
 
-## 2. The Science — Explained Simply
+## 2. The Science - Explained Simply
 
 ### What Is Gravity Measurement?
 
-Gravity — the force that keeps you on the ground — is not perfectly uniform across Earth's surface. It varies by tiny amounts depending on what is underground (rock, water, oil, voids), your altitude, tides, and even nearby buildings.
+Gravity - the force that keeps you on the ground - is not perfectly uniform across Earth's surface. It varies by tiny amounts depending on what is underground (rock, water, oil, voids), your altitude, tides, and even nearby buildings.
 
 Measuring these tiny variations is called **gravimetry**. It matters for:
 
-- **Mineral and oil exploration** — dense deposits change local gravity
-- **Earthquake and volcano monitoring** — mass movement underground shifts gravity
-- **Navigation** — submarines use gravity maps when GPS is unavailable
-- **Fundamental physics** — testing whether gravity behaves as Einstein predicted
+- **Mineral and oil exploration** - dense deposits change local gravity
+- **Earthquake and volcano monitoring** - mass movement underground shifts gravity
+- **Navigation** - submarines use gravity maps when GPS is unavailable
+- **Fundamental physics** - testing whether gravity behaves as Einstein predicted
 
 The variations we care about are incredibly small. We measure them in **microGals** (µGal), where:
 
-> **1 µGal = 0.00000001 m/s²** — about one ten-billionth of the gravity you feel standing up.
+> **1 µGal = 0.00000001 m/s²** - about one ten-billionth of the gravity you feel standing up.
 
 ### How Do Atom Interferometers Measure Gravity?
 
@@ -91,22 +91,22 @@ Traditional gravimeters use springs or superconducting spheres. Atom interferome
 
 Here is the idea, step by step:
 
-**Step 1 — Cool the atoms.**  
-A cloud of about 1,000 rubidium-87 atoms is cooled to microkelvin temperatures (millionths of a degree above absolute zero). At this temperature, atoms behave more like waves than particles — a quantum mechanical effect.
+**Step 1 - Cool the atoms.**  
+A cloud of about 1,000 rubidium-87 atoms is cooled to microkelvin temperatures (millionths of a degree above absolute zero). At this temperature, atoms behave more like waves than particles - a quantum mechanical effect.
 
-**Step 2 — Split the wave.**  
-A precisely timed laser pulse (called a **π/2 pulse**, lasting about 23 microseconds) puts each atom into a **superposition** — it simultaneously travels along two different paths. Think of it like splitting a beam of light with a half-mirror, except with matter.
+**Step 2 - Split the wave.**  
+A precisely timed laser pulse (called a **π/2 pulse**, lasting about 23 microseconds) puts each atom into a **superposition** - it simultaneously travels along two different paths. Think of it like splitting a beam of light with a half-mirror, except with matter.
 
-> **Superposition** means the atom is in two states at once. It is not "half here, half there" — it is genuinely in both places simultaneously until you measure it. This is the core weirdness of quantum mechanics, and also what makes the measurement so sensitive.
+> **Superposition** means the atom is in two states at once. It is not "half here, half there" - it is genuinely in both places simultaneously until you measure it. This is the core weirdness of quantum mechanics, and also what makes the measurement so sensitive.
 
-**Step 3 — Let them fall.**  
-For about 260 milliseconds (a quarter of a second), the two paths of each atom fall freely under gravity. During this time, gravity accelerates the atoms, and each path accumulates a different quantum **phase** — a kind of internal clock tick.
+**Step 3 - Let them fall.**  
+For about 260 milliseconds (a quarter of a second), the two paths of each atom fall freely under gravity. During this time, gravity accelerates the atoms, and each path accumulates a different quantum **phase** - a kind of internal clock tick.
 
-**Step 4 — Recombine.**  
-A second laser pulse (a **π pulse** — the mirror) redirects the paths, and a third pulse (another π/2 pulse) recombines them. The atoms interfere with themselves — just like light waves creating bright and dark fringes.
+**Step 4 - Recombine.**  
+A second laser pulse (a **π pulse** - the mirror) redirects the paths, and a third pulse (another π/2 pulse) recombines them. The atoms interfere with themselves - just like light waves creating bright and dark fringes.
 
-**Step 5 — Count.**  
-You count how many atoms end up in each output port. The ratio depends on the **phase difference** between the two paths — and that phase difference is directly proportional to gravity:
+**Step 5 - Count.**  
+You count how many atoms end up in each output port. The ratio depends on the **phase difference** between the two paths - and that phase difference is directly proportional to gravity:
 
 ```
 Phase difference = k_eff × g × T²
@@ -117,13 +117,13 @@ Where:
 - **g** is gravitational acceleration (~9.81 m/s²)
 - **T** is the free-fall time (0.26 seconds in our default setup)
 
-This three-pulse sequence is called a **Mach-Zehnder interferometer** — named after the optical interferometer it resembles, not the physicist Ernst Mach (well, actually, it is named after him — the same Mach from "Mach number").
+This three-pulse sequence is called a **Mach-Zehnder interferometer** - named after the optical interferometer it resembles, not the physicist Ernst Mach (well, actually, it is named after him - the same Mach from "Mach number").
 
 ### What Is a Virtual Interferometer?
 
 Before building an atom interferometer (which costs millions and takes years), you want to know: will my design work? How sensitive will it be? What noise sources will dominate?
 
-qgrav's **virtual interferometer** generates synthetic measurement data — fake but physically realistic I/Q signals (in-phase and quadrature) with configurable:
+qgrav's **virtual interferometer** generates synthetic measurement data - fake but physically realistic I/Q signals (in-phase and quadrature) with configurable:
 
 - Displacement signals (nanometer-scale sine waves)
 - Measurement noise
@@ -136,9 +136,9 @@ This lets you test your signal processing algorithms against a known truth. If y
 
 A superconducting gravimeter (SG) is the current gold standard for continuous gravity monitoring. It levitates a small niobium sphere in a magnetic field produced by superconducting coils. Changes in gravity change the sphere's position, which is measured with extreme precision.
 
-SGs achieve noise floors below 1 nanoGal/√Hz — better than any atom interferometer built so far. The qgrav platform lets you analyze real SG data (in GGP format) and compare its noise characteristics against your proposed atom interferometer design.
+SGs achieve noise floors below 1 nanoGal/√Hz - better than any atom interferometer built so far. The qgrav platform lets you analyze real SG data (in GGP format) and compare its noise characteristics against your proposed atom interferometer design.
 
-> **GGP** stands for Global Geodynamics Project format — a standard text format for sharing gravity measurements between observatories worldwide.
+> **GGP** stands for Global Geodynamics Project format - a standard text format for sharing gravity measurements between observatories worldwide.
 
 ---
 
@@ -189,7 +189,7 @@ Quantum gravimeter R&D platform
 
 ---
 
-## 4. Quick Start — Your First Run in 2 Minutes
+## 4. Quick Start - Your First Run in 2 Minutes
 
 ### Option A: The GUI (Recommended for Beginners)
 
@@ -197,7 +197,7 @@ Quantum gravimeter R&D platform
 qgrav gui
 ```
 
-This opens the **qgrav Research Workbench** — a desktop application. It loads a default virtual interferometer example automatically. Click **"Run Pipeline"** in the top toolbar.
+This opens the **qgrav Research Workbench** - a desktop application. It loads a default virtual interferometer example automatically. Click **"Run Pipeline"** in the top toolbar.
 
 Within a few seconds, you will see:
 
@@ -226,13 +226,13 @@ Open `report.html` in your browser for the full interactive report.
 qgrav run --config configs/example_aisim_gravity_sweep.yaml
 ```
 
-This runs a full atom interferometer simulation: creates 600 virtual atoms, runs them through a three-pulse Mach-Zehnder sequence, sweeps gravity across 61 points, and tells you exactly how sensitive your design would be — in µGal/√Hz.
+This runs a full atom interferometer simulation: creates 600 virtual atoms, runs them through a three-pulse Mach-Zehnder sequence, sweeps gravity across 61 points, and tells you exactly how sensitive your design would be - in µGal/√Hz.
 
 ---
 
 ## 5. The Three Modes of Operation
 
-qgrav has three bench types — three different sources of data that feed into the analysis pipeline.
+qgrav has three bench types - three different sources of data that feed into the analysis pipeline.
 
 ### Mode 1: Virtual Interferometer (`bench.type: virtual`)
 
@@ -244,7 +244,7 @@ qgrav has three bench types — three different sources of data that feed into t
 - Quick experiments without any real data
 
 **How it works:**
-You define displacement signals as a stack of sine waves (e.g., "4 nanometers at 3 Hz plus 2 nanometers at 21 Hz"). The simulator converts these into I/Q quadrature signals — the same kind of signals a real optical interferometer produces — and adds realistic noise, DC offset drift, and amplitude drift.
+You define displacement signals as a stack of sine waves (e.g., "4 nanometers at 3 Hz plus 2 nanometers at 21 Hz"). The simulator converts these into I/Q quadrature signals - the same kind of signals a real optical interferometer produces - and adds realistic noise, DC offset drift, and amplitude drift.
 
 Two algorithms then try to recover the original displacement:
 - **Baseline:** Simple arctangent demodulation with global offset subtraction
@@ -252,7 +252,7 @@ Two algorithms then try to recover the original displacement:
 
 The pipeline compares both algorithms against the known truth and reports RMSE, MAE, SNR, and bias.
 
-> **I/Q signals:** In an optical interferometer, you split a laser beam and recombine it. The output intensity depends on the path difference (displacement). By using two detectors 90° apart, you get two signals — I (in-phase, proportional to cosine of the phase) and Q (quadrature, proportional to sine). Together, they let you unambiguously extract the phase, even through multiple rotations.
+> **I/Q signals:** In an optical interferometer, you split a laser beam and recombine it. The output intensity depends on the path difference (displacement). By using two detectors 90° apart, you get two signals - I (in-phase, proportional to cosine of the phase) and Q (quadrature, proportional to sine). Together, they let you unambiguously extract the phase, even through multiple rotations.
 
 ### Mode 2: Real Interferometer (`bench.type: real`)
 
@@ -283,7 +283,7 @@ The pipeline automatically handles data gaps, identifies the longest contiguous 
 
 ---
 
-## 6. The GUI — Screen by Screen
+## 6. The GUI - Screen by Screen
 
 Launch the GUI with:
 
@@ -306,7 +306,7 @@ Across the top of the window, you will find:
 | **Validate** | Checks the YAML in the editor for structural errors without running anything |
 | **Save As** | Saves the current editor content to a new YAML file |
 | **Examples** | Dropdown with 7 pre-built example configs you can load instantly |
-| **Run Pipeline** | The main action button — runs the full pipeline on the current config |
+| **Run Pipeline** | The main action button - runs the full pipeline on the current config |
 | **Progress bar** | Animates while a pipeline run is in progress |
 | **Metric cards** | After a run, shows key numbers: RMSE, SNR, Allan minimum, etc. |
 
@@ -314,7 +314,7 @@ Across the top of the window, you will find:
 
 This is where you configure your experiment through visual controls instead of editing YAML.
 
-**Start Here — Workflow Selector**
+**Start Here - Workflow Selector**
 
 Choose one of three workflows:
 
@@ -324,7 +324,7 @@ Choose one of three workflows:
 | `synthetic` | AISim simulation controls, atom parameters | Running atom interferometer simulations |
 | `advanced` | All controls visible, direct YAML editing | Power users who want full control |
 
-The interface hides irrelevant controls based on your workflow choice. If you pick `real_data`, you will not see atom count or pulse duration fields — they do not apply.
+The interface hides irrelevant controls based on your workflow choice. If you pick `real_data`, you will not see atom count or pulse duration fields - they do not apply.
 
 **Analysis Settings**
 
@@ -353,19 +353,19 @@ The interface hides irrelevant controls based on your workflow choice. If you pi
 | Study model | Which simulation to run: `rabi_scan`, `mach_zehnder_phase_scan`, `gravity_sweep`, `multi_drop_cycle`, or `vibration_sensitivity_sweep` (see Section 10) |
 | Atoms | Number of atoms in the simulated cloud (more = less noise, slower) |
 | π/2 pulse duration | How long each beam-splitter pulse lasts (seconds) |
-| Interferometer T | Free-fall time between pulses — the most important sensitivity parameter |
+| Interferometer T | Free-fall time between pulses - the most important sensitivity parameter |
 | Gravity center | The gravity value to simulate around (9.81 m/s² for Earth) |
 | Gravity span | How wide a range of gravity to sweep (in m/s²) |
 
 Two collapsible sections (collapsed by default) expose the full physics surface.
 Every field shows a hover tooltip explaining it:
 
-- **Advanced physics** — random seed, single-photon (Raman) detuning, gravity
+- **Advanced physics** - random seed, single-photon (Raman) detuning, gravity
   propagation (the ballistic + chirped-laser "emergent gravity" path),
   lock-to-mid-fringe, gravity gradient, and a Zernike wavefront (coefficients +
   radius). These apply to `mach_zehnder_phase_scan`, `gravity_sweep`, and
   `multi_drop_cycle`.
-- **Multi-drop noise budget & servo** (for `multi_drop_cycle`) — drops per cycle,
+- **Multi-drop noise budget & servo** (for `multi_drop_cycle`) - drops per cycle,
   cycle time, true *g*, detection σ_p, Raman/vibration phase noise, correlated
   seismic vibration (Peterson NLNM/NHNM) with an isolation cut-off, fringe-
   visibility fitting, and a fringe-lock servo (`integrator` or full `pid`).
@@ -384,9 +384,9 @@ can still be set directly in the **Config Editor** tab.
 
 **Right Side**
 
-- **Recommended next steps** — contextual guidance based on your workflow
-- **Run summary** — after a run, shows the text summary (SUMMARY.md content)
-- **Live run log** — real-time messages during pipeline execution
+- **Recommended next steps** - contextual guidance based on your workflow
+- **Run summary** - after a run, shows the text summary (SUMMARY.md content)
+- **Live run log** - real-time messages during pipeline execution
 
 ### Tab 2: Data Browser
 
@@ -395,16 +395,16 @@ This tab lets you explore gravity datasets before committing to a full pipeline 
 **How to use it:**
 
 1. Enter or browse to a data source (a directory of `.ggp` files, a `.zip` archive, or click "Use sample" for the bundled example)
-2. Click **Scan** — the left panel populates with all stations found, showing station code, longitude, and latitude
-3. Click a station in the list — details appear below (sample count, time span, gap report)
-4. Click **Preview selected** — the right panel shows a quick time-series plot and histogram for data quality inspection
+2. Click **Scan** - the left panel populates with all stations found, showing station code, longitude, and latitude
+3. Click a station in the list - details appear below (sample count, time span, gap report)
+4. Click **Preview selected** - the right panel shows a quick time-series plot and histogram for data quality inspection
 5. If the data looks good, click **Use in Setup** or **Create config** to generate a ready-to-run YAML configuration
 
 This workflow prevents you from running a 30-minute pipeline on bad data. Always preview first.
 
 ### Tab 3: Config Editor
 
-A full-featured YAML text editor. This is the ground truth for what the pipeline actually runs — every control in the Setup tab just modifies this YAML.
+A full-featured YAML text editor. This is the ground truth for what the pipeline actually runs - every control in the Setup tab just modifies this YAML.
 
 You can:
 - Edit any config key directly
@@ -418,7 +418,7 @@ If you are comfortable with YAML, this is the fastest way to work.
 
 After a pipeline run completes, this tab shows everything:
 
-**Left Panel — Metrics Browser**
+**Left Panel - Metrics Browser**
 
 A tree view showing every computed metric. For a virtual run, this includes:
 - Error statistics (RMSE, MAE, SNR, bias) for both baseline and improved algorithms
@@ -434,7 +434,7 @@ For a gravity run:
 
 Quick-access buttons: **Open HTML** (interactive report), **Run folder**, **Metrics JSON** (raw data), **Summary** (text report).
 
-**Right Panel — Interactive Visuals**
+**Right Panel - Interactive Visuals**
 
 A plot selector dropdown with all available plot types:
 
@@ -450,9 +450,9 @@ A plot selector dropdown with all available plot types:
 | `error_hist` | Error distribution histogram | Virtual (with truth) |
 | Simulation plots | Model-specific (Rabi curves, fringes, etc.) | AISim runs |
 
-Every plot is interactive — you can zoom, pan, and save using the matplotlib toolbar below the plot.
+Every plot is interactive - you can zoom, pan, and save using the matplotlib toolbar below the plot.
 
-**Bottom — Run Log**
+**Bottom - Run Log**
 
 A detailed text log of everything that happened during the run: configuration loaded, data generated, algorithms applied, metrics computed, files saved.
 
@@ -461,11 +461,11 @@ A detailed text log of everything that happened during the run: configuration lo
 This tab connects the simulation to the published literature and to an
 independent solver.
 
-**Published reference library** — the registry of measured values from
+**Published reference library** - the registry of measured values from
 published atom-gravimeter papers that the automated regression suite checks
 against. Click any row to see its description, source, tolerance band, and DOI.
 
-**Reproduce a published measurement (one click)** — a table of five reference
+**Reproduce a published measurement (one click)** - a table of five reference
 instruments (Freier 2016, Hu 2013, Ménoret 2018, Xu 2022, Wu 2019). For each it
 shows the paper's published short-term ASD, qgrav's predicted ASD, the ratio,
 and whether it is within the documented band. Select a paper, optionally raise
@@ -473,7 +473,7 @@ the atom count for fidelity, then **Load into editor** or **Load & Run** to
 build and execute a `multi_drop_cycle` config from that paper's parameters and
 noise budget. Freier 2016 is the primary regression target.
 
-**Independent cross-check (QuTiP)** — recomputes the single Raman-pulse dynamics
+**Independent cross-check (QuTiP)** - recomputes the single Raman-pulse dynamics
 a different way and reports the disagreement with qgrav's closed-form matrix.
 *AISim vs analytic* needs no extra packages (expect ~1e-15); *Full QuTiP
 cross-check* integrates the Schrödinger equation independently
@@ -502,7 +502,7 @@ the performance notes, the roadmap, and the changelog).
 
 qgrav provides three CLI commands:
 
-### `qgrav run` — Run a Pipeline
+### `qgrav run` - Run a Pipeline
 
 ```bash
 qgrav run --config path/to/config.yaml
@@ -510,14 +510,14 @@ qgrav run --config path/to/config.yaml
 
 Runs the full pipeline (data generation or loading → algorithms → metrics → plots → report) and prints the output path. All plots are saved to disk as PNGs, and the interactive report is generated as HTML.
 
-### `qgrav gui` — Launch the Desktop Application
+### `qgrav gui` - Launch the Desktop Application
 
 ```bash
 qgrav gui                                    # Opens with default example
 qgrav gui --config configs/example.yaml      # Opens with a specific config pre-loaded
 ```
 
-### `qgrav convert-ggp` — Convert Gravity Data
+### `qgrav convert-ggp` - Convert Gravity Data
 
 ```bash
 qgrav convert-ggp --source data/raw/sg_sample --out output.csv --station ap046
@@ -597,20 +597,20 @@ stats:
 
 ### Section-by-Section Reference
 
-#### `output` — Where Results Go
+#### `output` - Where Results Go
 
 | Key | Type | Description |
 |-----|------|-------------|
 | `runs_dir` | string | Base directory for run output folders. Default: `runs` |
 | `name` | string | Human-readable name. Used in the folder name: `{name}_{timestamp}/` |
 
-#### `bench` — Data Source Selection
+#### `bench` - Data Source Selection
 
 | Key | Values | Description |
 |-----|--------|-------------|
 | `type` | `virtual`, `real`, `real_gravity` | Which data source to use |
 
-#### `bench_virtual_ifo` — Synthetic Interferometer
+#### `bench_virtual_ifo` - Synthetic Interferometer
 
 *Required when `bench.type: virtual`*
 
@@ -635,7 +635,7 @@ Each entry in `displacement_sines`:
 | `freq_hz` | float | Oscillation frequency | `3.0` Hz |
 | `phase_rad` | float | Initial phase offset in radians | `0.0` |
 
-#### `bench_real_ifo` — Real Interferometer CSV
+#### `bench_real_ifo` - Real Interferometer CSV
 
 *Required when `bench.type: real`*
 
@@ -649,7 +649,7 @@ Each entry in `displacement_sines`:
 
 CSV must contain columns: `I_meas`, `Q_meas`. Optional: `t` (time), `x_true` (ground truth).
 
-#### `bench_real_gravity` — Gravimetry Data
+#### `bench_real_gravity` - Gravimetry Data
 
 *Required when `bench.type: real_gravity`*
 
@@ -665,7 +665,7 @@ CSV must contain columns: `I_meas`, `Q_meas`. Optional: `t` (time), `x_true` (gr
 | `pressure_csv_path` | string | Path to co-located pressure CSV (columns: `unix_seconds`, `pressure_hpa`) |
 | `pressure_admittance_nm_s2_per_hpa` | float | Barometric admittance (default: `-3.0`) |
 
-#### `algorithms` — Signal Processing
+#### `algorithms` - Signal Processing
 
 *Used only for virtual and real interferometer modes*
 
@@ -674,7 +674,7 @@ CSV must contain columns: `I_meas`, `Q_meas`. Optional: `t` (time), `x_true` (gr
 | `improved.offset_tracking_alpha` | float | EWMA smoothing factor for DC tracking. Lower = smoother. | `0.003` |
 | `improved.phase_smooth_window` | int | Moving average window for phase smoothing (must be odd) | `21` |
 
-#### `stats` — Metrics Configuration
+#### `stats` - Metrics Configuration
 
 | Key | Values | Description |
 |-----|--------|-------------|
@@ -686,7 +686,7 @@ CSV must contain columns: `I_meas`, `Q_meas`. Optional: `t` (time), `x_true` (gr
 | `compare_allan_backends` | bool | Run both backends and cross-check |
 | `comparison_backend` | string | Which backend is the secondary one |
 
-#### `simulation` — Atom Interferometer Studies
+#### `simulation` - Atom Interferometer Studies
 
 | Key | Type | Description |
 |-----|------|-------------|
@@ -789,7 +789,7 @@ Individual plot images (PNG) for use in papers, presentations, or reports.
 
 ## 10. The Simulation Engine (AISim)
 
-qgrav includes a vendored copy of **AISim** — an atom interferometer simulator that models individual atoms as quantum mechanical wave packets.
+qgrav includes a vendored copy of **AISim** - an atom interferometer simulator that models individual atoms as quantum mechanical wave packets.
 
 ### Study Model 1: Rabi Scan (`rabi_scan`)
 
@@ -797,7 +797,7 @@ qgrav includes a vendored copy of **AISim** — an atom interferometer simulator
 
 **Why it matters:** Before you can run an interferometer, you need to know your pulse parameters. A Rabi scan tells you: "At what pulse duration does my atom flip from ground to excited state?" This calibrates the π/2 and π pulse times that the interferometer needs.
 
-**What you see:** An oscillating curve (Rabi oscillations) — population swinging between 0% and 100% as pulse duration increases. The first peak tells you the π pulse time.
+**What you see:** An oscillating curve (Rabi oscillations) - population swinging between 0% and 100% as pulse duration increases. The first peak tells you the π pulse time.
 
 **Key parameters:**
 
@@ -812,7 +812,7 @@ qgrav includes a vendored copy of **AISim** — an atom interferometer simulator
 
 **What it does:** Runs the full three-pulse interferometer sequence while sweeping an artificial phase offset from 0 to 2π.
 
-**Why it matters:** This measures your **fringe visibility** (contrast) — how cleanly you can distinguish constructive from destructive interference. Higher visibility = better sensitivity. Real-world effects (atom temperature, beam quality, timing errors) reduce visibility.
+**Why it matters:** This measures your **fringe visibility** (contrast) - how cleanly you can distinguish constructive from destructive interference. Higher visibility = better sensitivity. Real-world effects (atom temperature, beam quality, timing errors) reduce visibility.
 
 **What you see:** A sinusoidal fringe pattern. The amplitude of the sine tells you the contrast (ideally 1.0, realistically 0.7–0.9). The pipeline fits a sine curve and reports visibility and fit quality.
 
@@ -829,7 +829,7 @@ qgrav includes a vendored copy of **AISim** — an atom interferometer simulator
 
 **What it does:** Combines AISim's atom-optics simulation with analytical gravity phase to answer: "If gravity changes by X µGal, how does my atom interferometer's output change?"
 
-**Why it matters:** This is the core gravimeter question. The output tells you your **gravity sensitivity** — how small a gravity change you can detect. This is the number you would put in a research paper.
+**Why it matters:** This is the core gravimeter question. The output tells you your **gravity sensitivity** - how small a gravity change you can detect. This is the number you would put in a research paper.
 
 **How it works:**
 
@@ -856,7 +856,7 @@ qgrav includes a vendored copy of **AISim** — an atom interferometer simulator
 
 **What it does:** Simulates a vibrating reference mirror and measures how much the vibration corrupts the gravity measurement.
 
-**Why it matters:** Real labs have vibrations — from traffic, HVAC systems, earthquakes, even people walking. This study tells you: "If my mirror vibrates at frequency f with amplitude A, what equivalent gravity error does that create?"
+**Why it matters:** Real labs have vibrations - from traffic, HVAC systems, earthquakes, even people walking. This study tells you: "If my mirror vibrates at frequency f with amplitude A, what equivalent gravity error does that create?"
 
 **The physics:**
 
@@ -866,7 +866,7 @@ The three-pulse interferometer samples the mirror position at three times: t=0, 
 Phase_vibration = k_eff × [z(0) - 2×z(T) + z(2T)]
 ```
 
-This is a second-difference operation — the same operation a digital accelerometer performs. It makes the interferometer sensitive to mirror acceleration, not position or velocity.
+This is a second-difference operation - the same operation a digital accelerometer performs. It makes the interferometer sensitive to mirror acceleration, not position or velocity.
 
 **Key parameters:**
 
@@ -883,7 +883,7 @@ This is a second-difference operation — the same operation a digital accelerom
 three-pulse interferometer is run for many successive drops with a realistic
 per-shot noise budget and an optional fringe-lock servo, producing a gravity
 time series from which the pipeline computes an amplitude spectral density (ASD)
-and Allan deviation — the same observables real transportable gravimeters report.
+and Allan deviation - the same observables real transportable gravimeters report.
 
 **Why it matters:** This is the **fully simulated** path. The recovered *g*
 emerges from the microscopic atom-optics (with `gravity_propagation: true`,
@@ -902,7 +902,7 @@ phase formula. It is what the Validation tab's one-click reproductions drive.
 | `fit_visibility` | Fit contrast and use it in the P→g inversion | `true` |
 | `servo_enabled` / `servo_type` | Fringe-lock loop (`integrator` or `pid`) | `true` / `integrator` |
 
-The short-term sensitivity is set by the noise budget, not the atom number — but
+The short-term sensitivity is set by the noise budget, not the atom number - but
 too few atoms raises the 1/√N projection-noise floor and can swamp the budget,
 so a faithful reproduction uses several thousand atoms.
 
@@ -927,13 +927,13 @@ Imagine you take gravity readings every second. If you average 10 readings toget
 
 Allan deviation answers this. You plot it on a log-log scale:
 
-- **X-axis:** Averaging time τ (tau) — from one sample period to a large fraction of total measurement time
-- **Y-axis:** Allan deviation σ(τ) — the typical fluctuation at that averaging time
+- **X-axis:** Averaging time τ (tau) - from one sample period to a large fraction of total measurement time
+- **Y-axis:** Allan deviation σ(τ) - the typical fluctuation at that averaging time
 
 **What to look for:**
 
 - The curve should decrease as τ increases (averaging helps)
-- It reaches a **minimum** — the optimal averaging time for your sensor
+- It reaches a **minimum** - the optimal averaging time for your sensor
 - After the minimum, it may increase again (due to long-term drift)
 
 The **minimum Allan deviation** is one of the most important numbers. It tells you the best stability your sensor can achieve.
@@ -950,20 +950,20 @@ qgrav uses two complementary methods to identify the dominant noise type:
 |-------|-----------|---------|
 | −1.0 | White phase noise | Random, uncorrelated measurement errors |
 | −0.75 | Flicker phase noise | Low-frequency measurement fluctuations |
-| −0.5 | White frequency noise | Random walk in phase — ideal sensor behavior |
+| −0.5 | White frequency noise | Random walk in phase - ideal sensor behavior |
 | −0.25 | Flicker frequency noise | Low-frequency instability |
-| +0.5 | Random walk frequency | Long-term drift — sensor is wandering |
+| +0.5 | Random walk frequency | Long-term drift - sensor is wandering |
 
 The slope result is preserved in `metrics.json` under `noise_identification.legacy_slope_method` for cross-checking.
 
-**White frequency noise (slope = −0.5)** is the best case for a gravimeter — it means your noise is purely statistical and averages down as expected.
+**White frequency noise (slope = −0.5)** is the best case for a gravimeter - it means your noise is purely statistical and averages down as expected.
 
 ### Power Spectral Density (PSD)
 
 **What it is:** Shows how noise power is distributed across frequencies.
 
-- **X-axis:** Frequency (Hz) — from very slow variations to half the sample rate
-- **Y-axis:** Power density (m²/Hz or equivalent) — how much noise at each frequency
+- **X-axis:** Frequency (Hz) - from very slow variations to half the sample rate
+- **Y-axis:** Power density (m²/Hz or equivalent) - how much noise at each frequency
 
 **What to look for:**
 
@@ -985,15 +985,15 @@ The fundamental quantum limit on your gravity measurement:
 
 | Symbol | Meaning |
 |--------|---------|
-| C | Fringe visibility (0 to 1) — higher is better |
+| C | Fringe visibility (0 to 1) - higher is better |
 | k_eff | Effective wave vector (~16 million rad/m) |
 | T | Free-fall time between pulses |
 | N | Number of atoms per shot |
 | T_cycle | Total time per measurement cycle |
 
 Reported in two units:
-- **m/s²/√Hz** — SI standard
-- **µGal/√Hz** — practical unit (1 µGal = 10⁻⁸ m/s²)
+- **m/s²/√Hz** - SI standard
+- **µGal/√Hz** - practical unit (1 µGal = 10⁻⁸ m/s²)
 
 Typical values for a well-designed atom gravimeter: 0.1–10 µGal/√Hz.
 
@@ -1005,7 +1005,7 @@ Order-of-magnitude estimates for two major error sources:
 
 **Coriolis force:** Earth's rotation causes a sideways force on falling atoms. Depends on latitude and atomic velocity. Effect: 1–10 µGal.
 
-These are estimates — the actual values depend on your specific setup.
+These are estimates - the actual values depend on your specific setup.
 
 ### Sensitivity Function and Vibration Noise Budget (v0.8)
 
@@ -1013,10 +1013,10 @@ The Mach-Zehnder sensitivity function g_s(t) (Cheinet 2008) quantifies how laser
 
 Available functions in `qgrav.physics.sensitivity_function`:
 
-- `sensitivity_function_time_domain(t, *, interferometer_time_s, pulse_duration_s=0)` — returns g_s(t): -1 on [0,T], +1 on [T,2T] for instantaneous pulses, or continuous ramps for finite-duration pulses.
-- `transfer_function_vibration(f_hz, ...)` — returns |G(2pif)|^2. Has notches at f = n/T (the interferometer is blind to vibrations at these frequencies) and rolls off as 1/f^2 above 1/T.
-- `acceleration_to_phase_transfer_function_sq(f_hz, *, ..., k_eff_rad_per_m)` — converts acceleration PSD to phase variance: |H_a|^2 = 16 k_eff^2 sin^4(pi f T) / (2 pi f)^4.
-- `integrate_vibration_noise(psd, f_hz, ...)` — integrates an acceleration PSD against the transfer function and returns the equivalent gravity noise in m/s^2 and uGal.
+- `sensitivity_function_time_domain(t, *, interferometer_time_s, pulse_duration_s=0)` - returns g_s(t): -1 on [0,T], +1 on [T,2T] for instantaneous pulses, or continuous ramps for finite-duration pulses.
+- `transfer_function_vibration(f_hz, ...)` - returns |G(2pif)|^2. Has notches at f = n/T (the interferometer is blind to vibrations at these frequencies) and rolls off as 1/f^2 above 1/T.
+- `acceleration_to_phase_transfer_function_sq(f_hz, *, ..., k_eff_rad_per_m)` - converts acceleration PSD to phase variance: |H_a|^2 = 16 k_eff^2 sin^4(pi f T) / (2 pi f)^4.
+- `integrate_vibration_noise(psd, f_hz, ...)` - integrates an acceleration PSD against the transfer function and returns the equivalent gravity noise in m/s^2 and uGal.
 
 Built-in Peterson 1993 NLNM/NHNM seismic noise models (`interpolate_psd(f, model="nlnm")`) provide reference acceleration PSDs for estimating vibration-limited performance at quiet and noisy sites.
 
@@ -1024,8 +1024,8 @@ Built-in Peterson 1993 NLNM/NHNM seismic noise models (`interpolate_psd(f, model
 
 For real gravity data at IGETS Level 1 or Level 2, enable `apply_corrections: true` to subtract:
 
-1. **Solid-earth body tide** — using PyGTide (if installed) or the internal 20-constituent HW95 model
-2. **Atmospheric pressure loading** — linear admittance model (-3 nm/s^2/hPa, Crossley 1995)
+1. **Solid-earth body tide** - using PyGTide (if installed) or the internal 20-constituent HW95 model
+2. **Atmospheric pressure loading** - linear admittance model (-3 nm/s^2/hPa, Crossley 1995)
 
 Without these corrections, the Allan deviation is dominated by the ~100 uGal body-tide signal rather than instrument noise. See the `bench_real_gravity` configuration keys in Section 8 for details.
 
@@ -1037,8 +1037,8 @@ Without these corrections, the Allan deviation is dominated by the ~100 uGal bod
 
 qgrav ships with a sample dataset in `data/raw/sg_sample/`:
 
-- `ap046.ggp` — Real gravity data from station AP046
-- `SG station.txt` — Metadata file listing station code, longitude, and latitude
+- `ap046.ggp` - Real gravity data from station AP046
+- `SG station.txt` - Metadata file listing station code, longitude, and latitude
 
 ### Using Your Own Data
 
@@ -1056,7 +1056,7 @@ Each value is a gravity residual. The pipeline auto-detects the sample rate from
 
 #### ZIP Archives
 
-Many data repositories distribute GGP data as ZIP files. Point `source_path` directly to the `.zip` file — qgrav will extract and parse it automatically, including searching for the `SG station.txt` metadata file inside.
+Many data repositories distribute GGP data as ZIP files. Point `source_path` directly to the `.zip` file - qgrav will extract and parse it automatically, including searching for the `SG station.txt` metadata file inside.
 
 #### CSV Files
 
@@ -1093,7 +1093,7 @@ src/qgrav/
 ├── __init__.py              Version string (0.8.0)
 ├── cli.py                   Command-line interface (3 commands)
 ├── config.py                YAML loading, validation (incl. corrections keys)
-├── pipeline.py              Main orchestrator — corrections stage, output_format_version
+├── pipeline.py              Main orchestrator - corrections stage, output_format_version
 │
 ├── bench_ifo/               Data source layer
 │   ├── virtual_ifo.py       Synthetic I/Q signal generator
@@ -1210,7 +1210,7 @@ The YAML editor is empty or contains invalid YAML. Load a config file first (use
 Some dependencies (especially those using C extensions) may not have wheels for Python 3.13+. If you encounter build errors, use Python 3.12:
 
 ```bash
-# Windows — specify Python version explicitly
+# Windows - specify Python version explicitly
 py -3.12 -m venv .venv
 ```
 
@@ -1241,33 +1241,33 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 | **Contrast / Visibility** | How well the interferometer distinguishes between constructive and destructive interference. Ranges from 0 (useless) to 1 (perfect). |
 | **Coriolis effect** | A deflection caused by Earth's rotation. Affects falling atoms because they have a horizontal velocity component. |
 | **Doodson number** | Six-integer code identifying each harmonic constituent of the tidal potential. Used in the HW95 catalogue. |
-| **EWMA** | Exponentially Weighted Moving Average — a filter that tracks slow changes while ignoring fast noise. |
+| **EWMA** | Exponentially Weighted Moving Average - a filter that tracks slow changes while ignoring fast noise. |
 | **Fringe** | The oscillating output pattern of an interferometer as the phase difference changes. Like light and dark bands in an optical experiment. |
-| **GGP** | Global Geodynamics Project — a standard text format for sharing gravity time-series data between observatories. |
+| **GGP** | Global Geodynamics Project - a standard text format for sharing gravity time-series data between observatories. |
 | **Gravimetry** | The science of measuring gravitational acceleration and its spatial/temporal variations. |
 | **HW95** | Hartmann-Wenzel 1995 tidal potential catalogue (~12,000 constituents). qgrav uses a simplified 20-constituent version. |
-| **I/Q signals** | In-phase and Quadrature — two signals 90° apart that together encode the full phase of an interferometric measurement. |
+| **I/Q signals** | In-phase and Quadrature - two signals 90° apart that together encode the full phase of an interferometric measurement. |
 | **IGETS** | International Geodynamics and Earth Tide Service. Distributes superconducting gravimeter data at three processing levels (L1: raw, L2: minute, L3: hourly corrected). |
-| **k_eff** | Effective wave vector — the momentum kick atoms receive from laser pulses. For rubidium-87: ~16 million rad/m. |
+| **k_eff** | Effective wave vector - the momentum kick atoms receive from laser pulses. For rubidium-87: ~16 million rad/m. |
 | **Mach-Zehnder** | A three-pulse interferometer geometry: split → redirect → recombine. The standard design for atom gravimeters. |
 | **microGal (µGal)** | Unit of gravitational acceleration. 1 µGal = 10⁻⁸ m/s². Typical gravity variations of interest are 0.1–100 µGal. |
 | **nanoGal (nGal)** | 1 nGal = 10⁻¹¹ m/s². The sensitivity floor of the best superconducting gravimeters. |
 | **NLNM / NHNM** | New Low/High Noise Models (Peterson 1993). Acceleration PSD bounds for seismically quiet and noisy sites worldwide. |
-| **PSD** | Power Spectral Density — shows how noise power is distributed across frequency. |
-| **Sensitivity function** | g_s(t) — the time-domain function relating a laser-phase perturbation to the resulting interferometer phase shift. |
+| **PSD** | Power Spectral Density - shows how noise power is distributed across frequency. |
+| **Sensitivity function** | g_s(t) - the time-domain function relating a laser-phase perturbation to the resulting interferometer phase shift. |
 | **Tide correction** | Subtracting the predicted solid-earth body tide from a gravity residual time series so that instrument noise is revealed. |
 | **Transfer function** | Frequency-domain representation of how input noise (laser phase or mirror acceleration) maps to interferometer output phase. |
 | **π pulse** | A laser pulse that flips an atom from ground to excited state (or vice versa). Acts as a "mirror" in the interferometer. |
 | **π/2 pulse** | A laser pulse that puts an atom into a 50/50 superposition. Acts as a "beam splitter." |
 | **Rabi oscillation** | The oscillation of an atom between ground and excited states when driven by a resonant laser pulse. |
-| **RMSE** | Root Mean Square Error — the standard measure of how far estimated values are from true values. |
+| **RMSE** | Root Mean Square Error - the standard measure of how far estimated values are from true values. |
 | **Shot noise** | The fundamental quantum noise limit from counting discrete atoms. Scales as 1/√N. |
-| **SNR** | Signal-to-Noise Ratio — in decibels (dB). Every 6 dB roughly doubles the signal-to-noise. |
+| **SNR** | Signal-to-Noise Ratio - in decibels (dB). Every 6 dB roughly doubles the signal-to-noise. |
 | **Superposition** | A quantum state where a particle exists in multiple states simultaneously. Collapses to one state upon measurement. |
 | **Superconducting gravimeter (SG)** | A gravity sensor that levitates a superconducting sphere in a magnetic field. Current gold standard for continuous gravity monitoring. |
-| **T (interferometer time)** | Free-fall time between pulses in a Mach-Zehnder sequence. The single most important parameter for sensitivity — sensitivity scales as T². |
+| **T (interferometer time)** | Free-fall time between pulses in a Mach-Zehnder sequence. The single most important parameter for sensitivity - sensitivity scales as T². |
 | **Welch method** | A PSD estimation technique that averages multiple overlapping FFT windows. Produces smoother, more reliable spectra. |
-| **YAML** | "YAML Ain't Markup Language" — a human-readable configuration file format used by qgrav. |
+| **YAML** | "YAML Ain't Markup Language" - a human-readable configuration file format used by qgrav. |
 
 ---
 
@@ -1305,9 +1305,9 @@ ballistically (`GravityFreePropagator`) between Raman pulses; a chirped laser
 
 ### Published-reference validation (v1.1–v1.2)
 
-Automated regressions reproduce five published instruments — **Freier 2016**
+Automated regressions reproduce five published instruments - **Freier 2016**
 (primary, 96 nm/s²/√Hz), **Hu 2013**, **Ménoret 2018**, **Xu 2022**, **Wu
-2019** — each curated in `qgrav.validation.<name>_setup`. Run with
+2019** - each curated in `qgrav.validation.<name>_setup`. Run with
 `pytest -m slow`. The instrument parameters and noise budgets are sourced
 verbatim in `docs/research/`.
 

@@ -168,7 +168,7 @@ That is the path from a strong thesis-quality project toward a more publishable 
 
 ---
 
-## 6. v1.0 — Fully simulated and multi-drop studies
+## 6. v1.0 - Fully simulated and multi-drop studies
 
 The v0.x version of this document above describes a **hybrid** gravity sweep in which AISim handles the pulse-transfer / atom-optics part and the gravity phase is imposed analytically through `k_eff * g * T^2`. In **v1.0** that limitation has been removed. The same model name (`gravity_sweep`) can now be run in either mode:
 
@@ -244,11 +244,11 @@ What it simulates:
 
 What is reported:
 
-- `g_estimates_m_s2` — one estimate per drop.
-- `timestamps_s` — equispaced at `cycle_time_s`.
+- `g_estimates_m_s2` - one estimate per drop.
+- `timestamps_s` - equispaced at `cycle_time_s`.
 - `mean_g_m_s2`, `std_g_m_s2`, `mean_minus_true_m_s2`.
-- `allan_taus_s`, `allan_dev_m_s2` — overlapping Allan deviation across octave averaging windows.
-- `port_3_raw`, `port_3_noisy` — diagnostics for the readout chain.
+- `allan_taus_s`, `allan_dev_m_s2` - overlapping Allan deviation across octave averaging windows.
+- `port_3_raw`, `port_3_noisy` - diagnostics for the readout chain.
 - `study_scope_category` = `FULLY_SIMULATED` when `gravity_propagation: true`.
 
 Why it matters:
@@ -265,7 +265,7 @@ What it does **not** yet do:
 
 ### 6.4 Time-domain vibration noise (`generate_vibration_timeseries`)
 
-Not a top-level study model — a building block. Given a duration, sample rate, and Peterson model name (NLNM or NHNM), this generator produces a realistic acceleration time-series whose PSD matches the chosen model, with an optional second-order high-pass isolation filter `H²(f) = f⁴/(f² + f_c²)²`. Velocity and displacement time-series are derived by frequency-domain integration.
+Not a top-level study model - a building block. Given a duration, sample rate, and Peterson model name (NLNM or NHNM), this generator produces a realistic acceleration time-series whose PSD matches the chosen model, with an optional second-order high-pass isolation filter `H²(f) = f⁴/(f² + f_c²)²`. Velocity and displacement time-series are derived by frequency-domain integration.
 
 The intended use is to feed long acceleration/displacement traces into a future "real-mirror" vibration MZ that consumes `z(0), z(T), z(2T)` from the time-series instead of an analytical sinusoid. A `vibration_model="time_domain"` switch on the vibration sweep is left for a follow-up release.
 

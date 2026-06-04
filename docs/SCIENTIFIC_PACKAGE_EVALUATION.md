@@ -1,4 +1,4 @@
-# Scientific-package integration — honest evaluation
+# Scientific-package integration - honest evaluation
 
 This document records which third-party scientific packages were evaluated for
 integration into qgrav, and the reasoning for each decision. It exists because
@@ -16,13 +16,13 @@ wildly varying value.
 | GEANT4 | Radiation & particle transport (Monte Carlo) | None for the core problem | Documented, not built |
 | LAMMPS | Classical molecular dynamics | None | Documented, not built |
 
-## QuTiP — integrated (v1.2.1)
+## QuTiP - integrated (v1.2.1)
 
 **Why it fits.** qgrav's core physical object is a driven two-level (effective
 Raman) system whose internal state evolves under Rabi dynamics, with optional
 decoherence (spontaneous emission, dephasing). That is *exactly* what QuTiP is
 built for. QuTiP integrates the Schrödinger equation (`sesolve`) and the Lindblad
-master equation (`mesolve`) numerically — a completely independent code path
+master equation (`mesolve`) numerically - a completely independent code path
 from qgrav's closed-form 2×2 propagator matrix.
 
 **What we built.** `src/qgrav/validation/qutip_crosscheck.py`:
@@ -40,7 +40,7 @@ from qgrav's closed-form 2×2 propagator matrix.
 `pytest.importorskip("qutip")` so the core suite is unaffected when QuTiP is
 absent.
 
-## Qiskit — deferred (novelty, not physics)
+## Qiskit - deferred (novelty, not physics)
 
 **Why it does not fit (yet).** Qiskit models gate-based quantum *computation* on
 qubit registers. A light-pulse atom interferometer is not a gate circuit; the
@@ -53,10 +53,10 @@ compute nothing the AISim/QuTiP path does not already give, and it risks
 implying a quantum-computing capability the project does not have. Deferred as
 an optional outreach/teaching feature, not a v1.2 deliverable.
 
-## GEANT4 — not applicable
+## GEANT4 - not applicable
 
 GEANT4 is a Monte-Carlo toolkit for the passage of particles (and radiation)
-through matter — detectors, dosimetry, high-energy physics. The only conceivable
+through matter - detectors, dosimetry, high-energy physics. The only conceivable
 touch-point with an atom gravimeter is modelling stray-light or cosmic-ray
 backgrounds in the detection region, which is a third-order systematic far below
 anything qgrav currently models and is not part of the gravimetric phase
@@ -64,12 +64,12 @@ measurement at all. Integrating GEANT4 would be a large, C++-toolkit-bridging
 effort with no path to the published-reference validation bar. **Not built;
 documented here so the decision is on record.**
 
-## LAMMPS — not applicable
+## LAMMPS - not applicable
 
 LAMMPS is a classical molecular-dynamics engine for dense systems of interacting
 classical particles (materials, biomolecules). Cold-atom interferometry operates
 on a dilute, ultracold *quantum* gas where the relevant dynamics are
-single-atom quantum evolution and (at most) mean-field BEC physics — neither of
+single-atom quantum evolution and (at most) mean-field BEC physics - neither of
 which LAMMPS addresses. The only superficial overlap (the classical MOT-loading
 cloud) is already captured by qgrav's thermal-ensemble sampling. **Not built.**
 

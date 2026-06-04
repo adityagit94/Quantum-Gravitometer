@@ -106,14 +106,14 @@ Set the path with `pressure_csv_path` and the admittance with `pressure_admittan
 | `apply_corrections` | bool | `false` | Master switch for corrections stage |
 | `igets_level` | string | `"auto"` | Force IGETS product level: auto, 1, 2, 3 |
 | `tide_backend` | string | `"auto"` | Tide model: auto, pygtide, internal_hw95 |
-| `pressure_csv_path` | string | — | Path to pressure CSV |
+| `pressure_csv_path` | string | - | Path to pressure CSV |
 | `pressure_admittance_nm_s2_per_hpa` | float | `-3.0` | Barometric admittance |
 
 ### What gets recorded
 
 When corrections are applied, `metrics.json` includes:
 
-- `data_product_level_at_analysis` — the detected or forced IGETS level (1, 2, or 3)
-- `corrections_applied` — list of correction names (e.g., `["tide"]`)
-- `correction_metrics.tide_rms_subtracted_ugal` — RMS of the subtracted tide signal
-- `correction_metrics.tide_backend_used` — which backend was actually used
+- `data_product_level_at_analysis` - the detected or forced IGETS level (1, 2, or 3)
+- `corrections_applied` - list of correction names (e.g., `["tide"]`)
+- `correction_metrics.tide_rms_subtracted_ugal` - RMS of the subtracted tide signal
+- `correction_metrics.tide_backend_used` - which backend was actually used

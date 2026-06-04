@@ -1,4 +1,4 @@
-# Research Findings Summary — Topics 1–9
+# Research Findings Summary - Topics 1–9
 
 Quick-reference summary of the highest-impact findings from the 9 research files, focused on **what changes in the roadmap**. Detailed citations are in the individual files.
 
@@ -11,7 +11,7 @@ Quick-reference summary of the highest-impact findings from the 9 research files
 
 > *"The factor-of-2 claim of Patch C is consistent with every primary source surveyed, provided the patched code applies `exp(-i δ(t₀) t₀)` on top of an unmodified Cheinet 2008-style rotation."*
 
-**Implication:** The single most important physics claim in our `PHYSICS_REVIEW_PACKET.md` has been independently verified against Cheinet 2008, Kasevich & Chu 1991, Young/Kasevich/Chu 1997, and the Chu Nobel lecture. We can quote this finding in the review packet's §4 ("the factor-of-2 derivation has been corroborated by an independent literature survey") — this strengthens the packet considerably before sending it to a human reviewer.
+**Implication:** The single most important physics claim in our `PHYSICS_REVIEW_PACKET.md` has been independently verified against Cheinet 2008, Kasevich & Chu 1991, Young/Kasevich/Chu 1997, and the Chu Nobel lecture. We can quote this finding in the review packet's §4 ("the factor-of-2 derivation has been corroborated by an independent literature survey") - this strengthens the packet considerably before sending it to a human reviewer.
 
 ### F2. Open-source niche is real
 **Source:** `RESEARCH_OSS_COMPARISON.md` TL;DR
@@ -59,14 +59,14 @@ The Hu 2013 paper has **no systematic-error budget**; the first HUST systematic-
 
 The roadmap's Ménoret setup placeholder used `interferometer_time_s = 80e-3`. **Correct value is T = 60 ms.** Cycle is **500 ms (2 Hz)**, not 1.0 s.
 
-Vibration handling is **feed-forward active correction of the Raman laser phase using a hard-mounted Nanometrics Titan classical accelerometer — NOT a passive table**, which our roadmap mis-described.
+Vibration handling is **feed-forward active correction of the Raman laser phase using a hard-mounted Nanometrics Titan classical accelerometer - NOT a passive table**, which our roadmap mis-described.
 
 The 7.5e-7 m/s²/√Hz value we corrected in v1.0.1 is **one of five distinct Allan-deviation numbers** in the paper:
-- 500 nm/s²/√Hz — abstract/nominal
-- 500 nm/s²/√Hz — Larzac best
-- **750 nm/s²/√Hz — Larzac campaign** ← what we corrected to
-- 600 nm/s²/√Hz — Talence quiet
-- 700 nm/s²/√Hz — Talence typical
+- 500 nm/s²/√Hz - abstract/nominal
+- 500 nm/s²/√Hz - Larzac best
+- **750 nm/s²/√Hz - Larzac campaign** ← what we corrected to
+- 600 nm/s²/√Hz - Talence quiet
+- 700 nm/s²/√Hz - Talence typical
 
 We picked the right one for "field/transportable robustness" benchmark per the original user instruction.
 
@@ -104,10 +104,10 @@ This **changes Phase 18's time estimate from 8–16 hours to ~3 hours** total.
 JOSS now requires:
 - ≥6 months of iterative public commit history
 - OSI license file (we have GPL-3.0 ✓)
-- Automated tests in CI (we have 276 tests but no CI yet — **Phase 17 is now blocking JOSS**)
+- Automated tests in CI (we have 276 tests but no CI yet - **Phase 17 is now blocking JOSS**)
 - Documented Statement of Need
-- Demonstrated research use (reproducing a published gravimetry result — **this is exactly what Phase 13 produces with Freier 2016**)
-- **AI Usage Disclosure** (NEW 2025 requirement — we need to disclose that v1.0 plan was AI-assisted)
+- Demonstrated research use (reproducing a published gravimetry result - **this is exactly what Phase 13 produces with Freier 2016**)
+- **AI Usage Disclosure** (NEW 2025 requirement - we need to disclose that v1.0 plan was AI-assisted)
 - 750–1100 word paper
 
 **Implication:** Phase 17 (CI) and Phase 13 (Freier 2016 regression) are now **JOSS blockers**, not just nice-to-haves. The roadmap ordering is still correct but the criticality is higher than I labelled.
@@ -117,7 +117,7 @@ The AI Usage Disclosure deserves its own task. I'll add it.
 ### F9. Two new benchmark candidates suggested
 **Source:** `RESEARCH_RECENT_BENCHMARKS.md` TL;DR
 
-> *"qgrav v1.1.0 should retain all three existing regression targets and **add two new 2020+ targets** — Xu 2022 (HUST-QG, transportable; Metrologia) and Wu 2019 (Berkeley mobile; Sci. Adv.) — to broaden coverage to transportable and mobile/field regimes. Stray 2022 (Birmingham, Nature) is recommended as an optional gradiometer target."*
+> *"qgrav v1.1.0 should retain all three existing regression targets and **add two new 2020+ targets** - Xu 2022 (HUST-QG, transportable; Metrologia) and Wu 2019 (Berkeley mobile; Sci. Adv.) - to broaden coverage to transportable and mobile/field regimes. Stray 2022 (Birmingham, Nature) is recommended as an optional gradiometer target."*
 
 **Implication:** Phase 16 should be extended to include Xu 2022 + Wu 2019 (and optionally Stray 2022). This expands Phase 16 from "+2 benchmarks" to "+4 benchmarks". Time estimate increases from 5 hr to ~8 hr.
 
@@ -132,21 +132,21 @@ Our existing `qgrav.datasets.gravimetry` loader works on local GGP files but **t
 
 1. **Update task #20 (Phase 13: Freier 2016)** to use corrected parameters from F3 (τ=17µs, Δ=−700 MHz, beam radius 15 mm).
 2. **Update task #23 (Phase 16: Hu 2013 + Ménoret 2018)** to use corrected parameters from F4, F5 (Hu T=300ms, Ménoret T=60ms cycle 500ms) and to consider adding Xu 2022 + Wu 2019.
-3. **Update task #25 (Phase 18: Eliminate calibration)** to incorporate Bertoldi 2019 finite-τ correction (F6) — should shorten the work substantially.
+3. **Update task #25 (Phase 18: Eliminate calibration)** to incorporate Bertoldi 2019 finite-τ correction (F6) - should shorten the work substantially.
 4. **New task: AI Usage Disclosure** for the JOSS submission (F8).
 5. **Update task #26 (Phase 19: COMPLETE_GUIDE refresh + JOSS paper)** to reference the JOSS hard pre-review gates from F8.
-6. **Update PHYSICS_REVIEW_PACKET.md** with a section citing the AISim physics research (F1) as independent validation — strengthens the case before sending to a human reviewer.
+6. **Update PHYSICS_REVIEW_PACKET.md** with a section citing the AISim physics research (F1) as independent validation - strengthens the case before sending to a human reviewer.
 
 These updates fold the research findings directly into the v1.1 implementation work.
 
 ---
 
-## ✅ STATUS — applied to plans on 2026-05-28
+## ✅ STATUS - applied to plans on 2026-05-28
 
 The above findings were folded into the planning documents (no source-code changes yet, per user request to "understand → update plans → then move on"):
 
-- **`docs/ROADMAP_V1_TO_V2.md`** — new §1.5 "Research-driven updates (Topics 1–11)" added with corrected Freier/Hu/Ménoret parameter tables, the Bertoldi closed-form finite-τ correction, the two new benchmark targets (Xu 2022, Wu 2019), and the JOSS hard-gate notes. The §3 "who owns what" table was revised (Phase 16: 5→8 hr; Phase 18: 8–16→3 hr; Phase 11 marked done).
-- **Task list** — tasks #20, #23, #25, #24, #26 rewritten with the corrected parameters and citations so they are correct at execution time.
+- **`docs/ROADMAP_V1_TO_V2.md`** - new §1.5 "Research-driven updates (Topics 1–11)" added with corrected Freier/Hu/Ménoret parameter tables, the Bertoldi closed-form finite-τ correction, the two new benchmark targets (Xu 2022, Wu 2019), and the JOSS hard-gate notes. The §3 "who owns what" table was revised (Phase 16: 5→8 hr; Phase 18: 8–16→3 hr; Phase 11 marked done).
+- **Task list** - tasks #20, #23, #25, #24, #26 rewritten with the corrected parameters and citations so they are correct at execution time.
 - **Still pending (waiting on user):** Topics 12–14 research files; population of `REVIEW_REQUEST_TEMPLATE.md` with Achim Peters' contact; and the actual source-code work (Phases 12–20), which resumes once the user signals to proceed.
 
 Items NOT yet done (deferred until code work resumes):
@@ -155,7 +155,7 @@ Items NOT yet done (deferred until code work resumes):
 
 ---
 
-## Addendum — Topics 12 & 14 (final batch, May 2026) + Topic 13 applied
+## Addendum - Topics 12 & 14 (final batch, May 2026) + Topic 13 applied
 
 ### F13. Dissemination venues (Topic 12, `RESEARCH_VENUES.md`)
 Most 2026 conference deadlines have passed. Forward targets: JOSS (software) + CPC/SoftwareX (fuller paper); YAO 2026 (Crete, Jun), SciPy 2027, NCAMP 2027 (India). **JOSS requires ≥6 months of public open-development history** → the practical gating action is to make the GitHub repo public and start its commit history now; JOSS lands ~6 months later. Folded into roadmap §1.5.9.
@@ -164,11 +164,11 @@ Most 2026 conference deadlines have passed. Forward targets: JOSS (software) + C
 Confirms and refines F6:
 - Bertoldi 2019 Eq. 21 multiplicative factor `(1 − (2π−4)/π · τ/T)` reconfirmed; equals `1 − 2τ/T + 4τ/(πT)`.
 - Adds the **Fang/Mielec 2018 equivalent scale factor** `S_rec = k_eff·(T+τ/2)·(T+(4/π−3/2)τ)`.
-- Bertoldi Eq. 32 residual single-shot term **averages to zero over the velocity distribution** — so for our ensemble the velocity-averaged correction is exactly the multiplicative factor (good news for Phase 18 calibration).
+- Bertoldi Eq. 32 residual single-shot term **averages to zero over the velocity distribution** - so for our ensemble the velocity-averaged correction is exactly the multiplicative factor (good news for Phase 18 calibration).
 - **Caveat:** the `T+(4/Ω)tan(Ωτ/2)` form must NOT be attributed to Peters 2001 or Le Gouët 2008. Folded into roadmap §1.5.5 with corrected citations.
 - Cheinet 2008 exact `G(ω)` (Eq. 8) and low-freq `|H(2πf)|² = 16 sin⁴(πfT)` are code-ready if we ever want an exact transfer-function path.
 
-### Topic 13 — DONE and shipped
+### Topic 13 - DONE and shipped
 The reference audit (Topic 13) was applied in **v1.0.2**: 3 unit-category errors fixed + 2 ambiguous re-labelled, registry 12→14 entries, 286 tests pass. See CHANGELOG v1.0.2.
 
 ---
@@ -179,14 +179,14 @@ No research remains. Everything is folded into `docs/ROADMAP_V1_TO_V2.md` §1.5 
 
 ---
 
-## Addendum — Topics 10 & 11 (researched May 2026, second batch)
+## Addendum - Topics 10 & 11 (researched May 2026, second batch)
 
 ### F11. Reviewer-contact short list confirmed
 **Source:** `RESEARCH_REVIEWER_CONTACTS.md`
 
-Highest-priority contact for the physics-review packet is **Prof. Achim Peters** at HU Berlin (achim.peters@physik.hu-berlin.de) — directly relevant to the Freier 2016 benchmark since GAIN is his group's instrument. Bastian Leykauf (AISim upstream maintainer, also at QOM HU Berlin) is the natural second contact.
+Highest-priority contact for the physics-review packet is **Prof. Achim Peters** at HU Berlin (achim.peters@physik.hu-berlin.de) - directly relevant to the Freier 2016 benchmark since GAIN is his group's instrument. Bastian Leykauf (AISim upstream maintainer, also at QOM HU Berlin) is the natural second contact.
 
-**Implication:** No code change. User can now populate the `REVIEW_REQUEST_TEMPLATE.md` cover letter with a real email address and send. This unblocks resolving C14 (no independent physics review) — the gating item for crediblity of the `FULLY_SIMULATED` study scope label.
+**Implication:** No code change. User can now populate the `REVIEW_REQUEST_TEMPLATE.md` cover letter with a real email address and send. This unblocks resolving C14 (no independent physics review) - the gating item for crediblity of the `FULLY_SIMULATED` study scope label.
 
 ### F12. Exail AQG is the only fully-documented commercial atom gravimeter
 **Source:** `RESEARCH_HARDWARE_VENDORS.md` TL;DR

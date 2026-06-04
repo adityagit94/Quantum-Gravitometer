@@ -6,9 +6,9 @@ This guide explains how to use the project in a clean, research-oriented way.
 
 This is **not** a hardware gravimeter. It is a **software research platform** with three lanes:
 
-1. **Simulation lane** — atom-optics / interferometer simulation
-2. **Virtual bench lane** — synthetic interferometer readout and estimator testing
-3. **Real gravimetry lane** — real gravity residual data analysis from public datasets
+1. **Simulation lane** - atom-optics / interferometer simulation
+2. **Virtual bench lane** - synthetic interferometer readout and estimator testing
+3. **Real gravimetry lane** - real gravity residual data analysis from public datasets
 
 The third lane is the most important when you do not have hardware.
 
@@ -16,16 +16,16 @@ The third lane is the most important when you do not have hardware.
 
 ## 2) Recommended working order
 
-### Phase A — make the real-data lane reliable
+### Phase A - make the real-data lane reliable
 Use one station file first. Make sure the parser, plots, and statistics are correct. For IGETS Level 1 or Level 2 data, enable `apply_corrections: true` in `bench_real_gravity` so that tides and pressure effects are removed before stability analysis.
 
-### Phase B — compare stations
+### Phase B - compare stations
 Once one station works, compare several stations and document differences in drift, gaps, and long-term stability.
 
-### Phase C — tie this to the simulation lane
+### Phase C - tie this to the simulation lane
 Use the same reporting language (PSD, Allan, summary metrics) for both simulated and real data.
 
-### Phase D — noise budget via sensitivity function (v0.8)
+### Phase D - noise budget via sensitivity function (v0.8)
 Use `integrate_vibration_noise()` with the Peterson NLNM/NHNM models to estimate what fraction of your real-data noise comes from seismic vibrations vs. instrument-intrinsic noise. Compare to the shot-noise sensitivity from your AISim simulation.
 
 ---
@@ -68,7 +68,7 @@ Launch with `qgrav gui` (or `qgrav-gui`). The window has six tabs.
 
 ### Setup & Run tab
 Configure a run through visual controls (kept in sync with the YAML editor):
-- pick a workflow (`real_data`, `synthetic`, `advanced`) — the form hides
+- pick a workflow (`real_data`, `synthetic`, `advanced`) - the form hides
   controls that do not apply
 - choose the bench mode and statistics backend
 - point to a gravity source and station, or enable AISim and pick a study model
@@ -83,7 +83,7 @@ Configure a run through visual controls (kept in sync with the YAML editor):
 - create a ready-to-run config, or send the selection to Setup
 
 ### Config Editor tab
-The raw YAML — the ground truth for what actually runs. Validate and Save As here.
+The raw YAML - the ground truth for what actually runs. Validate and Save As here.
 
 ### Results & Visuals tab
 - inspect `metrics.json` in a tree and the metric cards
@@ -140,7 +140,7 @@ The best next scientific milestone is:
 > validate that your corrections-enabled real-data Allan deviations are consistent with published SG noise floors, and compare the vibration-limited sensitivity from the sensitivity function against your AISim shot-noise sensitivity.
 
 
-## Phase 2 — AISim gravimeter studies
+## Phase 2 - AISim gravimeter studies
 
 The project now includes three gravimeter-oriented AISim studies. Use them in this order:
 
@@ -167,7 +167,7 @@ Then compare the three reports and quote them carefully:
 For full interpretation, read `docs/AISIM_GRAVIMETER_STUDIES.md`.
 
 
-## Phase 3 — Fully simulated and multi-drop studies (v1.0)
+## Phase 3 - Fully simulated and multi-drop studies (v1.0)
 
 v1.0 unlocks two new workflows on top of the existing study models. They are aimed at users who want a self-consistent numerical gravimeter rather than the analytical-phase hybrid.
 
