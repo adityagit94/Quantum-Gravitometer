@@ -1,24 +1,19 @@
-# qgrav v1.3.0 — Software-first R&D pipeline for atom-interferometric gravimetry
+# qgrav — Software-first R&D pipeline for atom-interferometric gravimetry
 
 [![Tests](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml/badge.svg)](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-> **v1.2–v1.3 hardening highlights** (on top of the v1.1 published-reference
-> release): an independent **QuTiP** cross-validation backend (reproduces the
-> Raman dynamics to ~1.6×10⁻⁶); the finite-ensemble-floor finding that let the
-> Freier regression tighten to **factor 2** and the secondary benchmarks to
-> factor 3; the **Bertoldi 2019** closed-form finite-τ predictor; quantitative
-> **wavefront-curvature** validation; full gravity-sweep **YAML exposure** of
-> AC-Stark + wavefront; a **performance** harness (single MZ ~1.3 ms); **real
-> IGETS superconducting-gravimeter** analysis-chain validation; a **JOSS paper**
-> draft and a **MkDocs** site; and an honest **scientific-package evaluation**
-> (QuTiP integrated; Qiskit/GEANT4/LAMMPS documented as not applicable).
-> **378 tests pass.** See [CHANGELOG.md](CHANGELOG.md) and
-> [docs/ROADMAP_V1_TO_V2.md](docs/ROADMAP_V1_TO_V2.md).
-
-
+> **Highlights** — a gravity phase that **emerges** from a simulated ballistic
+> trajectory under a chirped Raman laser (not injected analytically);
+> **multi-drop measurement cycles** with a per-shot noise budget and a
+> fringe-lock servo that yield ASD / Allan curves like a real instrument;
+> **one-click reproductions** of five published transportable gravimeters;
+> an independent **QuTiP** cross-check of the Raman dynamics (agreement
+> ~1.6×10⁻⁶); real **IGETS** superconducting-gravimeter analysis; and a
+> six-tab desktop **GUI**. **378 tests, green on Python 3.11–3.12.**
+> See [CHANGELOG.md](CHANGELOG.md) and [docs/ROADMAP_V1_TO_V2.md](docs/ROADMAP_V1_TO_V2.md).
 
 **qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim) with **emergent gravity-phase physics**, a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), multi-drop measurement cycles, and an auto-generated HTML report — all driven from a single YAML config.
 
@@ -29,13 +24,7 @@
 - **A self-consistent numerical gravimeter simulation (v1.0+)**: gravity phase emerges from a ballistic atom trajectory under a chirped Raman laser, not from injecting `k_eff·g·T²` analytically. Optional fall-back to the hybrid mode for backward compatibility.
 - An honest tool: every simulation result carries a **study-scope label** (fully simulated / hybrid / analytical only) so users can tell at a glance what is computed from first principles vs imposed analytically.
 
-### What this is not
-
-- Hardware control: there is no GPIB / serial / real-time loop.
-- A general-purpose geodynamics suite: the v0.8 tide / pressure correction stage exists only to make IGETS Allan-deviation comparisons meaningful. For serious geodynamics use PyGTide, ETERNA, or SPOTL.
-- A competitor to dedicated research-group simulation codes (Mueller/Berkeley, SYRTE, Stanford, Humboldt). The AISim integration is the simulation core; qgrav wraps and extends it.
-
-See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.md` for the v1.0 emergent-physics design, and `CHANGELOG.md` for the v0.9 → v1.0 changes.
+See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.md` for the emergent-physics design, and `CHANGELOG.md` for the change history.
 
 **Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.11
 
@@ -49,9 +38,21 @@ See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.m
 | **Generate** | Virtual interferometer I/Q data with known truth displacement for algorithm benchmarking, **NLNM/NHNM time-domain vibration noise (v1.0)** |
 | **Ingest** | Real gravimetry time-series from `.ggp`, `.zip`, directory, or CSV (superconducting gravimeter residuals) |
 | **Analyze** | PSD, overlapping Allan deviation (custom + AllanTools backends), noise type classification, shot-noise sensitivity, **per-drop Allan deviation (v1.0)** |
-| **Validate** | Published reference comparison (Freier 2016, Menoret 2018, etc.), systematic effects estimation, backend cross-checks, **AC Stark light-shift and wavefront-aberration sensitivity (v1.0)** |
+| **Validate** | Published-reference comparison (Freier 2016, Ménoret 2018, and three more), systematic-effect estimation, backend cross-checks, **AC-Stark light-shift and wavefront-aberration sensitivity (v1.0)** |
 | **Report** | Auto-generated HTML reports with plots, metrics, systematics tables, and full config snapshots |
 | **GUI** | tkinter desktop app (6 tabs): config editing, pipeline execution, interactive plots, a Validation tab with one-click published-paper reproductions and a QuTiP cross-check, and a navigable in-app guide |
+
+---
+
+## Validation & quality
+
+qgrav is checked against the published literature and an independent solver, not only against itself:
+
+- **Published-instrument regressions.** The automated suite reproduces the short-term sensitivity of five transportable atom gravimeters from their documented parameters and noise budgets — **Freier 2016 (GAIN)** as the primary target, plus **Hu 2013**, **Ménoret 2018**, **Xu 2022**, and **Wu 2019** — each within its documented tolerance band. One-click reproductions ship in the GUI's **Validation** tab.
+- **Independent cross-validation.** The single-pulse Raman dynamics are reproduced by an independent **QuTiP** Schrödinger integration to ~1.6×10⁻⁶, and match the closed-form Rabi solution to ~1×10⁻¹⁵.
+- **Real precision-gravity data.** The analysis chain is validated on bundled real **IGETS** superconducting-gravimeter data against the published instrument noise floor.
+- **Emergent physics.** In fully-simulated mode the `k_eff·g·T²` gravity phase emerges from first principles (ballistic free-fall + chirped laser), confirmed against the analytical result and the **Bertoldi 2019** finite-pulse closed form.
+- **378 automated tests**, green on Linux and Windows across Python 3.11–3.12.
 
 ---
 
@@ -215,7 +216,7 @@ Two complementary methods:
 Both methods are stored in `metrics.json`. The ACF result is under `noise_identification`; the slope result is under `noise_identification.legacy_slope_method`.
 
 ### Systematic effects
-Order-of-magnitude estimates (clearly documented as **not** included in AISim simulation):
+Order-of-magnitude analytical estimates of the leading systematic shifts:
 - **Gravity gradient** — vertical free-air gradient effect during free fall
 - **Coriolis** — Earth rotation coupling with horizontal atomic velocity
 
@@ -240,22 +241,24 @@ For IGETS Level 1 or Level 2 data, enable `apply_corrections: true` in `bench_re
 The pipeline auto-detects the IGETS data product level from sample rate, applies corrections before Allan/PSD computation, and records what was applied in `metrics.json`. This makes Allan deviation comparisons against published SG noise floors meaningful for un-corrected input data.
 
 ### Published references
-Frozen registry of 12 benchmark values with DOI links for validation:
+Frozen registry of **14** benchmark values with DOI links, used directly by the automated validation suite:
 
 | Key | Value | Source |
 |-----|-------|--------|
 | `freier_2016_short_term_noise` | 9.6e-8 m/s²/√Hz | Freier et al. (2016) |
 | `freier_2016_accuracy` | 3.9e-8 m/s² | Freier et al. (2016) |
 | `freier_2016_long_term_stability` | 5e-10 m/s² | Freier et al. (2016) |
-| `menoret_2018_short_term_noise` | 5e-7 m/s²/√Hz | Menoret et al. (2018) |
-| `menoret_2018_long_term_stability` | 1e-8 m/s² | Menoret et al. (2018) |
-| `hu_2013_short_term_noise` | 4.2e-9 m/s²/√Hz | Hu et al. (2013) |
+| `hu_2013_short_term_noise` | 4.2e-8 m/s²/√Hz | Hu et al. (2013) |
+| `menoret_2018_short_term_noise` | 7.5e-7 m/s²/√Hz | Ménoret et al. (2018) |
+| `menoret_2018_long_term_stability` | 1e-8 m/s² | Ménoret et al. (2018) |
 | `peters_2001_accuracy` | 3e-8 m/s² | Peters, Chung & Chu (2001) |
-| `kasevich_chu_1991_first_demo` | 3e-6 m/s²/√Hz | Kasevich & Chu (1991) |
-| `bidel_2018_marine` | 1.7e-6 m/s²/√Hz | Bidel et al. (2018) |
-| `nlnm_low_freq` | 7e-10 m/s²/√Hz | Peterson (1993) |
-| `sg_noise_floor` | 1e-11 m/s²/√Hz | Hinderer et al. (2007) |
-| `mz_visibility` | 0.5 | Peters et al. (2001) |
+| `kasevich_chu_1991_first_demo` | 3e-6 (Δg/g at 1000 s) | Kasevich & Chu (1991) |
+| `bidel_2018_marine` | 8e-6 m/s²/√Hz | Bidel et al. (2018) |
+| `bidel_2018_marine_static_uncertainty` | 1.7e-6 m/s² | Bidel et al. (2018) |
+| `nlnm_low_freq` | 4e-10 m/s²/√Hz | Peterson (1993) |
+| `sg_noise_floor` | 1.8e-9 m/s²/√Hz | Van Camp et al. |
+| `sg_detectability_nGal` | 1e-11 m/s² | Hinderer et al. (2007) |
+| `mz_visibility` | 0.5 | idealised MZ value |
 
 ---
 
@@ -293,7 +296,7 @@ scripts/run_aisim_gravimeter_studies.sh
 
 To enable fully-simulated mode, add `gravity_propagation: true` to the simulation block of any gravity_sweep or vibration_sensitivity_sweep YAML config.
 
-See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and limitations of each study, and [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) for the v1.0 emergent-physics design.
+See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and scope of each study, and [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) for the emergent-physics design.
 
 ---
 
@@ -320,7 +323,7 @@ qgrav/
     sim_ai/                     # AISim adapter layer
       aisim_adapter.py          #   gravity sweep, vibration sweep, multi-drop cycle,
                                 #   calibration (v1.0), wavefront wiring (v1.0)
-    validation/                 # published references (12 entries), curve comparison
+    validation/                 # published references (14 entries), curve comparison
                                 # truth_checks expanded to handle simulated-gravity
                                 # and multi_drop_cycle (v1.0)
     vendor/aisim/               # patched AISim core (v1.0)
@@ -334,7 +337,7 @@ qgrav/
     visuals.py                  # matplotlib figure builders
     pipeline.py                 # orchestrates the full run (corrections stage, output_format_version)
     cli.py                      # CLI entry point
-  tests/                        # 253 tests (pytest) - up from 192 baseline
+  tests/                        # 378 tests (pytest)
 ```
 
 ---
@@ -355,7 +358,7 @@ python -m pytest -q
 python -m pytest -v --tb=short
 ```
 
-**253 tests** covering everything in v0.9 (192) plus **61 new v1.0 tests**:
+**378 tests** run green on Linux and Windows (Python 3.11–3.12). The v1.0 physics upgrade contributed 61 of them:
 
 - Gravity-free ballistic propagator (10)
 - Chirped-laser detuning (5)
