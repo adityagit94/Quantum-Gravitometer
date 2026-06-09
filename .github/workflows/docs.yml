@@ -5,12 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
-# Builds the MkDocs site on every push (a build check). Publishing to GitHub
-# Pages runs ONLY on a manual trigger, so a push never shows a red "deploy"
-# check when Pages is disabled. To publish the docs site:
-#   1. Settings -> Pages -> Source: "GitHub Actions"  (one-time)
-#   2. Actions -> Docs -> "Run workflow"
-# (To restore auto-publish on push, drop the `if:` on the deploy job below.)
+# Builds the MkDocs site and deploys it to GitHub Pages on every push to main
+# (and on manual dispatch). Requires Pages enabled once:
+# Settings -> Pages -> Source: "GitHub Actions".
 
 permissions:
   contents: read
@@ -35,8 +32,6 @@ jobs:
           path: site
 
   deploy:
-    # Manual only: avoids a red check on pushes when Pages isn't enabled.
-    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     environment:
