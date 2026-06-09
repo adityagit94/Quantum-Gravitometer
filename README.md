@@ -4,6 +4,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Docs](https://img.shields.io/badge/docs-online-success.svg)](https://adityagit94.github.io/Quantum-Gravitometer/)
 
 > **Highlights** - a gravity phase that **emerges** from a simulated ballistic
 > trajectory under a chirped Raman laser (not injected analytically);
@@ -21,10 +22,10 @@
 
 - A reproducible pipeline that takes synthetic or real time-series in and writes a versioned run folder out (raw arrays, metrics JSON, plots, HTML report).
 - A research workbench for designing and benchmarking atom-interferometer parameters against published instruments.
-- **A self-consistent numerical gravimeter simulation (v1.0+)**: gravity phase emerges from a ballistic atom trajectory under a chirped Raman laser, not from injecting `k_eff·g·T²` analytically. Optional fall-back to the hybrid mode for backward compatibility.
+- **A self-consistent numerical gravimeter simulation**: gravity phase emerges from a ballistic atom trajectory under a chirped Raman laser, not from injecting `k_eff·g·T²` analytically. An optional hybrid mode keeps the analytical path available.
 - An honest tool: every simulation result carries a **study-scope label** (fully simulated / hybrid / analytical only) so users can tell at a glance what is computed from first principles vs imposed analytically.
 
-See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.md` for the emergent-physics design, and `CHANGELOG.md` for the change history.
+**Documentation:** the full user guide, physics design, and validation notes are published at **<https://adityagit94.github.io/Quantum-Gravitometer/>**. See [CHANGELOG.md](CHANGELOG.md) for the change history.
 
 **Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.11
 
@@ -34,11 +35,11 @@ See `docs/COMPLETE_GUIDE.md` for the full user guide, `docs/V1_PHYSICS_UPGRADE.m
 
 | Stage | Description |
 |-------|-------------|
-| **Simulate** | AISim-backed atom interferometry: Rabi scans, Mach-Zehnder phase scans, gravity sweeps, vibration sensitivity sweeps, **emergent-gravity simulations (v1.0)**, **multi-drop measurement cycles (v1.0)** |
-| **Generate** | Virtual interferometer I/Q data with known truth displacement for algorithm benchmarking, **NLNM/NHNM time-domain vibration noise (v1.0)** |
+| **Simulate** | AISim-backed atom interferometry: Rabi scans, Mach-Zehnder phase scans, gravity sweeps, vibration sensitivity sweeps, **emergent-gravity simulations**, and **multi-drop measurement cycles** |
+| **Generate** | Virtual interferometer I/Q data with known truth displacement for algorithm benchmarking, plus **NLNM/NHNM time-domain vibration noise** |
 | **Ingest** | Real gravimetry time-series from `.ggp`, `.zip`, directory, or CSV (superconducting gravimeter residuals) |
-| **Analyze** | PSD, overlapping Allan deviation (custom + AllanTools backends), noise type classification, shot-noise sensitivity, **per-drop Allan deviation (v1.0)** |
-| **Validate** | Published-reference comparison (Freier 2016, Ménoret 2018, and three more), systematic-effect estimation, backend cross-checks, **AC-Stark light-shift and wavefront-aberration sensitivity (v1.0)** |
+| **Analyze** | PSD, overlapping Allan deviation (custom + AllanTools backends), noise type classification, shot-noise sensitivity, and **per-drop Allan deviation** |
+| **Validate** | Published-reference comparison (Freier 2016, Ménoret 2018, and three more), systematic-effect estimation, backend cross-checks, and **AC-Stark light-shift and wavefront-aberration sensitivity** |
 | **Report** | Auto-generated HTML reports with plots, metrics, systematics tables, and full config snapshots |
 | **GUI** | tkinter desktop app (6 tabs): config editing, pipeline execution, interactive plots, a Validation tab with one-click published-paper reproductions and a QuTiP cross-check, and a navigable in-app guide |
 
@@ -95,7 +96,7 @@ qgrav run --config configs/example_aisim_phase_scan.yaml
 # AISim gravity sweep - hybrid mode (analytical gravity phase)
 qgrav run --config configs/example_aisim_gravity_sweep.yaml
 
-# AISim gravity sweep - fully simulated (v1.0: gravity phase EMERGES from simulation)
+# AISim gravity sweep - fully simulated (gravity phase emerges from the simulation)
 # Add `gravity_propagation: true` to the simulation block of any AISim config.
 
 # AISim vibration sensitivity sweep
@@ -105,7 +106,7 @@ qgrav run --config configs/example_aisim_vibration_sweep.yaml
 qgrav run --config configs/example_real_gravity.yaml
 ```
 
-### Programmatic use - multi-drop measurement cycle (v1.0)
+### Programmatic use - multi-drop measurement cycle
 
 ```python
 from qgrav.sim_ai.aisim_adapter import run_aisim_multi_drop_cycle
@@ -370,9 +371,11 @@ python -m pytest -v --tb=short
 
 | Document | Description |
 |----------|-------------|
-| [CHANGELOG.md](CHANGELOG.md) | Full change log with commit hashes |
-| [GUIDE.md](GUIDE.md) | User guide and workflow documentation |
-| [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) | **v1.0 emergent-physics design (start here for v1.0)** |
+| **[Online documentation](https://adityagit94.github.io/Quantum-Gravitometer/)** | The full rendered documentation site (recommended). |
+| [docs/COMPLETE_GUIDE.md](docs/COMPLETE_GUIDE.md) | The complete user guide: install, run, configure, interpret results. |
+| [CHANGELOG.md](CHANGELOG.md) | Full change log. |
+| [GUIDE.md](GUIDE.md) | Quick-start workflow guide. |
+| [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) | Emergent-physics design and equations. |
 | [docs/PHYSICS_REVIEW_PACKET.md](docs/PHYSICS_REVIEW_PACKET.md) | **Comprehensive review packet for external atom-interferometry experts** (with executable notebook `docs/reviewer_notebook.ipynb`) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture overview |
 | [docs/SCIENTIFIC_HARDENING.md](docs/SCIENTIFIC_HARDENING.md) | What is AISim-backed vs. hybrid vs. analytic |
