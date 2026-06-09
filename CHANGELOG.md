@@ -2,7 +2,7 @@
 
 ## Unreleased - GUI integration
 
-Brings the full v1.0–v1.3 simulation/validation engine into the desktop
+Brings the full v1.0-v1.3 simulation/validation engine into the desktop
 workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 regressions.**
 
 ### Setup & Run tab
@@ -90,7 +90,7 @@ Documentation, real-data validation, and JOSS-readiness release. **362 → 371 t
 
 - **`paper/paper.md` + `paper/paper.bib`** - JOSS submission draft (~600 words; Summary, Statement of need, Functionality, AI-assistance disclosure) citing AISim, QuTiP, Freier/Hu/Ménoret, Bertoldi, Cheinet, Peterson.
 - **`mkdocs.yml` + `docs/index.md` + `.github/workflows/docs.yml`** - MkDocs site (readthedocs theme, builds with bare `mkdocs`) deployed to GitHub Pages on push. Verified `mkdocs build` succeeds.
-- **`tests/test_docs_build.py`** (6 tests): mkdocs nav targets all exist, JOSS paper has the required sections + word count in the JOSS 250–1750 range + an AI-usage disclosure.
+- **`tests/test_docs_build.py`** (6 tests): mkdocs nav targets all exist, JOSS paper has the required sections + word count in the JOSS 250-1750 range + an AI-usage disclosure.
 
 ### Documentation refresh
 
@@ -281,12 +281,12 @@ Four new curated setups, each with verbatim parameter provenance in `docs/resear
 
 - **`kasevich_chu_1991_first_demo`**: value `3e-6` was tagged `m/s²/√Hz` but the Kasevich & Chu 1991 abstract reports it as a **dimensionless Δg/g resolution after 1000 s integration** (and used **sodium**, not Rb). Re-typed to `unit="dimensionless (delta_g/g at 1000 s)"`. As an ASD it would be ≈ 9e-4 m/s²/√Hz.
 - **`bidel_2018_marine`**: was `1.7e-6 m/s²/√Hz` - that number is the **0.17 mGal static measurement uncertainty** (a bias, no /√Hz), not the sensitivity. Corrected to the paper's actual static sensitivity **0.8 mGal/√Hz = 8e-6 m/s²/√Hz**. The 0.17 mGal figure is preserved in a new key `bidel_2018_marine_static_uncertainty` (1.7e-6 m/s², no /√Hz).
-- **`sg_noise_floor`**: was `1e-11 m/s²/√Hz` - that is the **1 nGal frequency-domain detectability** mislabeled as an ASD. Corrected to the true superconducting-gravimeter ASD floor **1.8e-9 m/s²/√Hz** (LSBB best site at 1 mHz, Van Camp et al. 2017) - ~100–300× higher. The 1 nGal detectability is preserved in a new key `sg_detectability_nGal` (1e-11 m/s²).
+- **`sg_noise_floor`**: was `1e-11 m/s²/√Hz` - that is the **1 nGal frequency-domain detectability** mislabeled as an ASD. Corrected to the true superconducting-gravimeter ASD floor **1.8e-9 m/s²/√Hz** (LSBB best site at 1 mHz, Van Camp et al. 2017) - ~100-300× higher. The 1 nGal detectability is preserved in a new key `sg_detectability_nGal` (1e-11 m/s²).
 
 ### Fixed - ambiguous entries
 
-- **`nlnm_low_freq`**: was `7e-10 m/s²/√Hz` (≈ −183 dB), ~4 dB too high. Corrected to the true NLNM acceleration-ASD minimum **4e-10 m/s²/√Hz** (−187.5 dB) at ~30–100 s period. Description now flags the strong frequency dependence.
-- **`mz_visibility`**: value `0.5` retained but **could not be verified** in the cited Peters 2001 text (paywalled figure). Re-labelled as the idealised two-output Mach–Zehnder maximum, no longer attributed to Peters 2001. (A verified real-instrument contrast is C = 0.3, Bidel et al. 2018.)
+- **`nlnm_low_freq`**: was `7e-10 m/s²/√Hz` (≈ −183 dB), ~4 dB too high. Corrected to the true NLNM acceleration-ASD minimum **4e-10 m/s²/√Hz** (−187.5 dB) at ~30-100 s period. Description now flags the strong frequency dependence.
+- **`mz_visibility`**: value `0.5` retained but **could not be verified** in the cited Peters 2001 text (paywalled figure). Re-labelled as the idealised two-output Mach-Zehnder maximum, no longer attributed to Peters 2001. (A verified real-instrument contrast is C = 0.3, Bidel et al. 2018.)
 
 ### Added
 
@@ -491,7 +491,7 @@ Developer experience improvements. **6 new tests** (170 → 176 passing).
 
 ---
 
-### CLI Commands (Phase 4.1–4.3)
+### CLI Commands (Phase 4.1-4.3)
 
 - **`qgrav validate-data --source PATH`**: Load and validate a gravimetry dataset
   without running the full pipeline. Prints station code, sample rate, IGETS

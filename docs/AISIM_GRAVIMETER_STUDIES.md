@@ -26,7 +26,7 @@ This AISim stage moves the project from a generic atom-light demo toward a gravi
 
 ## 2. The three studies in this stage
 
-### 2.1 Mach–Zehnder phase scan
+### 2.1 Mach-Zehnder phase scan
 
 Config example:
 - `configs/example_aisim_phase_scan.yaml`
@@ -69,7 +69,7 @@ Model name:
 
 What it does:
 - keeps the AISim three-pulse sequence for pulse-transfer/contrast behavior
-- maps gravity `g` to interferometer phase using the standard Mach–Zehnder scaling
+- maps gravity `g` to interferometer phase using the standard Mach-Zehnder scaling
 
 In other words, this is a **hybrid study**:
 - pulse sequence + imperfect populations: **AISim**
@@ -132,7 +132,7 @@ This means the three-pulse interferometer sequence itself is simulated directly 
 ### `hybrid_aisim_plus_analytic_gravity_phase`
 This means:
 - AISim handles the pulse-transfer / atom-optics part
-- the gravity phase is imposed analytically using the standard Mach–Zehnder gravimeter scaling
+- the gravity phase is imposed analytically using the standard Mach-Zehnder gravimeter scaling
 
 ### `hybrid_aisim_plus_analytic_vibration_phase`
 This means:
@@ -147,7 +147,7 @@ These labels are intentionally explicit so the report stays scientifically hones
 
 A safe and accurate way to describe this stage is:
 
-> The project integrates AISim into a software-first gravimeter R&D platform and implements three gravimeter-relevant studies: a full three-pulse Mach–Zehnder phase scan in AISim, a hybrid gravity sweep combining AISim pulse-transfer effects with the standard light-pulse gravimeter phase law, and a hybrid vibration sensitivity sweep using the discrete three-pulse vibration phase response.
+> The project integrates AISim into a software-first gravimeter R&D platform and implements three gravimeter-relevant studies: a full three-pulse Mach-Zehnder phase scan in AISim, a hybrid gravity sweep combining AISim pulse-transfer effects with the standard light-pulse gravimeter phase law, and a hybrid vibration sensitivity sweep using the discrete three-pulse vibration phase response.
 
 A shorter version is:
 
@@ -237,7 +237,7 @@ What it simulates:
 
 - N independent drops at a 1/T_cycle cadence.
 - Each drop creates a **fresh** atom ensemble (`seed = base_seed + i + 1`) so the per-drop ensemble noise is genuinely uncorrelated.
-- Each drop runs a full three-pulse Mach–Zehnder sequence (in either fully simulated or hybrid mode).
+- Each drop runs a full three-pulse Mach-Zehnder sequence (in either fully simulated or hybrid mode).
 - Detection (projection) noise with σ = 1/√N_detected is added to each port population.
 - An optional digital integrator **servo** adjusts the phase bias between drops to keep `P₃ ≈ 0.5` (mid-fringe).
 - A linear mid-fringe inversion converts each `P₃` into a gravity estimate `g_est = g_setpoint + (P₃ − 0.5) / fringe_slope`.
@@ -283,7 +283,7 @@ The intended use is to feed long acceleration/displacement traces into a future 
 
 A safe and accurate way to describe the v1.0 simulation layer:
 
-> qgrav's simulation core integrates a locally patched AISim with a self-consistent emergent-gravity model. Atoms propagate under a `GravityFreePropagator` between Raman pulses; a chirped Raman laser cancels the common gravity Doppler. The propagator's matrix elements use the time-integrated laser phase `−k_eff·z(t₀) + ½·α·t₀²` so that the Mach–Zehnder combination yields the standard `k_eff·(g − g_chirp)·T²` gravity phase from first principles, rather than imposing it through a closed-form formula. A multi-drop measurement cycle with detection noise and an optional fringe-locking servo produces an Allan-deviation time series, providing an end-to-end software analogue of a deployed atom gravimeter.
+> qgrav's simulation core integrates a locally patched AISim with a self-consistent emergent-gravity model. Atoms propagate under a `GravityFreePropagator` between Raman pulses; a chirped Raman laser cancels the common gravity Doppler. The propagator's matrix elements use the time-integrated laser phase `−k_eff·z(t₀) + ½·α·t₀²` so that the Mach-Zehnder combination yields the standard `k_eff·(g − g_chirp)·T²` gravity phase from first principles, rather than imposing it through a closed-form formula. A multi-drop measurement cycle with detection noise and an optional fringe-locking servo produces an Allan-deviation time series, providing an end-to-end software analogue of a deployed atom gravimeter.
 
 A shorter version:
 

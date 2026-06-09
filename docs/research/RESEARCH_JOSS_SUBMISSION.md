@@ -4,16 +4,16 @@
 
 ## TL;DR (overall)
 
-- **Submit qgrav to JOSS only after the GitHub repository has ≥6 months of iterative public commit history**, an OSI license file, automated tests in CI, a documented Statement of Need, demonstrated research use (at minimum a worked physics example reproducing a published gravimetry result such as the Peters–Chu Δg/g ≈ 3×10⁻⁹ measurement [Peters, Chung & Chu, *Nature* **400**, 849–852 (1999)]), and an explicit "AI Usage Disclosure" - these are now hard pre-review gates as of the 2025 JOSS scope update. A submission that does not meet all four pre-review gates will be desk-rejected.
-- **Closest precedents in JOSS are GPUE (BEC/Gross–Pitaevskii solver, 10.21105/joss.01037) and RydIQule v2 (Rydberg-atom quantum sensor modelling, 10.21105/joss.08539).** Adjacent state-of-the-field tools that qgrav must cite - PyLCP, AtomECS, ARC, QuTiP, ElecSus, atomSmltr - were *not* published in JOSS but in Computer Physics Communications / SciPost; qgrav should benchmark itself explicitly against these to satisfy the "State of the Field" required section.
-- **Aim for a 750–1100-word paper** (per the current JOSS paper-format spec, which mandates 750–1750 words), formatted to JOSS's `paper.md` template, with 2 suggested reviewers drawn from the atomic-physics reviewer pool surfaced below (e.g., @nikolasibalic, @mgalloy, @wcwitt) and 1 from the Bose–Einstein-condensate or quantum-optics neighborhood.
+- **Submit qgrav to JOSS only after the GitHub repository has ≥6 months of iterative public commit history**, an OSI license file, automated tests in CI, a documented Statement of Need, demonstrated research use (at minimum a worked physics example reproducing a published gravimetry result such as the Peters-Chu Δg/g ≈ 3×10⁻⁹ measurement [Peters, Chung & Chu, *Nature* **400**, 849-852 (1999)]), and an explicit "AI Usage Disclosure" - these are now hard pre-review gates as of the 2025 JOSS scope update. A submission that does not meet all four pre-review gates will be desk-rejected.
+- **Closest precedents in JOSS are GPUE (BEC/Gross-Pitaevskii solver, 10.21105/joss.01037) and RydIQule v2 (Rydberg-atom quantum sensor modelling, 10.21105/joss.08539).** Adjacent state-of-the-field tools that qgrav must cite - PyLCP, AtomECS, ARC, QuTiP, ElecSus, atomSmltr - were *not* published in JOSS but in Computer Physics Communications / SciPost; qgrav should benchmark itself explicitly against these to satisfy the "State of the Field" required section.
+- **Aim for a 750-1100-word paper** (per the current JOSS paper-format spec, which mandates 750-1750 words), formatted to JOSS's `paper.md` template, with 2 suggested reviewers drawn from the atomic-physics reviewer pool surfaced below (e.g., @nikolasibalic, @mgalloy, @wcwitt) and 1 from the Bose-Einstein-condensate or quantum-optics neighborhood.
 
 ---
 
 ## 1. JOSS submission checklist (current 2025/2026)
 
 ### TL;DR
-JOSS now operates with **four hard pre-review "must-meet" gates** (6-month public history; demonstrated research impact; good OSS practices; iterative development) plus a longer set of paper-content requirements that, since the 2025 scope update, includes explicitly labelled **Summary, Statement of Need, State of the Field, Software Design, Research Impact, and AI Usage Disclosure** sections. The paper must be **750–1750 words**. The reviewer checklist is published at joss.readthedocs.io and is used verbatim by reviewers in the joss-reviews GitHub repository.
+JOSS now operates with **four hard pre-review "must-meet" gates** (6-month public history; demonstrated research impact; good OSS practices; iterative development) plus a longer set of paper-content requirements that, since the 2025 scope update, includes explicitly labelled **Summary, Statement of Need, State of the Field, Software Design, Research Impact, and AI Usage Disclosure** sections. The paper must be **750-1750 words**. The reviewer checklist is published at joss.readthedocs.io and is used verbatim by reviewers in the joss-reviews GitHub repository.
 
 ### Authoritative sources
 - Submission guidelines: https://joss.readthedocs.io/en/latest/submitting.html
@@ -61,8 +61,8 @@ Plus author list with affiliations (ROR ids encouraged), key references, mention
 - The current GitHub repo (adityagit94/Quantum-Gravitometer) **must show ≥6 months of iterative commit history** before a JOSS submission can pass the pre-review gate. If the project went public recently, do not submit yet.
 - A CONTRIBUTING.md, CODE_OF_CONDUCT.md, a CHANGELOG, tagged releases (v1.0.1 already exists per the question - good), and CI (GitHub Actions running `pytest` with coverage) are *all* required signals.
 - An OSI license **file** (e.g., MIT, BSD-3, Apache-2.0, GPL-3.0) - not a README mention.
-- At least one citation/usage example: an arXiv preprint reproducing the Peters–Chu g-measurement (*Nature* **400**, 849–852, 1999) using qgrav, a Zenodo DOI for v1.1.0, or documented usage in a teaching/research workflow.
-- The paper.md must contain a labelled "AI Usage Disclosure" section since v1.0.1 was developed in 2025–2026.
+- At least one citation/usage example: an arXiv preprint reproducing the Peters-Chu g-measurement (*Nature* **400**, 849-852, 1999) using qgrav, a Zenodo DOI for v1.1.0, or documented usage in a teaching/research workflow.
+- The paper.md must contain a labelled "AI Usage Disclosure" section since v1.0.1 was developed in 2025-2026.
 
 ---
 
@@ -71,15 +71,15 @@ Plus author list with affiliations (ROR ids encouraged), key references, mention
 ### TL;DR
 Two JOSS papers are direct precedents for qgrav: **GPUE** (BEC simulator, 2018) and **RydIQule v2** (Rydberg-atom sensor modelling, 2026). Four quantum-information / many-body packages - **quimb**, **toqito**, **qujax**, and **QuantNBody** - are useful structural models for the paper format. Several of the most important atomic-physics simulation packages qgrav must cite (PyLCP, AtomECS, ARC, ElecSus, QuTiP, atomSmltr) were NOT published in JOSS; they appeared in Computer Physics Communications or SciPost.
 
-### 2.1 GPUE: Graphics Processing Unit Gross–Pitaevskii Equation solver
+### 2.1 GPUE: Graphics Processing Unit Gross-Pitaevskii Equation solver
 - **DOI:** 10.21105/joss.01037 - https://joss.theoj.org/papers/10.21105/joss.01037
 - **Authors:** James R. Schloss, Lee J. O'Riordan (OIST, Japan)
 - **Year/volume:** 2018, JOSS 3(32), 1037
 - **Repo:** https://github.com/GPUE-group/GPUE
 - **Editor / Reviewers:** @labarba (Lorena Barba) / @mgalloy, @markbasham
-- **Description:** GPU-based split-operator solver for the linear and non-linear Gross–Pitaevskii equation, focused on superfluid vortex dynamics in BECs.
-- **Style:** ~500-word body, single "Summary" section that combines functionality, comparators (GPELab/XMDS2/Trotter–Suzuki), feature list, and acknowledgements. Predates the 2025 required-sections format and is below the current 750-word floor; qgrav cannot imitate this layout exactly.
-- **Verbatim opening (de-facto statement of need):** "Bose–Einstein Condensates (BECs) are superfluid systems consisting of bosonic atoms that have been cooled and condensed into a single, macroscopic ground state … Numerical simulations of BECs that directly mimic experiments are valuable to fundamental research in these areas and allow for theoretical advances before experimental validation."
+- **Description:** GPU-based split-operator solver for the linear and non-linear Gross-Pitaevskii equation, focused on superfluid vortex dynamics in BECs.
+- **Style:** ~500-word body, single "Summary" section that combines functionality, comparators (GPELab/XMDS2/Trotter-Suzuki), feature list, and acknowledgements. Predates the 2025 required-sections format and is below the current 750-word floor; qgrav cannot imitate this layout exactly.
+- **Verbatim opening (de-facto statement of need):** "Bose-Einstein Condensates (BECs) are superfluid systems consisting of bosonic atoms that have been cooled and condensed into a single, macroscopic ground state … Numerical simulations of BECs that directly mimic experiments are valuable to fundamental research in these areas and allow for theoretical advances before experimental validation."
 
 ### 2.2 RydIQule Version 2: Enhancing graph-based modeling of Rydberg atoms
 - **DOI:** 10.21105/joss.08539 - https://joss.theoj.org/papers/10.21105/joss.08539
@@ -130,8 +130,8 @@ Two JOSS papers are direct precedents for qgrav: **GPUE** (BEC simulator, 2018) 
 | **ARC / ARC 3.0** (Šibalić, Pritchard, Adams, Weatherill; Robertson et al.) | Computer Physics Communications **220**, 319 (2017); **261**, 107814 (2021) | Standard Alkali-atom Rydberg calculator; routinely cited by RydIQule and PyLCP. |
 | **ElecSus** (Keaveney, Adams, Hughes) | Computer Physics Communications **224**, 311 (2018) | Atomic-magnetometer / vapor spectroscopy calculator. |
 | **QuTiP / QuTiP 2** (Johansson, Nation, Nori) | Computer Physics Communications **184**, 1234 (2013) | Standard open-quantum-system solver, cited by both PyLCP and RydIQule v2. |
-| **atomSmltr** (Weill, Bertoldi, Dareau - Institut d'Optique / LP2N, Université Bordeaux, CNRS) | SciPost Physics Codebases, arXiv:2511.20596; v1 submitted 25 Nov 2025, v2 resubmitted 18–19 Feb 2026 after two referee reports (Dr Bentine, Dr Jones); **under review, not yet published** as of May 2026. | Newest Python laser-cooling simulator with modular MOT geometry - direct competitor to PyLCP. |
-| **Peters–Chu g-measurement** (A. Peters, K.Y. Chung, S. Chu) | *Nature* **400**, 849–852 (1999); achieved Δg/g ≈ 3×10⁻⁹ | The canonical published gravimetry benchmark qgrav should reproduce as its "research impact" demonstration. |
+| **atomSmltr** (Weill, Bertoldi, Dareau - Institut d'Optique / LP2N, Université Bordeaux, CNRS) | SciPost Physics Codebases, arXiv:2511.20596; v1 submitted 25 Nov 2025, v2 resubmitted 18-19 Feb 2026 after two referee reports (Dr Bentine, Dr Jones); **under review, not yet published** as of May 2026. | Newest Python laser-cooling simulator with modular MOT geometry - direct competitor to PyLCP. |
+| **Peters-Chu g-measurement** (A. Peters, K.Y. Chung, S. Chu) | *Nature* **400**, 849-852 (1999); achieved Δg/g ≈ 3×10⁻⁹ | The canonical published gravimetry benchmark qgrav should reproduce as its "research impact" demonstration. |
 
 **For atom-interferometric gravimetry specifically, no published JOSS paper exists** as of May 2026. This is a positive for qgrav: it can credibly claim to fill an open niche. The closest published gravimetry-instrument paper outside JOSS is Ménoret et al., "Gravity measurements below 10⁻⁹ g with a transportable absolute quantum gravimeter," *Scientific Reports* (PMC6098009).
 
@@ -174,7 +174,7 @@ Suggested reviewer pool drawn from JOSS atomic-physics and quantum-software revi
 ## 4. Reasonable scope analysis - minimum vs. comprehensive JOSS paper
 
 ### TL;DR
-JOSS papers are formally bounded at **750–1750 words** of body prose (per joss.readthedocs.io/en/latest/paper.html). Published physics tools cluster around **~500–900 words** (some legacy papers like GPUE are below the current floor and would have to be expanded under today's rules). RydIQule v2 (2026, ~800 words) is the strongest comprehensive template.
+JOSS papers are formally bounded at **750-1750 words** of body prose (per joss.readthedocs.io/en/latest/paper.html). Published physics tools cluster around **~500-900 words** (some legacy papers like GPUE are below the current floor and would have to be expanded under today's rules). RydIQule v2 (2026, ~800 words) is the strongest comprehensive template.
 
 ### 4.1 What JOSS says (verbatim)
 > "The paper should be between 750-1750 words. Authors submitting papers significantly longer than 1750 words may be asked to reduce the length of their paper." - https://joss.readthedocs.io/en/latest/paper.html
@@ -189,7 +189,7 @@ JOSS papers are formally bounded at **750–1750 words** of body prose (per joss
 - Best modern template for qgrav.
 
 ### 4.4 Recommended target for qgrav v1.1.0
-- **750–1100 words**, comfortably above the 750-word floor and well below the 1750-word ceiling.
+- **750-1100 words**, comfortably above the 750-word floor and well below the 1750-word ceiling.
 - Section budget: Summary 200w, Statement of Need 200w, State of the Field 250w, Software Design 250w, Research Impact 100w, AI Usage Disclosure 50w (≈ 1050 words). Acknowledgements + references are not counted against the limit.
 
 ---
@@ -238,11 +238,11 @@ Five well-written Statement-of-Need (or de-facto SoN) passages from JOSS physics
 ### Now (before any JOSS submission)
 1. **Audit the GitHub repo for the four pre-review gates.** If the commit history is <6 months old or shows a recent dump-style import, *do not submit* - continue iterating publicly until the 6-month threshold passes.
 2. **Add or verify the required repo artefacts:** OSI LICENSE file (MIT/BSD-3/Apache-2.0 recommended), CONTRIBUTING.md, CODE_OF_CONDUCT.md, CHANGELOG.md, GitHub Actions CI running `pytest` + coverage, tagged v1.0.x and v1.1.x releases on GitHub *and* on PyPI.
-3. **Generate at least one piece of "demonstrated research impact" evidence:** an arXiv preprint reproducing the Peters–Chu g-measurement (*Nature* **400**, 849–852, 1999) using qgrav, a Zenodo DOI for v1.1.0, or documented usage in another group's repository.
+3. **Generate at least one piece of "demonstrated research impact" evidence:** an arXiv preprint reproducing the Peters-Chu g-measurement (*Nature* **400**, 849-852, 1999) using qgrav, a Zenodo DOI for v1.1.0, or documented usage in another group's repository.
 
 ### Pre-submission (paper.md drafting)
 4. **Use the RydIQule v2 paper as the structural template.** Copy its section ordering: Summary → Statement of Need → Software Design subsections → Related Packages and Work → Acknowledgements → References, then add an explicit "AI Usage Disclosure" section.
-5. **Target 750–1100 words of body prose.** Hard floor 750, hard cap 1750.
+5. **Target 750-1100 words of body prose.** Hard floor 750, hard cap 1750.
 6. **Write the State-of-the-Field section to explicitly distinguish qgrav from PyLCP, AtomECS, atomSmltr, ARC, ElecSus, and any closed-source/Mathematica gravimetry models.** Use a "Like X, but focused on Y" sentence pattern (see §5.4).
 7. **Use the Open Journals GitHub Action** (https://github.com/marketplace/actions/open-journals-pdf-generator) on the paper branch so a PDF artefact is built on every commit and you can be sure the paper compiles.
 
@@ -252,7 +252,7 @@ Five well-written Statement-of-Need (or de-facto SoN) passages from JOSS physics
 
 ### Benchmarks that would change the staging
 - If the GitHub repo has <6 months of public iterative history at the time of submission: **delay until threshold met**.
-- If qgrav has no external citing publication, preprint, or third-party adoption: **delay until at least one preprint exists**, or pre-empt the question by writing a benchmark companion preprint reproducing Peters–Chu (1999).
+- If qgrav has no external citing publication, preprint, or third-party adoption: **delay until at least one preprint exists**, or pre-empt the question by writing a benchmark companion preprint reproducing Peters-Chu (1999).
 - If the JOSS scope is updated again before submission (the front page warns "JOSS has updated its submission scope requirements"): **re-read joss.readthedocs.io/en/latest/submitting.html and paper.html before any final draft**.
 
 ## Caveats
@@ -265,4 +265,4 @@ Five well-written Statement-of-Need (or de-facto SoN) passages from JOSS physics
 - "Sophie Beck" is the editor name printed on the RydIQule v2 paper; her GitHub handle was not confirmed in this research session - to find it, check the joss-reviews issue for joss.08539.
 - The "widely cited" claim for quimb is qualitative; an exact citation count was not independently verified.
 - JOSS's reviewer-suggestion process does not guarantee selection; editors choose freely from the reviewer pool.
-- The first JOSS pre-review for qgrav may be rejected if the paper claims novelty without a benchmark; mitigate by including a reproducible Peters–Chu validation notebook in the repo at submission time.
+- The first JOSS pre-review for qgrav may be rejected if the paper claims novelty without a benchmark; mitigate by including a reproducible Peters-Chu validation notebook in the repo at submission time.

@@ -65,13 +65,13 @@ quantum-sensing R&D.
   ballistically between Raman pulses; a chirped `Wavevectors` cancels the common
   gravity Doppler; the patched two-level propagator uses the time-integrated
   laser phase $-k_\mathrm{eff} z(t_0) + \tfrac12 \alpha t_0^2$ so the
-  Mach–Zehnder combination yields $k_\mathrm{eff}(g-g_\mathrm{chirp})T^2$ from
+  Mach-Zehnder combination yields $k_\mathrm{eff}(g-g_\mathrm{chirp})T^2$ from
   first principles. The finite-pulse-duration correction is reported in closed
   form (Bertoldi 2019 [@bertoldi2019]).
 - **Noise & systematics.** NLNM/NHNM time-domain vibration with isolation
   filtering; detection (projection and technical) noise; Raman-phase noise;
   spontaneous-emission loss; position-dependent AC Stark; Zernike wavefront
-  aberrations (whose Mach–Zehnder effect is the known curvature systematic,
+  aberrations (whose Mach-Zehnder effect is the known curvature systematic,
   second-order in the inter-pulse drift).
 - **Measurement cycle.** Multi-drop simulator with fresh ensembles per drop,
   correlated seismic noise, PID or integrator fringe-locking servo, and
@@ -81,7 +81,7 @@ quantum-sensing R&D.
   independent numerical integration; real superconducting-gravimeter data
   ingest (IGETS) for the analysis chain.
 - **Pipeline.** Single-YAML configuration, versioned run folders, HTML reports,
-  CI (Linux + Windows × Python 3.11–3.12), and a Docker image.
+  CI (Linux + Windows × Python 3.11-3.12), and a Docker image.
 
 # AI-assistance disclosure
 

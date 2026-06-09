@@ -27,7 +27,7 @@ I've prepared a self-contained **30-page review packet** and a companion **Jupyt
 
 The packet and notebook are at:
 
-- `docs/PHYSICS_REVIEW_PACKET.md` (read-time ~60–90 min; targeted answer of §11 questions ~1.5–2 hr)
+- `docs/PHYSICS_REVIEW_PACKET.md` (read-time ~60-90 min; targeted answer of §11 questions ~1.5-2 hr)
 - `docs/reviewer_notebook.ipynb` (run-time <2 min)
 - Repository: [URL of your GitHub repo / DOI]
 
@@ -63,7 +63,7 @@ Suggested first-line contacts:
 | **Indian Institute of Astrophysics / Raman Research Institute / IUCAA** | Domestic option, faster reply | Direct email |
 | **Atom Interferometry Workshop mailing list / iCAP attendees** | Broadcast option | If you've attended a conference |
 
-I'd suggest sending to 3–5 in parallel; the first reply you get back wins.
+I'd suggest sending to 3-5 in parallel; the first reply you get back wins.
 
 ## After you get a reply
 

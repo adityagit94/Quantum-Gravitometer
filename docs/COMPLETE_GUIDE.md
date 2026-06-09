@@ -1,14 +1,14 @@
 # qgrav - The Complete Guide
 
-**Quantum Gravimeter R&D Platform v1.2.3**
+**Quantum Gravimeter R&D Platform**
 
 *A software-first research workbench for simulating, benchmarking, and analyzing quantum gravity sensors.*
 
 **Author:** Aditya Prakash  
 **License:** GPL-3.0
 
-> **Reader's note (v1.2):** sections 1–15 below describe the v0.8 base feature
-> set and remain accurate - those workflows are unchanged. The v1.0–v1.2
+> **Reader's note:** sections 1-15 below describe the core feature
+> set and remain accurate; those workflows are unchanged. The later
 > capabilities (emergent-gravity simulation, multi-drop cycle with servo &
 > correlated noise, AC Stark, wavefront aberrations, published-reference
 > validation, QuTiP cross-check, performance harness) are summarised in
@@ -23,11 +23,11 @@
 ## Table of Contents
 
 1. [What Is This Software?](#1-what-is-this-software)
-2. [The Science - Explained Simply](#2-the-science--explained-simply)
+2. [The Science - Explained Simply](#2-the-science---explained-simply)
 3. [Installation](#3-installation)
-4. [Quick Start - Your First Run in 2 Minutes](#4-quick-start--your-first-run-in-2-minutes)
+4. [Quick Start - Your First Run in 2 Minutes](#4-quick-start---your-first-run-in-2-minutes)
 5. [The Three Modes of Operation](#5-the-three-modes-of-operation)
-6. [The GUI - Screen by Screen](#6-the-gui--screen-by-screen)
+6. [The GUI - Screen by Screen](#6-the-gui---screen-by-screen)
 7. [The Command Line Interface](#7-the-command-line-interface)
 8. [Configuration Reference](#8-configuration-reference)
 9. [Understanding the Output](#9-understanding-the-output)
@@ -803,9 +803,9 @@ qgrav includes a vendored copy of **AISim** - an atom interferometer simulator t
 
 | Parameter | Meaning | Typical Value |
 |-----------|---------|---------------|
-| `n_atoms` | Atoms in the cloud | 300–500 |
+| `n_atoms` | Atoms in the cloud | 300-500 |
 | `tau_step_s` | Time step between pulse durations | `1.0e-6` (1 µs) |
-| `n_steps` | Number of points in the scan | 30–60 |
+| `n_steps` | Number of points in the scan | 30-60 |
 | `center_rabi_freq_hz` | Expected Rabi frequency | 15,000 Hz |
 
 ### Study Model 2: Mach-Zehnder Phase Scan (`mach_zehnder_phase_scan`)
@@ -814,7 +814,7 @@ qgrav includes a vendored copy of **AISim** - an atom interferometer simulator t
 
 **Why it matters:** This measures your **fringe visibility** (contrast) - how cleanly you can distinguish constructive from destructive interference. Higher visibility = better sensitivity. Real-world effects (atom temperature, beam quality, timing errors) reduce visibility.
 
-**What you see:** A sinusoidal fringe pattern. The amplitude of the sine tells you the contrast (ideally 1.0, realistically 0.7–0.9). The pipeline fits a sine curve and reports visibility and fit quality.
+**What you see:** A sinusoidal fringe pattern. The amplitude of the sine tells you the contrast (ideally 1.0, realistically 0.7-0.9). The pipeline fits a sine curve and reports visibility and fit quality.
 
 **Key parameters:**
 
@@ -895,7 +895,7 @@ phase formula. It is what the Validation tab's one-click reproductions drive.
 | Parameter | Meaning | Typical Value |
 |-----------|---------|---------------|
 | `n_drops` | Number of measurement drops | `100` |
-| `cycle_time_s` | Time per drop (sets the ASD/Allan time axis) | `1.0`–`1.5` |
+| `cycle_time_s` | Time per drop (sets the ASD/Allan time axis) | `1.0`-`1.5` |
 | `gravity_true_m_s2` | Ground-truth *g* to recover | `9.81` |
 | `detection_sigma_p` | Per-shot detection noise on the excited fraction | `6e-3` |
 | `raman_phase_noise_rad` | Per-shot laser + vibration phase noise | `1.2e-2` |
@@ -995,7 +995,7 @@ Reported in two units:
 - **m/s²/√Hz** - SI standard
 - **µGal/√Hz** - practical unit (1 µGal = 10⁻⁸ m/s²)
 
-Typical values for a well-designed atom gravimeter: 0.1–10 µGal/√Hz.
+Typical values for a well-designed atom gravimeter: 0.1-10 µGal/√Hz.
 
 ### Systematic Effects
 
@@ -1003,7 +1003,7 @@ Order-of-magnitude estimates for two major error sources:
 
 **Gravity gradient:** Earth's gravity decreases with altitude at ~3.086 µGal per meter. During the 260 ms free fall, atoms drop ~0.33 m, experiencing a slightly different gravity at the top vs. bottom of their trajectory. Effect: ~1 µGal.
 
-**Coriolis force:** Earth's rotation causes a sideways force on falling atoms. Depends on latitude and atomic velocity. Effect: 1–10 µGal.
+**Coriolis force:** Earth's rotation causes a sideways force on falling atoms. Depends on latitude and atomic velocity. Effect: 1-10 µGal.
 
 These are estimates - the actual values depend on your specific setup.
 
@@ -1250,7 +1250,7 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 | **IGETS** | International Geodynamics and Earth Tide Service. Distributes superconducting gravimeter data at three processing levels (L1: raw, L2: minute, L3: hourly corrected). |
 | **k_eff** | Effective wave vector - the momentum kick atoms receive from laser pulses. For rubidium-87: ~16 million rad/m. |
 | **Mach-Zehnder** | A three-pulse interferometer geometry: split → redirect → recombine. The standard design for atom gravimeters. |
-| **microGal (µGal)** | Unit of gravitational acceleration. 1 µGal = 10⁻⁸ m/s². Typical gravity variations of interest are 0.1–100 µGal. |
+| **microGal (µGal)** | Unit of gravitational acceleration. 1 µGal = 10⁻⁸ m/s². Typical gravity variations of interest are 0.1-100 µGal. |
 | **nanoGal (nGal)** | 1 nGal = 10⁻¹¹ m/s². The sensitivity floor of the best superconducting gravimeters. |
 | **NLNM / NHNM** | New Low/High Noise Models (Peterson 1993). Acceleration PSD bounds for seismically quiet and noisy sites worldwide. |
 | **PSD** | Power Spectral Density - shows how noise power is distributed across frequency. |
@@ -1273,7 +1273,7 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 
 ## 16. What's new since v1.0 (capabilities map)
 
-Sections 1–15 describe the v0.8 foundation. The v1.0–v1.2 releases added a full
+Sections 1-15 describe the v0.8 foundation. The v1.0-v1.2 releases added a full
 emergent-gravity simulation, realistic noise, published-reference validation, an
 independent cross-check, and release infrastructure. Use this section as the
 index into those capabilities; each links to its detailed doc.
@@ -1288,7 +1288,7 @@ ballistically (`GravityFreePropagator`) between Raman pulses; a chirped laser
 [V1_PHYSICS_UPGRADE.md](V1_PHYSICS_UPGRADE.md). Honest scope labels
 (`FULLY_SIMULATED` / `HYBRID` / `ANALYTICAL_ONLY`) accompany every result.
 
-### Noise & systematics (v1.0–v1.2)
+### Noise & systematics (v1.0-v1.2)
 
 - **Multi-drop measurement cycle** (`multi_drop_cycle` model): N independent
   drops, detection noise, correlated NLNM/NHNM seismic vibration, a
@@ -1303,7 +1303,7 @@ ballistically (`GravityFreePropagator`) between Raman pulses; a chirped laser
   wavefront effect is the curvature systematic (second-order in inter-pulse
   drift); see [AISIM_GRAVIMETER_STUDIES.md](AISIM_GRAVIMETER_STUDIES.md).
 
-### Published-reference validation (v1.1–v1.2)
+### Published-reference validation (v1.1-v1.2)
 
 Automated regressions reproduce five published instruments - **Freier 2016**
 (primary, 96 nm/s²/√Hz), **Hu 2013**, **Ménoret 2018**, **Xu 2022**, **Wu
@@ -1325,11 +1325,11 @@ gravimeter data** (IGETS station `ap046`, bundled). Note this validates the
 analysis chain, not the atom-interferometer simulation against hardware (no
 public atom-gravimeter raw data exists).
 
-### Performance & release infrastructure (v1.2–v1.3)
+### Performance & release infrastructure (v1.2-v1.3)
 
-- **Performance:** single MZ ~1.3 ms, 60-pt sweep ~0.1–0.2 s, 100-drop cycle
+- **Performance:** single MZ ~1.3 ms, 60-pt sweep ~0.1-0.2 s, 100-drop cycle
   ~0.3 s. Harness: `pytest -m benchmark`; numbers in [PERFORMANCE.md](PERFORMANCE.md).
-- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.11–3.12),
+- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.11-3.12),
   nightly slow + QuTiP + benchmark runs, PyPI Trusted-Publishing release
   workflow, a Docker image, and this MkDocs site.
 

@@ -44,7 +44,7 @@ absent.
 
 **Why it does not fit (yet).** Qiskit models gate-based quantum *computation* on
 qubit registers. A light-pulse atom interferometer is not a gate circuit; the
-three-pulse Mach–Zehnder is a continuous-time Rabi/free-evolution sequence on a
+three-pulse Mach-Zehnder is a continuous-time Rabi/free-evolution sequence on a
 momentum-state ladder, not a discrete gate sequence on logical qubits.
 
 One could *map* the MZ sequence onto a 1-qubit circuit (π/2 → √X-like, free
