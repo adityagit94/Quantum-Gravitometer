@@ -75,7 +75,7 @@ nav:
       - Scientific-package evaluation: SCIENTIFIC_PACKAGE_EVALUATION.md
       - Performance: PERFORMANCE.md
   - Project:
-      - Roadmap v1→v2: ROADMAP_V1_TO_V2.md
+      - Roadmap: ROADMAP_V1_TO_V2.md
       - AI usage disclosure: AI_USAGE_DISCLOSURE.md
 
 # mkdocstrings (API docs from docstrings) is optional; enable when the plugin

@@ -84,7 +84,7 @@ Documentation, real-data validation, and JOSS-readiness release. **362 → 371 t
 ### Real-data validation of the analysis chain (resolves C8, scoped)
 
 - **`tests/test_real_data_igets_validation.py`** (3 tests): ingests the bundled real IGETS superconducting-gravimeter station (`ap046`) through the existing `bench_ifo/real_gravity` pipeline, computes the overlapping Allan deviation, and asserts it is finite, positive, structurally bounded by the sample std, and physically plausible - cross-referenced to the `sg_noise_floor` instrument-floor reference. Hermetic (uses bundled data, no network).
-- **Honest scope:** this validates the *analysis chain* on real precision-gravity data; it does **not** validate the atom-interferometer *simulation* against hardware, because essentially no public atom-gravimeter raw data exists. A real-AI-data outreach ask was added to `docs/REVIEW_REQUEST_TEMPLATE.md` for the user-owned collaboration track.
+- **Honest scope:** this validates the *analysis chain* on real precision-gravity data; it does **not** validate the atom-interferometer *simulation* against hardware, because essentially no public atom-gravimeter raw data exists. An outreach ask for real atom-gravimeter data was added to `docs/REVIEW_REQUEST_TEMPLATE.md` as a future collaboration track.
 
 ### JOSS paper + MkDocs site
 
@@ -188,7 +188,7 @@ Physics-rigor release: pulse-center-timing investigation, the finite-ensemble-fl
 
 ## v1.1.0 (2026-05-29)
 
-The published-reference release. Lands the v1.0→v1.1 roadmap (`docs/ROADMAP_V1_TO_V2.md`) end-to-end with all 14 research topics applied (`docs/research/FINDINGS_SUMMARY.md`). **312 → 344 tests** (+32). Highlights:
+The published-reference release. Lands the v1.0 to v1.1 roadmap end-to-end with all 14 research topics applied. **312 to 344 tests** (+32). Highlights:
 
 - **Five automated published-reference regressions**: Freier 2016 (PRIMARY, 96 nm/s²/√Hz), Hu 2013 (4.2 µGal/√Hz, HUST short fountain - research correction: NOT the 10-m tower), Ménoret 2018 (750 nm/s²/√Hz Larzac, T=60 ms NOT 80 ms), Xu 2022 (24 µGal/√Hz, first HUST per-effect systematic budget, NEW), Wu 2019 (37 µGal/√Hz Berkeley mobile, NEW). Marked `@pytest.mark.slow` and run nightly.
 - **Vendor subclass refactor (resolves C4)**: the v1.0 physics extensions moved out of vendored AISim into `qgrav/sim_ai/_aisim_overrides.py`. Re-vendoring upstream AISim is now trivial. Guard test enforces no `[LOCAL PATCH]` markers in `vendor/aisim/{prop,beam}.py`.
