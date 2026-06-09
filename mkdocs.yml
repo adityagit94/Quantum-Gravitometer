@@ -1,15 +1,62 @@
 site_name: qgrav
 site_description: Software-first R&D platform for atom-interferometric gravimetry
+site_url: https://adityagit94.github.io/Quantum-Gravitometer/
+repo_url: https://github.com/adityagit94/Quantum-Gravitometer
+repo_name: adityagit94/Quantum-Gravitometer
 docs_dir: docs
+
 # README.md is the GitHub folder index; index.md is the MkDocs home. Exclude the
 # README from the build so the two do not conflict.
 exclude_docs: |
   README.md
   research/
-# Use the built-in 'readthedocs' theme so the site builds with only `mkdocs`
-# installed (no extra theme dependency required for CI).
+
+# Material for MkDocs. Requires `pip install mkdocs-material` (a docs-build
+# dependency only; it is not needed to install or run qgrav). To fall back to the
+# zero-dependency built-in theme, set `theme: { name: readthedocs }`.
 theme:
-  name: readthedocs
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - toc:
+      permalink: true
+
+plugins:
+  - search
 
 nav:
   - Home: index.md
@@ -32,5 +79,4 @@ nav:
       - AI usage disclosure: AI_USAGE_DISCLOSURE.md
 
 # mkdocstrings (API docs from docstrings) is optional; enable when the plugin
-# is installed.  Kept out of the default plugin list so `mkdocs build` works
-# with a bare `pip install mkdocs`.
+# is installed.
