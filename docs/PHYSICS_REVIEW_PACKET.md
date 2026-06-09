@@ -647,7 +647,7 @@ Please answer **yes / no / unclear / needs more info** for each, with a 1-3 sent
 ### Patch A - `GravityFreePropagator`
 
 - **A.1** Is the sign convention `g_m_s2 > 0 → downward` and `v_z -= g·dt` correct (i.e., a positive `g_m_s2` causes a stationary atom to gain *negative* `v_z` and reach *negative* `z`)?
-- **A.2** Is the linear-gradient formula `g(z) = g₀ + γ·(z − z_ref)` the right form for a small altitude variation around `z_ref`, and is the sign of γ free for the user to set (i.e., we don't impose Earth's `γ < 0` convention)?
+- **A.2** Is the linear-gradient formula `g(z) = g₀ + γ·(z − z_ref)` the right form for a small altitude variation around `z_ref`, and is the sign of γ free to set (i.e., we don't impose Earth's `γ < 0` convention)?
 - **A.3** Is it physically correct that the quantum state is unchanged (identity matrix) during gravity free-fall, in the standard semiclassical atom-interferometer treatment?
 
 ### Patch B - chirped `Wavevectors`
@@ -690,7 +690,7 @@ A companion Jupyter notebook `docs/reviewer_notebook.ipynb` (TODO: generate) wil
 
 ```python
 # Cell 1: install & import
-# (assumes the user has cloned the qgrav repo and run `pip install -e .`)
+# (assumes the qgrav repo is cloned and installed with `pip install -e .`)
 
 from qgrav.vendor.aisim import (
     AtomicEnsemble, GravityFreePropagator, FreePropagator,

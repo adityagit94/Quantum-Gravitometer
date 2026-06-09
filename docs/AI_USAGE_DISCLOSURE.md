@@ -26,18 +26,16 @@ Bertoldi closed-form predictor, the PID servo, the correlated-vibration
 sampling, the calibration step - was co-designed in conversation with the AI
 and verified against the primary literature.
 
-**Plan generation.** The v1.0 ten-phase plan and the v1.1 roadmap §1.5
-research-driven revisions were AI-drafted under user direction, then signed
-off by the user before each phase was executed.
+**Plan generation.** The development plan and documentation structure were
+AI-drafted under the author's direction, then reviewed and signed off by the
+author before being implemented.
 
-**Research-prompt drafting.** The 14-topic research brief
-(`docs/INTERNET_RESEARCH_PROMPT.md`) was AI-drafted, then the user ran the
-actual web research separately (using Perplexity/Claude with browsing) and
-delivered the results as `docs/research/RESEARCH_*.md`. Those research files
-themselves are AI-assisted summaries of primary sources, with verbatim
-quotes; the user re-verified the most consequential numbers against the cited
-papers, catching one premise error (Hu 2013 is the HUST short fountain, not
-the Wuhan 10-m tower).
+**Research-prompt drafting.** The 14-topic research brief was AI-drafted, then
+the author ran the web research separately and recorded the results under
+`docs/research/`. Those research files are AI-assisted summaries of primary
+sources, with verbatim quotes; the author re-verified the most consequential
+numbers against the cited papers, catching one premise error (Hu 2013 is the
+HUST short fountain, not the Wuhan 10-m tower).
 
 **Test design.** Test parametrisation, fixture design, tolerance choice and
 seed selection were AI-assisted; the tolerances were calibrated empirically
@@ -45,14 +43,14 @@ by running the tests and adjusting until they reflected the underlying
 physics correctly (e.g., factor-3 envelope on Freier ASD vs factor-4.5 on the
 secondary benchmarks, both motivated by the V≈0.6-vs-1 inversion mismatch).
 
-**Documentation.** All Markdown docs in `docs/`, the CHANGELOG, the README
-and this disclosure file were AI-drafted, then the user reviewed and edited
-for accuracy and tone.
+**Documentation.** The Markdown docs in `docs/`, the CHANGELOG, the README
+and this disclosure file were AI-drafted, then reviewed and edited by the
+author for accuracy and tone.
 
 ## Verification posture
 
-The user is the sole author of the project on its public face, takes
-responsibility for the code and the claims, and will be the first point of
+Aditya Prakash is the sole author of the project, takes
+responsibility for the code and the claims, and is the first point of
 contact for any reviewer or user query. The physics-review packet
 (`docs/PHYSICS_REVIEW_PACKET.md`) is the primary mechanism by which the
 project's core physics derivation (the integrated-phase patch and the
