@@ -3,7 +3,7 @@
 **TL;DR (overall)**
 - The only currently published, peer-reviewed, commercial atom-interferometric gravimeter with a complete public spec sheet is the Exail (ex-Muquans / iXBlue) AQG family: 500 nm/s²/√Hz (5 × 10⁻⁷ m/s²/√Hz) sensitivity, ~2 Hz drop rate, sub-µGal long-term stability, and an independently measured combined uncertainty ~100 nm/s² (1 × 10⁻⁷ m/s²) from BKG (Glässel et al. 2025).
 - AOSense, Vector Atomic (GAINS), Infleqtion (ex-ColdQuanta), and Q-CTRL all market cold-atom gravimeters or quantum inertial sensors, but public technical disclosure is at the level of marketing copy and conference abstracts; only Vector Atomic GAINS has a conference-disclosed performance figure ("surpassing 1 mGal precision and accuracy" - < 1 × 10⁻⁵ m/s²), and none publish APIs, data-format specs, or sample-level documentation.
-- For the signal-chain integration layer, the right reference architectures are: a digital cross-correlation phase-noise/ADEV analyzer (Microchip 5125A, –145 dBc/Hz typ at 1 Hz on a 10 MHz carrier; < 3 × 10⁻¹⁵ ADEV at 1 s), the Miles Design / Microsemi TimePod 5330A (0.5–30 MHz, 16-bit RF ADCs at ~78 MHz clock, 236 kS/s baseband), and an NI PXIe-4464 DSA module (24-bit delta-sigma, 4 simultaneously sampled channels, 100 S/s–204.8 kS/s, 119 dB DR) for fluorescence-photodiode / lock-in chains.
+- For the signal-chain integration layer, the right reference architectures are: a digital cross-correlation phase-noise/ADEV analyzer (Microchip 5125A, -145 dBc/Hz typ at 1 Hz on a 10 MHz carrier; < 3 × 10⁻¹⁵ ADEV at 1 s), the Miles Design / Microsemi TimePod 5330A (0.5-30 MHz, 16-bit RF ADCs at ~78 MHz clock, 236 kS/s baseband), and an NI PXIe-4464 DSA module (24-bit delta-sigma, 4 simultaneously sampled channels, 100 S/s-204.8 kS/s, 119 dB DR) for fluorescence-photodiode / lock-in chains.
 
 ---
 
@@ -11,14 +11,14 @@
 
 **TL;DR.** Peer-reviewed AQG-A01 sensitivity: 500 nm/s²/√Hz (= 5 × 10⁻⁷ m/s²/√Hz) at a quiet site, 2 Hz repetition rate, long-term stability < 10 nm/s² (1 × 10⁻⁸ m/s², ~1 µGal). Independent BKG evaluation of AQG-A02 / AQG-B10 confirms the 500 nm/s²/√Hz spec, with a combined accuracy budget ~100 nm/s² (1 × 10⁻⁷ m/s²) - not yet competitive with FG5-class FCCGs on accuracy, but uniquely good for continuous absolute monitoring. Software interfaces are described qualitatively (dedicated control software, remote internet operation, raw accelerometer stream, Earth-tide/ocean-loading corrections via a built-in TSoft routine) but **no public API, file-format, or schema documentation exists.**
 
-**Corporate history.** Muquans → acquired by iXblue → rebranded Exail. The Ménoret 2018 paper (DOI 10.1038/s41598-018-30608-1, arXiv:1809.04908) is the canonical first-product reference; AQG-B is the field/outdoor variant, AQG-A the indoor variant; AQG-B10 is among the most recent units evaluated externally (Glässel et al., J. Geod. 99:73, 2025, DOI 10.1007/s00190-025-01995-x). Recent Exail manufacturer summary at arXiv:2405.10844 (Antoni-Micollier et al., 2024 - manufacturer conference paper) reports A01–A04 and B01–B12 already produced.
+**Corporate history.** Muquans → acquired by iXblue → rebranded Exail. The Ménoret 2018 paper (DOI 10.1038/s41598-018-30608-1, arXiv:1809.04908) is the canonical first-product reference; AQG-B is the field/outdoor variant, AQG-A the indoor variant; AQG-B10 is among the most recent units evaluated externally (Glässel et al., J. Geod. 99:73, 2025, DOI 10.1007/s00190-025-01995-x). Recent Exail manufacturer summary at arXiv:2405.10844 (Antoni-Micollier et al., 2024 - manufacturer conference paper) reports A01-A04 and B01-B12 already produced.
 
 **Quantitative specs (each with unit conversion):**
 
 | Quantity | Value | SI conversion | Source class |
 |---|---|---|---|
 | Short-term sensitivity (AQG-A01, peer reviewed) | 500 nm·s⁻²·Hz⁻¹ᐟ² | 5 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | Peer-reviewed (Ménoret 2018) |
-| Sensitivity at Talence (noisy lab) | 600–700 nm·s⁻²·Hz⁻¹ᐟ² | 6–7 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | Peer-reviewed (Ménoret 2018) |
+| Sensitivity at Talence (noisy lab) | 600-700 nm·s⁻²·Hz⁻¹ᐟ² | 6-7 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | Peer-reviewed (Ménoret 2018) |
 | Long-term stability (1 day) | 9.4 nm·s⁻² | 9.4 × 10⁻⁹ m·s⁻² | Peer-reviewed (Ménoret 2018) |
 | Repeatability between pillars | ≤ ~24 nm·s⁻² | ≤ 2.4 × 10⁻⁸ m·s⁻² | Peer-reviewed (Ménoret 2018) |
 | Repetition rate | 2 Hz (drop interval ≈ 0.5 s; BKG study quotes 0.54 s) | T_cycle ≈ 0.5 s | Peer-reviewed (Ménoret 2018; Glässel 2025) |
@@ -27,7 +27,7 @@
 | Atom number per drop | ~10⁷ ⁸⁷Rb | - | Peer-reviewed (Ménoret 2018) |
 | Atom temperature | < 2 µK | - | Peer-reviewed (Ménoret 2018) |
 | Combined uncertainty (BKG / Bad Homburg & Wettzell) | ~100 nm·s⁻² | 1 × 10⁻⁷ m/s² | Peer-reviewed (Glässel et al. 2025) |
-| AQG-B10 measured sensitivity at Wettzell | 430–500 nm·s⁻²·τ⁻¹ᐟ² | 4.3–5.0 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | Conf./manuf. (arXiv:2405.10844) |
+| AQG-B10 measured sensitivity at Wettzell | 430-500 nm·s⁻²·τ⁻¹ᐟ² | 4.3-5.0 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | Conf./manuf. (arXiv:2405.10844) |
 | AQG-A02 measured at Bad Homburg | 300 nm·s⁻²·τ⁻¹ᐟ² | 3 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | Conf./manuf. (arXiv:2405.10844) |
 | Differential AQG (DQG) gradiometer sensitivity | "about 60 E/τ¹ᐟ² for the gradient with a long-term stability around 1 E" | 6 × 10⁻⁸ s⁻²/√Hz; ~1 × 10⁻⁹ s⁻² | Conf./manuf. (arXiv:2405.10844) |
 | Manufacturer headline ("turn-key … gravity at a level of 10⁻⁸ m/s²") | 10⁻⁸ m/s² | 10⁻⁸ m/s² | Marketing (exail.com/product/quantum-gravimeters) |
@@ -71,7 +71,7 @@
 
 ## 3. ColdQuanta / Infleqtion - quantum sensing & inertial products
 
-**TL;DR.** Infleqtion (rebranded from ColdQuanta on November 30, 2022, per the company's own press release) sells: (a) an optical atomic clock product line called Tiqker, (b) Rydberg-based quantum RF receivers, (c) cold-atom inertial sensors / "Q-INS" (a Q-NAV programme in pre-commercial development; no shipping product), and (d) a cloud Bose–Einstein-condensate generator now called Oqtant (originally "Albert"). **No quantitative sensitivity, bias, or noise specification for an Infleqtion gravimeter or quantum-inertial sensor is publicly disclosed.** Q-INS is described in press releases as integrating quantum and classical sensors with ML-based denoising; the only quantitative claim is qualitative: "sensor volume reduction of greater than a factor of 10,000 times compared to the current state-of-the-art technology."
+**TL;DR.** Infleqtion (rebranded from ColdQuanta on November 30, 2022, per the company's own press release) sells: (a) an optical atomic clock product line called Tiqker, (b) Rydberg-based quantum RF receivers, (c) cold-atom inertial sensors / "Q-INS" (a Q-NAV programme in pre-commercial development; no shipping product), and (d) a cloud Bose-Einstein-condensate generator now called Oqtant (originally "Albert"). **No quantitative sensitivity, bias, or noise specification for an Infleqtion gravimeter or quantum-inertial sensor is publicly disclosed.** Q-INS is described in press releases as integrating quantum and classical sensors with ML-based denoising; the only quantitative claim is qualitative: "sensor volume reduction of greater than a factor of 10,000 times compared to the current state-of-the-art technology."
 
 **Verbatim quotes (all marketing / press):**
 - Product line: "Our range of sensing products-optical atomic clock, quantum radio frequency (RF) receiver, and inertial sensing-tackle real-world challenges in energy, space, national security, and more." - infleqtion.com.
@@ -85,7 +85,7 @@
 
 ## 4. Vector Atomic - atom-interferometer GAINS gravimeter and iodine-based optical clocks
 
-**TL;DR.** Vector Atomic's GAINS is a strapdown ⁸⁷Rb atom-interferometric gravimeter that operated at sea on a U.S. Navy vessel for 20 days during RIMPAC 2022 and a follow-on for 36 days; the only public performance metric is "**surpassing 1 mGal gravimeter precision and accuracy**" (i.e., < 1 × 10⁻⁵ m/s²), from the 2025 ION PLANS conference abstract. The company also markets the Evergreen / EG-30 iodine optical clock (35 L / 30 L rackmount, < 100 W, ≈ 25 fs stability at 1 s, < 1 ns holdover for several days; peer-reviewed by Roslund et al., Nature 628, 736–740, 2024, DOI 10.1038/s41586-024-07225-2). MAGIC is Vector Atomic's terrestrial portable atom gravimeter (< 35 kg, 12 V / < 100 W, "µGal-level"). No public API or file-format documentation.
+**TL;DR.** Vector Atomic's GAINS is a strapdown ⁸⁷Rb atom-interferometric gravimeter that operated at sea on a U.S. Navy vessel for 20 days during RIMPAC 2022 and a follow-on for 36 days; the only public performance metric is "**surpassing 1 mGal gravimeter precision and accuracy**" (i.e., < 1 × 10⁻⁵ m/s²), from the 2025 ION PLANS conference abstract. The company also markets the Evergreen / EG-30 iodine optical clock (35 L / 30 L rackmount, < 100 W, ≈ 25 fs stability at 1 s, < 1 ns holdover for several days; peer-reviewed by Roslund et al., Nature 628, 736-740, 2024, DOI 10.1038/s41586-024-07225-2). MAGIC is Vector Atomic's terrestrial portable atom gravimeter (< 35 kg, 12 V / < 100 W, "µGal-level"). No public API or file-format documentation.
 
 **Verbatim quotes:**
 - GAINS performance (conference): "The comparison results confirm that GAINS measurements are more accurate than the publicly available gravity maps, with performance surpassing 1 mGal gravimeter precision and accuracy for all relevant navigation timescales." - Cashen et al., ION PLANS 2025 abstract (ion.org/plans/abstracts.cfm?paperID=15240).
@@ -94,7 +94,7 @@
 - GAINS at RIMPAC (marketing): "GAINS generated high-resolution absolute gravity measurements that matched the satellite maps at the micro-g level (0.000001 g), which is within the reported accuracy and discrepancy between available, competing satellite maps." - Vector Atomic / BusinessWire, 27 March 2023.
 - MAGIC, terrestrial (conference abstract): "The total package weighs < 35 kg and operates from a single 12V power source consuming < 100 W, making it capable of operating over 12 h off a single battery." - Cashen et al., ION PLANS 2025.
 - Iodine optical clock EG-30 (marketing): "EG-30 introduces a new performance class to commercial timing markets, offering 25 femtosecond stability (0.000000000000025 s) at one second, and multiday, sub-nanosecond holdover." - Vector Atomic / BusinessWire, 13 Nov 2023.
-- Iodine optical clock holdover (peer reviewed): "The clocks can maintain holdovers of 10 ps for several hours and 1 ns for several days." - Roslund et al., Nature 628, 736–740 (2024). Per the arXiv preprint (arXiv:2308.12457), the same clocks maintained "< 10⁻¹⁴ frequency instability for multiple days."
+- Iodine optical clock holdover (peer reviewed): "The clocks can maintain holdovers of 10 ps for several hours and 1 ns for several days." - Roslund et al., Nature 628, 736-740 (2024). Per the arXiv preprint (arXiv:2308.12457), the same clocks maintained "< 10⁻¹⁴ frequency instability for multiple days."
 
 **SI conversions.**
 - 1 mGal = 1 × 10⁻⁵ m/s² → GAINS "surpasses" this precision.
@@ -123,7 +123,7 @@
 
 ## 6. Lab-grade alternatives for the signal chain - Microchip 5125A, TimePod 5330A, NI DAQ
 
-**TL;DR.** A realistic open-source v2.0 hardware-integration layer can rely entirely on well-documented commercial timing analyzers and DAQ hardware: (a) **Microchip (Microsemi) 5125A** - 1–400 MHz phase-noise / Allan-deviation test set, system noise floor –140 dBc/Hz at 1 Hz (10 MHz carrier), –165 dBc/Hz at 10 kHz, ADEV floor < 3 × 10⁻¹⁵ at 1 s; (b) **Miles Design / Microsemi TimePod 5330A** - cross-spectrum analyzer 0.5–30 MHz, 16-bit RF ADCs with ≈ 78 MHz ADC clock and 236 kS/s baseband, ADEV < 1 × 10⁻¹³ @ 1 s, residual phase-noise < –170 dBc/Hz at offsets > 10 kHz; (c) **NI PXIe-4464 DSA module** - 24-bit delta-sigma, 4 simultaneous-sampled channels, 100 S/s–204.8 kS/s, 119 dB DR (good fit for fluorescence-photodiode / lock-in detection chains). For higher-bandwidth waveform digitization (e.g., direct Raman beat-note sampling or fast atom-detection envelopes), the **NI PXIe-6124** S-series multifunction module (16-bit, 4 MS/s/channel, 4 simultaneous channels) is the canonical low-cost reference. All three vendors document their public APIs (NI-DAQmx for the NI hardware; TSERVE/TimeLab for the 5125A and TimePod).
+**TL;DR.** A realistic open-source v2.0 hardware-integration layer can rely entirely on well-documented commercial timing analyzers and DAQ hardware: (a) **Microchip (Microsemi) 5125A** - 1-400 MHz phase-noise / Allan-deviation test set, system noise floor -140 dBc/Hz at 1 Hz (10 MHz carrier), -165 dBc/Hz at 10 kHz, ADEV floor < 3 × 10⁻¹⁵ at 1 s; (b) **Miles Design / Microsemi TimePod 5330A** - cross-spectrum analyzer 0.5-30 MHz, 16-bit RF ADCs with ≈ 78 MHz ADC clock and 236 kS/s baseband, ADEV < 1 × 10⁻¹³ @ 1 s, residual phase-noise < -170 dBc/Hz at offsets > 10 kHz; (c) **NI PXIe-4464 DSA module** - 24-bit delta-sigma, 4 simultaneous-sampled channels, 100 S/s-204.8 kS/s, 119 dB DR (good fit for fluorescence-photodiode / lock-in detection chains). For higher-bandwidth waveform digitization (e.g., direct Raman beat-note sampling or fast atom-detection envelopes), the **NI PXIe-6124** S-series multifunction module (16-bit, 4 MS/s/channel, 4 simultaneous channels) is the canonical low-cost reference. All three vendors document their public APIs (NI-DAQmx for the NI hardware; TSERVE/TimeLab for the 5125A and TimePod).
 
 **Verbatim quotes (5125A - Microsemi datasheet ds_5125a-test-set.pdf):**
 - "The Microsemi® 5125A makes accurate phase noise measurements on signals from 1 MHz to 400 MHz, covering the full range of the most commonly used frequency references."
@@ -156,7 +156,7 @@
 
 ## 7. Typical atom-gravimeter detection / readout signal chain in the published literature
 
-**TL;DR.** Across the published mobile atom gravimeters (Ménoret 2018 / AQG-A01; Freier 2016 / GAIN; Hu 2013 / HUST; Wu 2014 / Wuhan field; Bidel 2018 marine), the canonical signal chain is: (i) ⁸⁷Rb (or ⁸⁵Rb) trapped in a MOT loaded for ~200–300 ms; (ii) sub-Doppler optical-molasses cooling to ≈ 2 µK; (iii) microwave / Raman state-preparation pulse selecting |F=1, m_F=0⟩; (iv) π/2 − π − π/2 stimulated-Raman or Bragg sequence with T from 50–60 ms (transportable / AQG) to 120 ms (Wu 2014; AQG drop limit) to 300 ms (HUST lab fountain, Hu 2013); (v) **fluorescence detection** (not absorption in any of these production gravimeters) onto Si photodiodes at the D2 (780 nm) line, computing the F=2 / (F=1+F=2) population ratio drop-to-drop; (vi) Allan-weighted servo of the Raman-chirp α (≈ 25 MHz/s for ⁸⁷Rb at T = 60 ms) locked to mid-fringe; (vii) parallel real-time MEMS/seismometer-based vibration compensation. Cycle rates 0.5–2 Hz on lab/field instruments; 50–330 Hz dual-axis dynamic atom interferometers (Sandia / McGuinness 2012, Rakholia 2014) at the cost of an order-of-magnitude single-shot sensitivity penalty.
+**TL;DR.** Across the published mobile atom gravimeters (Ménoret 2018 / AQG-A01; Freier 2016 / GAIN; Hu 2013 / HUST; Wu 2014 / Wuhan field; Bidel 2018 marine), the canonical signal chain is: (i) ⁸⁷Rb (or ⁸⁵Rb) trapped in a MOT loaded for ~200-300 ms; (ii) sub-Doppler optical-molasses cooling to ≈ 2 µK; (iii) microwave / Raman state-preparation pulse selecting |F=1, m_F=0⟩; (iv) π/2 − π − π/2 stimulated-Raman or Bragg sequence with T from 50-60 ms (transportable / AQG) to 120 ms (Wu 2014; AQG drop limit) to 300 ms (HUST lab fountain, Hu 2013); (v) **fluorescence detection** (not absorption in any of these production gravimeters) onto Si photodiodes at the D2 (780 nm) line, computing the F=2 / (F=1+F=2) population ratio drop-to-drop; (vi) Allan-weighted servo of the Raman-chirp α (≈ 25 MHz/s for ⁸⁷Rb at T = 60 ms) locked to mid-fringe; (vii) parallel real-time MEMS/seismometer-based vibration compensation. Cycle rates 0.5-2 Hz on lab/field instruments; 50-330 Hz dual-axis dynamic atom interferometers (Sandia / McGuinness 2012, Rakholia 2014) at the cost of an order-of-magnitude single-shot sensitivity penalty.
 
 **Concrete numbers (each quoted verbatim).**
 
@@ -198,10 +198,10 @@
 - SI: 0.57 μg/√Hz ≈ 5.6 × 10⁻⁶ m·s⁻²·Hz⁻¹ᐟ² (at 50 Hz cycle); 36.7 μg/√Hz ≈ 3.6 × 10⁻⁴ m·s⁻²·Hz⁻¹ᐟ² (at 330 Hz cycle). These are five orders of magnitude noisier than gravimeter-class instruments but enable IMU-class operation.
 
 **Implications for qgrav v2.0.**
-- The detection model should default to fluorescence on a small (1–4) array of photodiodes at the D2 wavelength (780 nm for Rb; 852 nm for Cs), with normalized population ratio P = N₂/(N₁+N₂) and SNR floor 100–200 per shot.
+- The detection model should default to fluorescence on a small (1-4) array of photodiodes at the D2 wavelength (780 nm for Rb; 852 nm for Cs), with normalized population ratio P = N₂/(N₁+N₂) and SNR floor 100-200 per shot.
 - ADC sample rate for the fluorescence pulse can be modest (the integrated fluorescence pulse is a few ms long → 200 kS/s, 24-bit DSA is comfortable; 24-bit gives DR > 119 dB, well above shot-noise-limited signals).
-- The vibration-compensation channel (classical accelerometer) needs ≥ 1 kHz bandwidth and clean noise to < 10 ng/√Hz; the AQG uses a Nanometrics Titan as the canonical co-sensor, sampled at sub-kHz with bandpass 0.05 Hz–1 kHz.
-- The Raman / Bragg LO chain reference can be modeled at –140 to –165 dBc/Hz close-in (1 Hz–10 kHz, 10 MHz reference) as set by a 5125A-grade quartz; this is the noise floor that limits short-term sensitivity in all the cited instruments.
+- The vibration-compensation channel (classical accelerometer) needs ≥ 1 kHz bandwidth and clean noise to < 10 ng/√Hz; the AQG uses a Nanometrics Titan as the canonical co-sensor, sampled at sub-kHz with bandpass 0.05 Hz-1 kHz.
+- The Raman / Bragg LO chain reference can be modeled at -140 to -165 dBc/Hz close-in (1 Hz-10 kHz, 10 MHz reference) as set by a 5125A-grade quartz; this is the noise floor that limits short-term sensitivity in all the cited instruments.
 
 ---
 
@@ -210,18 +210,18 @@
 | Vendor / Product | Class | Headline sensitivity (verbatim) | Headline sensitivity (SI) | Accuracy / stability (verbatim) | Stability (SI) | Cycle rate | Software / API public? | Best public source class |
 |---|---|---|---|---|---|---|---|---|
 | Exail AQG-A01 (Ménoret 2018) | Cold-atom absolute gravimeter | "500 nm.s⁻².Hz⁻¹ᐟ²" | 5 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | "long term stability below 10 nm.s⁻²" | < 1 × 10⁻⁸ m/s² | 2 Hz | No (control SW described, no API spec) | Peer-reviewed (DOI 10.1038/s41598-018-30608-1) + indep. eval. (DOI 10.1007/s00190-025-01995-x) |
-| Exail AQG-B (B01–B12) | Cold-atom absolute gravimeter, field | "below 500 nm/s²/τ¹ᐟ²" (B10 at Wettzell) | < 5 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | "combined uncertainty on the order of 100 nm/s²" | 1 × 10⁻⁷ m/s² | 2 Hz | No | Conf./manuf. (arXiv:2405.10844) + indep. eval. (DOI 10.1007/s00190-025-01995-x) |
+| Exail AQG-B (B01-B12) | Cold-atom absolute gravimeter, field | "below 500 nm/s²/τ¹ᐟ²" (B10 at Wettzell) | < 5 × 10⁻⁷ m·s⁻²·Hz⁻¹ᐟ² | "combined uncertainty on the order of 100 nm/s²" | 1 × 10⁻⁷ m/s² | 2 Hz | No | Conf./manuf. (arXiv:2405.10844) + indep. eval. (DOI 10.1007/s00190-025-01995-x) |
 | Exail DQG (differential gradiometer) | Cold-atom gravimeter + gradiometer | "about 60 E/τ¹ᐟ² for the gradient" | 6 × 10⁻⁸ s⁻²/√Hz | "long-term stability around 1 E" | 1 × 10⁻⁹ s⁻² | ≈ 2 Hz | No | Conf./manuf. (arXiv:2405.10844) |
 | AOSense compact gravimeter | Cold-atom gravimeter | Not public (only "20 Hz sampling rate") | - | Not public | - | 20 Hz | No | Marketing only (aosense.com) |
 | AOSense Rb microwave clock | Atomic clock (separate product) | "ADEV 2 × 10⁻¹² @ 1 s, 2 × 10⁻¹⁴ @ 10⁴ s" | - | "absolute accuracy < 1 × 10⁻¹³" | - | n/a | No | Marketing (etesters AOSense catalog) |
-| Infleqtion (ColdQuanta) Q-INS / accelerometer | Quantum-classical inertial sensor (dev.) | Not public; only "10–100× more vibration-tolerant" | - | Not public | - | not public | Partial (Oqtant BEC service has public API; gravimeter does not) | Marketing/press (infleqtion.com) |
+| Infleqtion (ColdQuanta) Q-INS / accelerometer | Quantum-classical inertial sensor (dev.) | Not public; only "10-100× more vibration-tolerant" | - | Not public | - | not public | Partial (Oqtant BEC service has public API; gravimeter does not) | Marketing/press (infleqtion.com) |
 | Infleqtion Tiqker optical clock | Optical atomic clock | Not public (precision quoted only qualitatively) | - | Not public quant. | - | n/a | No | Marketing |
 | Vector Atomic GAINS | Strapdown cold-atom gravimeter | "surpassing 1 mGal gravimeter precision and accuracy" | < 1 × 10⁻⁵ m/s² | "matched the satellite maps at the micro-g level (10⁻⁶ g)" | < 1 × 10⁻⁵ m/s² | Not public | No | Conf. abstract (ION PLANS 2025) + marketing (BusinessWire) |
 | Vector Atomic MAGIC | Portable terrestrial gravimeter | "µGal-level observations" | ~10⁻⁸ m/s² order | Not public | - | Not public | No | Conf. abstract (ION PLANS 2025) |
-| Vector Atomic EG-30 (Evergreen) | Iodine optical atomic clock | "25 fs stability at one second" | - | "1 ns for several days" holdover; "< 10⁻¹⁴ frequency instability for multiple days" (arXiv:2308.12457) | - | n/a | No | Peer-reviewed (Roslund et al., Nature 628, 736–740, 2024, DOI 10.1038/s41586-024-07225-2) + marketing |
+| Vector Atomic EG-30 (Evergreen) | Iodine optical atomic clock | "25 fs stability at one second" | - | "1 ns for several days" holdover; "< 10⁻¹⁴ frequency instability for multiple days" (arXiv:2308.12457) | - | n/a | No | Peer-reviewed (Roslund et al., Nature 628, 736-740, 2024, DOI 10.1038/s41586-024-07225-2) + marketing |
 | Q-CTRL Ironstone Opal (gravimetric) | Quantum dual gravimeter (full nav system) | Not public | - | Not public; only "144 h continuous operation," 180 W | - | Not public | No (for sensor); Yes for Boulder/Fire Opal QC SDK | Marketing/press; arXiv:2504.08167 (magnetic variant) |
-| Microchip / Microsemi 5125A | Phase-noise / ADEV test set (1–400 MHz) | "-140 dBc/Hz at 1 Hz offset (10 MHz)" | - | "ADEV: < 3 × 10⁻¹⁵ at 1 s" | - | n/a | Yes - TSERVE/TimeLab API documented | Manufacturer datasheet (ds_5125a-test-set.pdf) |
-| Miles Design / Microsemi TimePod 5330A | Cross-spectrum phase analyzer (0.5–30 MHz) | "below -170 dBc/Hz at 10 kHz" | - | "ADEV typically < 1 × 10⁻¹³ at 1 s" | - | 236 kS/s baseband, 16-bit ADCs | Yes - TSERVE/TimeLab API documented | Manufacturer manual (miles.io) |
+| Microchip / Microsemi 5125A | Phase-noise / ADEV test set (1-400 MHz) | "-140 dBc/Hz at 1 Hz offset (10 MHz)" | - | "ADEV: < 3 × 10⁻¹⁵ at 1 s" | - | n/a | Yes - TSERVE/TimeLab API documented | Manufacturer datasheet (ds_5125a-test-set.pdf) |
+| Miles Design / Microsemi TimePod 5330A | Cross-spectrum phase analyzer (0.5-30 MHz) | "below -170 dBc/Hz at 10 kHz" | - | "ADEV typically < 1 × 10⁻¹³ at 1 s" | - | 236 kS/s baseband, 16-bit ADCs | Yes - TSERVE/TimeLab API documented | Manufacturer manual (miles.io) |
 | NI PXIe-4464 | 4-channel DSA module | "100 S/s to 204.8 kS/s, 24-bit delta-sigma" | - | 119 dB DR | - | up to 204.8 kS/s | Yes - NI-DAQmx public API | Manufacturer specs (ni.com) |
 | NI PXIe-6124 (representative) | 4-channel S-series DAQ | 16-bit, 4 MS/s/channel | - | n/a | - | up to 4 MS/s | Yes - NI-DAQmx public API | Manufacturer specs (ni.com) |
 
@@ -231,9 +231,9 @@
 
 1. **Adopt the AQG-A/B numbers as the primary reference model** for cold-atom absolute gravimeters. Use 500 nm/s²/√Hz, 2 Hz cycle, T = 60 ms, k_eff ≈ 16 × 10⁶ m⁻¹, fluorescence detection on a 2-channel photodiode pair, 10⁷ Rb atoms, 2 µK cloud, and a 100 nm/s² accuracy budget (not 10 nm/s²) as defaults. Cite Ménoret 2018 + Glässel 2025 in the simulation's docstrings.
 
-2. **Provide a "high-data-rate IMU-class" alternative model** at 100–330 Hz cycle and 0.5–37 μg/√Hz (5 × 10⁻⁶ – 3.6 × 10⁻⁴ m·s⁻²·Hz⁻¹ᐟ²), parameterized after McGuinness 2012 / Rakholia 2014. This is the right model for shipboard/airborne work (cf. Vector Atomic GAINS, Bidel 2018).
+2. **Provide a "high-data-rate IMU-class" alternative model** at 100-330 Hz cycle and 0.5-37 μg/√Hz (5 × 10⁻⁶ - 3.6 × 10⁻⁴ m·s⁻²·Hz⁻¹ᐟ²), parameterized after McGuinness 2012 / Rakholia 2014. This is the right model for shipboard/airborne work (cf. Vector Atomic GAINS, Bidel 2018).
 
-3. **For the laser/microwave LO chain noise floor**, default to a quartz-class reference at –140 dBc/Hz at 1 Hz / –165 dBc/Hz at 10 kHz on a 10 MHz carrier (5125A spec), and let users substitute a TimePod-class (–170 dBc/Hz at 10 kHz) noise model.
+3. **For the laser/microwave LO chain noise floor**, default to a quartz-class reference at -140 dBc/Hz at 1 Hz / -165 dBc/Hz at 10 kHz on a 10 MHz carrier (5125A spec), and let users substitute a TimePod-class (-170 dBc/Hz at 10 kHz) noise model.
 
 4. **For the photodiode / detection digitizer model**, use a 24-bit delta-sigma DSA (PXIe-4464 numbers: 204.8 kS/s, 119 dB DR) as the default ADC model. For pulsed-envelope work (a few ms detection window), this is overkill in bandwidth but exactly right in dynamic range. Provide a 16-bit, 4 MS/s alternative (PXIe-6124 class) for users modeling waveform-level Raman pulses.
 
@@ -247,6 +247,6 @@
 - **Conference abstracts ≠ peer-reviewed.** The GAINS "surpassing 1 mGal" figure is a conference abstract from ION PLANS 2025. The Antoni-Micollier AQG cross-unit data are a manufacturer conference paper (arXiv:2405.10844). The Glässel 2025 J. Geod. study is the closest thing to a peer-reviewed third-party AQG benchmark.
 - **No public API/data format for any cold-atom gravimeter product.** Plan for vendor-specific NDA documentation, or wrap each vendor as an opaque "data file ingest" backend.
 - **Hu 2013 photodiode model and exact cycle time are paywalled.** The 4.2 μGal/√Hz number is canonical and quoted verbatim in the abstract; T = 300 ms and ≈ 1 Hz cycle are taken from a HUST review of the same apparatus (Chinese Phys. B 24, 050401, 2015) rather than the 2013 paper itself.
-- **Q-CTRL and Infleqtion gravimeter intrinsic specs are not public.** Their navigation-system-level performance claims (50×–111× improvement vs. classical GPS-alternative INS) are system-integration figures, not raw gravimeter sensitivities, and should not be back-converted into m/s²/√Hz.
+- **Q-CTRL and Infleqtion gravimeter intrinsic specs are not public.** Their navigation-system-level performance claims (50×-111× improvement vs. classical GPS-alternative INS) are system-integration figures, not raw gravimeter sensitivities, and should not be back-converted into m/s²/√Hz.
 - **AOSense's "20 Hz sampling rate" is a bandwidth statement, not a sensitivity statement.** Without a published noise floor, no equivalent m/s²/√Hz figure can be inferred.
-- **Vector Atomic Evergreen / EG-30 clock product line** mixes a peer-reviewed iodine optical-clock physics result (Roslund et al., Nature 628, 736–740, 2024) with marketing copy. The peer-reviewed paper gives the holdover budget ("10 ps for several hours and 1 ns for several days") and the at-sea 20-day trial ("accruing timing errors below 300 ps per day"); the "25 fs at 1 s" figure is in marketing copy and not separately confirmed in the open Nature text.
+- **Vector Atomic Evergreen / EG-30 clock product line** mixes a peer-reviewed iodine optical-clock physics result (Roslund et al., Nature 628, 736-740, 2024) with marketing copy. The peer-reviewed paper gives the holdover budget ("10 ps for several hours and 1 ns for several days") and the at-sea 20-day trial ("accruing timing errors below 300 ps per day"); the "25 fs at 1 s" figure is in marketing copy and not separately confirmed in the open Nature text.

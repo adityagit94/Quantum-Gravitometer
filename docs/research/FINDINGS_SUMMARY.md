@@ -1,4 +1,4 @@
-# Research Findings Summary - Topics 1–9
+# Research Findings Summary - Topics 1-9
 
 Quick-reference summary of the highest-impact findings from the 9 research files, focused on **what changes in the roadmap**. Detailed citations are in the individual files.
 
@@ -77,13 +77,13 @@ We picked the right one for "field/transportable robustness" benchmark per the o
 ### F6. Bertoldi 2019 gives an analytical finite-τ correction
 **Source:** `RESEARCH_FINITE_TAU.md` TL;DR
 
-> *"The canonical leading-order finite-τ correction to the Mach–Zehnder scale factor Φ = k_eff·a·T² is multiplicative: Φ → k_eff·a·T²·[1 − ((2π−4)/π)·(τ/T)], with (2π−4)/π ≈ 0.7268"* (Bertoldi, Minardi & Prevedelli, PRA 99, 033619 (2019), Eq. 21)
+> *"The canonical leading-order finite-τ correction to the Mach-Zehnder scale factor Φ = k_eff·a·T² is multiplicative: Φ → k_eff·a·T²·[1 − ((2π−4)/π)·(τ/T)], with (2π−4)/π ≈ 0.7268"* (Bertoldi, Minardi & Prevedelli, PRA 99, 033619 (2019), Eq. 21)
 
 > Equivalently: `T_eff = T + (2/Ω_R)·tan(Ω_R·τ_R/2)`, which for an ideal π/2-pulse area reduces to `T_eff = T + 4τ_R/π`.
 
 **Implication for Phase 18:** We don't need to do the full sub-pulse integration (Approach B). We can substitute the **Bertoldi correction** as a closed-form replacement and check whether it eliminates the ~2.5 rad calibration offset. Pulse-center time convention (Approach A, 2 hours) plus the Bertoldi `T_eff` (1 more hour) should bring the residual down to <0.1 rad.
 
-This **changes Phase 18's time estimate from 8–16 hours to ~3 hours** total.
+This **changes Phase 18's time estimate from 8-16 hours to ~3 hours** total.
 
 ### F7. Cheinet 2008 places time origin at pulse 2 CENTER
 **Source:** `RESEARCH_FINITE_TAU.md` §1
@@ -108,7 +108,7 @@ JOSS now requires:
 - Documented Statement of Need
 - Demonstrated research use (reproducing a published gravimetry result - **this is exactly what Phase 13 produces with Freier 2016**)
 - **AI Usage Disclosure** (NEW 2025 requirement - we need to disclose that v1.0 plan was AI-assisted)
-- 750–1100 word paper
+- 750-1100 word paper
 
 **Implication:** Phase 17 (CI) and Phase 13 (Freier 2016 regression) are now **JOSS blockers**, not just nice-to-haves. The roadmap ordering is still correct but the criticality is higher than I labelled.
 
@@ -145,9 +145,9 @@ These updates fold the research findings directly into the v1.1 implementation w
 
 The above findings were folded into the planning documents (no source-code changes yet, per user request to "understand → update plans → then move on"):
 
-- **`docs/ROADMAP_V1_TO_V2.md`** - new §1.5 "Research-driven updates (Topics 1–11)" added with corrected Freier/Hu/Ménoret parameter tables, the Bertoldi closed-form finite-τ correction, the two new benchmark targets (Xu 2022, Wu 2019), and the JOSS hard-gate notes. The §3 "who owns what" table was revised (Phase 16: 5→8 hr; Phase 18: 8–16→3 hr; Phase 11 marked done).
+- **`docs/ROADMAP_V1_TO_V2.md`** - new §1.5 "Research-driven updates (Topics 1-11)" added with corrected Freier/Hu/Ménoret parameter tables, the Bertoldi closed-form finite-τ correction, the two new benchmark targets (Xu 2022, Wu 2019), and the JOSS hard-gate notes. The §3 "who owns what" table was revised (Phase 16: 5→8 hr; Phase 18: 8-16→3 hr; Phase 11 marked done).
 - **Task list** - tasks #20, #23, #25, #24, #26 rewritten with the corrected parameters and citations so they are correct at execution time.
-- **Still pending (waiting on user):** Topics 12–14 research files; population of `REVIEW_REQUEST_TEMPLATE.md` with Achim Peters' contact; and the actual source-code work (Phases 12–20), which resumes once the user signals to proceed.
+- **Still pending (waiting on user):** Topics 12-14 research files; population of `REVIEW_REQUEST_TEMPLATE.md` with Achim Peters' contact; and the actual source-code work (Phases 12-20), which resumes once the user signals to proceed.
 
 Items NOT yet done (deferred until code work resumes):
 - Adding the F1 citation into `PHYSICS_REVIEW_PACKET.md` §4 (a doc edit; will do alongside Phase 13 or when packet is sent).
@@ -175,7 +175,7 @@ The reference audit (Topic 13) was applied in **v1.0.2**: 3 unit-category errors
 
 ## ✅ ALL 14 RESEARCH TOPICS COMPLETE
 
-No research remains. Everything is folded into `docs/ROADMAP_V1_TO_V2.md` §1.5 and the task list. The remaining work is the v1.1 source-code implementation (Phases 12–20), on hold pending the user's go-ahead.
+No research remains. Everything is folded into `docs/ROADMAP_V1_TO_V2.md` §1.5 and the task list. The remaining work is the v1.1 source-code implementation (Phases 12-20), on hold pending the user's go-ahead.
 
 ---
 

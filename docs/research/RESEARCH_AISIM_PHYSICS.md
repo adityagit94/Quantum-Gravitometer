@@ -1,6 +1,6 @@
 # RESEARCH_AISIM_PHYSICS: Sign/Phase Conventions and the Chirped‑Detuning Factor‑of‑Two Question
 
-**Bottom line.** The canonical Raman pulse propagator (Cheinet 2008 Eq. 3) imprints the laser phase **exactly once per pulse**, evaluated at the pulse start `t₀` as `±(ω_L t₀ + φ)`. Generalising to a chirped laser, ω_L → ω(t) = ω_L0 + α t, so the imprinted phase becomes `±(ω_L0 t₀ + ½ α t₀² + φ)` - the chirp enters via the **integral** ∫₀^{t₀} ω_L(t')dt', not via δ(t₀)·t₀. A separate `exp(-i δ t₀)` factor that uses the **instantaneous** chirped detuning multiplied by t₀ effectively contributes `α t₀²` per pulse, i.e. twice the correct `½ α t₀²`, leading to a chirp term of `−2αT²` in the Mach–Zehnder readout instead of the canonical `−αT²`. The vendored AISim package (bleykauf/aisim) does not expose a chirp parameter or pulse-start time at all; any handling of chirped detuning inside `qgrav`'s patched copy of `prop.py` is local to the fork. **The factor-of-2 claim of Patch C is consistent with every primary source surveyed**, provided the patched code applies `exp(-i δ(t₀) t₀)` on top of an unmodified Cheinet 2008-style rotation.
+**Bottom line.** The canonical Raman pulse propagator (Cheinet 2008 Eq. 3) imprints the laser phase **exactly once per pulse**, evaluated at the pulse start `t₀` as `±(ω_L t₀ + φ)`. Generalising to a chirped laser, ω_L → ω(t) = ω_L0 + α t, so the imprinted phase becomes `±(ω_L0 t₀ + ½ α t₀² + φ)` - the chirp enters via the **integral** ∫₀^{t₀} ω_L(t')dt', not via δ(t₀)·t₀. A separate `exp(-i δ t₀)` factor that uses the **instantaneous** chirped detuning multiplied by t₀ effectively contributes `α t₀²` per pulse, i.e. twice the correct `½ α t₀²`, leading to a chirp term of `−2αT²` in the Mach-Zehnder readout instead of the canonical `−αT²`. The vendored AISim package (bleykauf/aisim) does not expose a chirp parameter or pulse-start time at all; any handling of chirped detuning inside `qgrav`'s patched copy of `prop.py` is local to the fork. **The factor-of-2 claim of Patch C is consistent with every primary source surveyed**, provided the patched code applies `exp(-i δ(t₀) t₀)` on top of an unmodified Cheinet 2008-style rotation.
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1(a). Kasevich & Chu 1991 PRL and Bordé conventions
 
-- **DOI:** 10.1103/PhysRevLett.67.181 (Phys. Rev. Lett. 67, 181 – published 8 July 1991).
+- **DOI:** 10.1103/PhysRevLett.67.181 (Phys. Rev. Lett. 67, 181 - published 8 July 1991).
 - The 1991 PRL itself is short and does not write the off-diagonal matrix element in closed form. The Chu Nobel lecture review (https://www.nobelprize.org/uploads/2018/06/chu-symp.pdf), which references the 1991 PRL as [13], states the convention precisely (verbatim):
 
   > "respectively, where k_eff is the effective k-vector of the Raman pulse, z is the position of the atomic wavefunction at time t, ω_L is the optical frequency, and φ_L any additional phase factor of the light."
@@ -37,7 +37,7 @@
   2. The diagonal elements carry only the free internal evolution `exp(−i ω_{a,b}(t−t₀))`. There is **no separate `exp(−i δ t₀)` factor** outside this matrix; detuning enters via the rotating-frame energies ω_a, ω_b and through the generalised Rabi frequency on resonance.
   3. For a chirped laser the natural generalisation is ω_L(t) = ω_L0 + α t, so the integrated laser phase ∫₀^{t₀} ω_L(t')dt' becomes `ω_L0 t₀ + ½ α t₀²`. The propagator carries `exp[±i(ω_L0 t₀ + ½ α t₀² + φ)]` - the chirp term `½ α t₀²` appears **once** per pulse, not twice.
 
-- The three-pulse Mach–Zehnder phase combination (Cheinet 2008, p. 3, verbatim):
+- The three-pulse Mach-Zehnder phase combination (Cheinet 2008, p. 3, verbatim):
 
   > "Φ = φ₁ − 2 φ₂ + φ₃ [15]"
 
@@ -45,8 +45,8 @@
 
 ### 1(c). Young, Kasevich & Chu 1997 - AISim's own cited source
 
-- Reference: B. C. Young, M. Kasevich & S. Chu, "Precision Atom Interferometry with Light Pulses," in *Atom Interferometry* (P. R. Berman ed., Academic Press 1997), pp. 363–406. DOI 10.1016/B978-012092460-8/50010-2. AISim's documentation explicitly cites this as the source of its `TwoLevelTransitionPropagator` (readthedocs v2.1.0 reference list).
-- The Young–Kasevich–Chu chapter uses the same Rabi rotation matrix as Cheinet 2008, with the imprinted phase `φ_L = k_eff·z − ω·t − φ` on the |g⟩→|e⟩ off-diagonal. **I could not retrieve the chapter PDF directly**; this is reported on the basis of secondary citations in Peters/Chung/Chu 2001 (Metrologia 38, 25) and Cheinet 2008 [16].
+- Reference: B. C. Young, M. Kasevich & S. Chu, "Precision Atom Interferometry with Light Pulses," in *Atom Interferometry* (P. R. Berman ed., Academic Press 1997), pp. 363-406. DOI 10.1016/B978-012092460-8/50010-2. AISim's documentation explicitly cites this as the source of its `TwoLevelTransitionPropagator` (readthedocs v2.1.0 reference list).
+- The Young-Kasevich-Chu chapter uses the same Rabi rotation matrix as Cheinet 2008, with the imprinted phase `φ_L = k_eff·z − ω·t − φ` on the |g⟩→|e⟩ off-diagonal. **I could not retrieve the chapter PDF directly**; this is reported on the basis of secondary citations in Peters/Chung/Chu 2001 (Metrologia 38, 25) and Cheinet 2008 [16].
 
 ### Imprinted-phase sign of `k_eff z` is convention-dependent
 
@@ -54,7 +54,7 @@ The choice of `+k_eff z` vs `−k_eff z` depends on the labelling of `k_eff = k_
 
 ### Sign of the chirp term
 
-For a "down-chirped" laser (decreasing ω with time) compensating a freely-falling atom under +z gravity, `α = ω̇_L < 0`. The integrated imprinted phase is `∫ ω_L(t)dt = ω_L0 t + ½ α t²`, so the chirp contributes `+½ α t²` to φ_L. Reversing the sign convention of the rotating-frame transformation flips this to `−½ α t²`. The combination that appears in the Mach–Zehnder readout is invariant: the laser chirp partially cancels the Doppler-induced detuning, leaving the gravimeter phase `Φ = (k_eff·g − α) T²` (with both signs of α and g defined consistently with k_eff up).
+For a "down-chirped" laser (decreasing ω with time) compensating a freely-falling atom under +z gravity, `α = ω̇_L < 0`. The integrated imprinted phase is `∫ ω_L(t)dt = ω_L0 t + ½ α t²`, so the chirp contributes `+½ α t²` to φ_L. Reversing the sign convention of the rotating-frame transformation flips this to `−½ α t²`. The combination that appears in the Mach-Zehnder readout is invariant: the laser chirp partially cancels the Doppler-induced detuning, leaving the gravimeter phase `Φ = (k_eff·g − α) T²` (with both signs of α and g defined consistently with k_eff up).
 
 ---
 
@@ -66,9 +66,9 @@ For a "down-chirped" laser (decreasing ω with time) compensating a freely-falli
 
 > "class aisim.prop.TwoLevelTransitionPropagator(time_delta, intensity_profile, wave_vectors=None, wf=None, phase_scan=0)  
 > A time propagator of an effective Raman two-level system.  
-> Parameters: time_delta (float) – length of pulse; intensity_profile (IntensityProfile) – Intensity profile of the interferometry lasers; wave_vectors (Wavevectors) – wave vectors of the two Raman beams for calculation of Doppler shifts; wf (Wavefront, optional) – wavefront aberrations of the interferometry beam; phase_scan (float) – effective phase for fringe scans.  
+> Parameters: time_delta (float) - length of pulse; intensity_profile (IntensityProfile) - Intensity profile of the interferometry lasers; wave_vectors (Wavevectors) - wave vectors of the two Raman beams for calculation of Doppler shifts; wf (Wavefront, optional) - wavefront aberrations of the interferometry beam; phase_scan (float) - effective phase for fringe scans.  
 > Notes - The propagator is for example defined in [1].  
-> [1] Young, B. C., Kasevich, M., & Chu, S. (1997). Precision atom interferometry with light pulses. In P. R. Berman (Ed.), Atom Interferometry (pp. 363–406). Academic Press."
+> [1] Young, B. C., Kasevich, M., & Chu, S. (1997). Precision atom interferometry with light pulses. In P. R. Berman (Ed.), Atom Interferometry (pp. 363-406). Academic Press."
 
 ### Repository state (May 2026 snapshot)
 
@@ -107,7 +107,7 @@ Because the upstream API exposes neither a chirp rate α nor an absolute pulse-s
 
   > "we would like to highlight the possibility to generalise this method to Raman or 1-photon transitions if we account for the internal state degree of freedom change during the diffraction."
 
-  Hence UATIS does **not** currently model two-photon Raman transitions of the Kasevich–Chu type; chirped *Bragg* scattering is supported via a time-dependent external potential, which gives the chirp phase implicitly through position-space wavefunction evolution and is therefore not prone to the AISim-style over-counting issue.
+  Hence UATIS does **not** currently model two-photon Raman transitions of the Kasevich-Chu type; chirped *Bragg* scattering is supported via a time-dependent external potential, which gives the chirp phase implicitly through position-space wavefunction evolution and is therefore not prone to the AISim-style over-counting issue.
 
 - The code base is Fortran (UATIS) and is not open-source; access is via the Leibniz Hannover group on request. Confirmed verbatim in the 2026 thesis by Rui Li (M.Sc.), "Robust Atom Interferometry with Double Bragg Diffraction," QUEST-Leibniz-Forschungsschule, Leibniz Universität Hannover, defended 26 January 2026 (arXiv:2603.22385):
 
@@ -120,7 +120,7 @@ Because the upstream API exposes neither a chirp rate α nor an absolute pulse-s
 
   > "Laser-cooling of atoms by optical scattering forces. Doppler forces on atoms that scatter light, including the random fluctuations that give rise to the Doppler temperature limit. Magnetic fields, implemented on a grid or through simple analytical models. Hot atoms generated by an oven. [...] Cooling light beams, defined by their detuning and gaussian intensity profiles."
 
-- No interferometer phase calculation, no Raman / two-photon transition module, no chirp-driven Doppler-compensated Mach–Zehnder. AtomECS is **not relevant** to the chirped-Raman question.
+- No interferometer phase calculation, no Raman / two-photon transition module, no chirp-driven Doppler-compensated Mach-Zehnder. AtomECS is **not relevant** to the chirped-Raman question.
 
 ### MaxAtoms
 
@@ -132,7 +132,7 @@ Because the upstream API exposes neither a chirp rate α nor an absolute pulse-s
 
 ### QuTiP-based
 
-- QuTiP itself (qutip.org) has no domain-specific atom-interferometer module. A general-purpose `mesolve`/`sesolve` Hamiltonian simulation with a time-dependent two-level Rabi term + chirp can in principle reproduce the correct one-pulse-per-imprint behaviour, but no widely-used package implements this for Raman gravimetry. The github topic page lists ARC (Rydberg atoms) and several Jaynes–Cummings demos, but nothing dedicated to Mach–Zehnder Raman gravimetry.
+- QuTiP itself (qutip.org) has no domain-specific atom-interferometer module. A general-purpose `mesolve`/`sesolve` Hamiltonian simulation with a time-dependent two-level Rabi term + chirp can in principle reproduce the correct one-pulse-per-imprint behaviour, but no widely-used package implements this for Raman gravimetry. The github topic page lists ARC (Rydberg atoms) and several Jaynes-Cummings demos, but nothing dedicated to Mach-Zehnder Raman gravimetry.
 
 ### Optimal-control / pulse-shaping codes
 
@@ -235,7 +235,7 @@ The chirp term `−α T²` in the MZ output arises **purely from the quadratic-i
 
 This Case-B interpretation is the most likely meaning of the Patch C claim: the `exp(−i δ t₀)` factor is being used as a stand-in for the full imprinted laser phase, but it should be `exp(−i ∫₀^{t₀} δ(t')dt') = exp(−i δ_0 t₀ − i (α/2) t₀²)`, i.e. **the half** of what the literal `δ(t₀)·t₀` evaluates to in its chirp piece.
 
-The Patch C derivation - "the factor of ½ is missing because the integral `∫₀^{t₀}(δ_0 + α t')dt' = δ_0 t₀ + ½ α t₀²`, not `δ(t₀)·t₀ = δ_0 t₀ + α t₀²`" - is **supported by every primary source consulted**: Cheinet 2008 Eq. (3), Kasevich–Chu 1991 (via the Chu Nobel lecture), and the gravimeter-phase derivations in Karcher 2020 and Le Gouët 2008. The standard derivation writes the imprinted phase as the *integral* of the instantaneous laser frequency, not as the instantaneous frequency × elapsed time.
+The Patch C derivation - "the factor of ½ is missing because the integral `∫₀^{t₀}(δ_0 + α t')dt' = δ_0 t₀ + ½ α t₀²`, not `δ(t₀)·t₀ = δ_0 t₀ + α t₀²`" - is **supported by every primary source consulted**: Cheinet 2008 Eq. (3), Kasevich-Chu 1991 (via the Chu Nobel lecture), and the gravimeter-phase derivations in Karcher 2020 and Le Gouët 2008. The standard derivation writes the imprinted phase as the *integral* of the instantaneous laser frequency, not as the instantaneous frequency × elapsed time.
 
 ---
 

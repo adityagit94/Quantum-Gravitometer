@@ -3,8 +3,8 @@
 **Document version**: 1.0
 **Code version**: qgrav 1.0.0
 **For review by**: an atom-interferometry researcher (PhD student, postdoc, or PI with hands-on light-pulse atom-gravimeter experience)
-**Estimated read time**: 60–90 minutes
-**Estimated review time** (skim + targeted answer of §11 questions): 1.5–2 hours
+**Estimated read time**: 60-90 minutes
+**Estimated review time** (skim + targeted answer of §11 questions): 1.5-2 hours
 
 ---
 
@@ -14,9 +14,9 @@
 2. [Quick-start reference frame](#2-quick-start-reference-frame)
 3. [The upstream AISim model](#3-the-upstream-aisim-model)
 4. [The problem with `δ·t₀` for time-varying detuning](#4-the-problem-with-δt-for-time-varying-detuning)
-5. [Patch A - `GravityFreePropagator` (new class)](#5-patch-a--gravityfreepropagator-new-class)
-6. [Patch B - chirped `Wavevectors`](#6-patch-b--chirped-wavevectors)
-7. [Patch C - integrated laser phase in `TwoLevelTransitionPropagator`](#7-patch-c--integrated-laser-phase-in-twoleveltransitionpropagator)
+5. [Patch A - `GravityFreePropagator` (new class)](#5-patch-a---gravityfreepropagator-new-class)
+6. [Patch B - chirped `Wavevectors`](#6-patch-b---chirped-wavevectors)
+7. [Patch C - integrated laser phase in `TwoLevelTransitionPropagator`](#7-patch-c---integrated-laser-phase-in-twoleveltransitionpropagator)
 8. [The empirical calibration step](#8-the-empirical-calibration-step)
 9. [Cross-validation results](#9-cross-validation-results)
 10. [Known finite-τ residuals](#10-known-finite-τ-residuals)
@@ -233,7 +233,7 @@ We ran a single-atom diagnostic (`vz = 0`, `z₀ = 0`, T = 0.26 s, g = 9.81 m/s�
 | 0 | 0.00 | 2.53 (constant offset) | - |
 | +2 | −2.18 | (out of cycle, ~5π) | ~2.5× |
 
-Pre-patch, with the upstream `δ·t₀` formula, the simulated fringe oscillated 2.5–3× faster than the analytical hybrid fringe - consistent with the factor-of-2 prediction plus a τ-related residual.
+Pre-patch, with the upstream `δ·t₀` formula, the simulated fringe oscillated 2.5-3× faster than the analytical hybrid fringe - consistent with the factor-of-2 prediction plus a τ-related residual.
 
 Post-patch (with equation 3 applied):
 
@@ -317,7 +317,7 @@ All 10 pass.
 
 ### 5.4 Reviewer asks for Patch A
 
-(See full list in §11; the Patch A questions are A.1–A.3.)
+(See full list in §11; the Patch A questions are A.1-A.3.)
 
 ---
 
@@ -370,7 +370,7 @@ All 5 pass.
 
 ### 6.4 Reviewer asks for Patch B
 
-See questions B.1–B.2 in §11.
+See questions B.1-B.2 in §11.
 
 ---
 
@@ -456,7 +456,7 @@ All 9 pass.
 
 ### 7.5 Reviewer asks for Patch C
 
-See questions C.1–C.6 in §11.
+See questions C.1-C.6 in §11.
 
 ---
 
@@ -528,7 +528,7 @@ The offset is a real numerical artefact of how AISim discretises the Raman pulse
 
 ### 8.6 Reviewer asks for the calibration
 
-See questions D.1–D.4 in §11.
+See questions D.1-D.4 in §11.
 
 ---
 
@@ -642,7 +642,7 @@ A future Tier-5 patch could:
 
 ## 11. Reviewer questions (the asks)
 
-Please answer **yes / no / unclear / needs more info** for each, with a 1–3 sentence justification.
+Please answer **yes / no / unclear / needs more info** for each, with a 1-3 sentence justification.
 
 ### Patch A - `GravityFreePropagator`
 
@@ -668,7 +668,7 @@ Please answer **yes / no / unclear / needs more info** for each, with a 1–3 se
 
 - **D.1** Given the observed ~2.5 rad gravity-independent offset described in §8, is the empirical removal via the calibration described in §8.2 a legitimate engineering workaround, or a sign that something is fundamentally wrong with the patch?
 - **D.2** Does the pulse-center-vs-pulse-start hypothesis in §8.3 (item 1) seem like the dominant origin of the offset, given the orders of magnitude we computed?
-- **D.3** Would you recommend implementing the pulse-center time convention now (~3 hours of work, reduces offset by ~half), the sub-pulse integration (~8–16 hours, eliminates the offset), or accepting the calibration as the simplest path?
+- **D.3** Would you recommend implementing the pulse-center time convention now (~3 hours of work, reduces offset by ~half), the sub-pulse integration (~8-16 hours, eliminates the offset), or accepting the calibration as the simplest path?
 - **D.4** If we accept the calibration: is `FULLY_SIMULATED_WITH_EMPIRICAL_PHASE_OFFSET` a more honest study-scope label than the current `FULLY_SIMULATED`, given the workflow in §8.2?
 
 ### Cross-validation tolerances
@@ -731,15 +731,15 @@ If you want the executable notebook, ping us and we'll generate it.
 
 ### Standard atom-interferometry derivations
 
-- Bordé, Ch. J. "Atomic interferometry with internal state labelling." *Phys. Lett. A* **140** (1989) 10–12.
+- Bordé, Ch. J. "Atomic interferometry with internal state labelling." *Phys. Lett. A* **140** (1989) 10-12.
 - Kasevich, M. & Chu, S. "Atomic interferometry using stimulated Raman transitions." *Phys. Rev. Lett.* **67** (1991) 181.
-- Peters, A., Chung, K. Y., & Chu, S. "High-precision gravity measurements using atom interferometry." *Metrologia* **38** (2001) 25–61.
-- Young, B. C., Kasevich, M., & Chu, S. "Precision atom interferometry with light pulses." In Berman (Ed.), *Atom Interferometry*, Academic Press (1997) 363–406.
+- Peters, A., Chung, K. Y., & Chu, S. "High-precision gravity measurements using atom interferometry." *Metrologia* **38** (2001) 25-61.
+- Young, B. C., Kasevich, M., & Chu, S. "Precision atom interferometry with light pulses." In Berman (Ed.), *Atom Interferometry*, Academic Press (1997) 363-406.
 
 ### Sensitivity function and vibration
 
 - Cheinet, P. *et al.* "Measurement of the sensitivity function in a time-domain atomic interferometer." *IEEE Trans. Instrum. Meas.* **57** (2008) 1141.
-- Le Gouët, J. *et al.* "Limits to the sensitivity of a low noise compact atomic gravimeter." *Appl. Phys. B* **92** (2008) 133–144.
+- Le Gouët, J. *et al.* "Limits to the sensitivity of a low noise compact atomic gravimeter." *Appl. Phys. B* **92** (2008) 133-144.
 
 ### Performance numbers we benchmark against
 

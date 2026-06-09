@@ -11,16 +11,16 @@
 1. [Where we are](#1-where-we-are)
 2. [Three guiding principles](#2-three-guiding-principles)
 3. [Quick reference: who owns what](#3-quick-reference-who-owns-what)
-4. [Phase 11 - Reference-registry bug fixes (URGENT)](#4-phase-11--reference-registry-bug-fixes-urgent)
-5. [Phase 12 - Subclass refactor of vendor patches](#5-phase-12--subclass-refactor-of-vendor-patches)
-6. [Phase 13 - Freier 2016 automated regression (PRIMARY)](#6-phase-13--freier-2016-automated-regression-primary)
-7. [Phase 14 - Wire advanced AISim features through configs](#7-phase-14--wire-advanced-aisim-features-through-configs)
-8. [Phase 15 - Multi-drop realism upgrades](#8-phase-15--multi-drop-realism-upgrades)
-9. [Phase 16 - Hu 2013 and Ménoret 2018 benchmarks](#9-phase-16--hu-2013-and-mnoret-2018-benchmarks)
-10. [Phase 17 - CI / CD / packaging infrastructure](#10-phase-17--ci--cd--packaging-infrastructure)
-11. [Phase 18 - Eliminate the empirical calibration](#11-phase-18--eliminate-the-empirical-calibration)
-12. [Phase 19 - Documentation completion](#12-phase-19--documentation-completion)
-13. [Phase 20 - Release v1.1.0 (consolidation)](#13-phase-20--release-v110-consolidation)
+4. [Phase 11 - Reference-registry bug fixes (URGENT)](#4-phase-11---reference-registry-bug-fixes-urgent)
+5. [Phase 12 - Subclass refactor of vendor patches](#5-phase-12---subclass-refactor-of-vendor-patches)
+6. [Phase 13 - Freier 2016 automated regression (PRIMARY)](#6-phase-13---freier-2016-automated-regression-primary)
+7. [Phase 14 - Wire advanced AISim features through configs](#7-phase-14---wire-advanced-aisim-features-through-configs)
+8. [Phase 15 - Multi-drop realism upgrades](#8-phase-15---multi-drop-realism-upgrades)
+9. [Phase 16 - Hu 2013 and Ménoret 2018 benchmarks](#9-phase-16---hu-2013-and-mnoret-2018-benchmarks)
+10. [Phase 17 - CI / CD / packaging infrastructure](#10-phase-17---ci---cd---packaging-infrastructure)
+11. [Phase 18 - Eliminate the empirical calibration](#11-phase-18---eliminate-the-empirical-calibration)
+12. [Phase 19 - Documentation completion](#12-phase-19---documentation-completion)
+13. [Phase 20 - Release v1.1.0 (consolidation)](#13-phase-20---release-v110-consolidation)
 14. [Beyond v1.1: v2.0 vision](#14-beyond-v11-v20-vision)
 15. [What you need to do (and when)](#15-what-you-need-to-do-and-when)
 16. [Cumulative test-count target](#16-cumulative-test-count-target)
@@ -62,15 +62,15 @@
 | C-bug-1 | `hu_2013_short_term_noise = 4.2e-9 m/s²/√Hz` should be `4.2e-8` (off by factor 10) | High |
 | C-bug-2 | `menoret_2018_short_term_noise = 5e-7 m/s²/√Hz` should be `7.5e-7` (paper says 750 nm/s²/√Hz in the Larzac trace) | Medium |
 
-This roadmap explains how each of these gets resolved across phases 11–20 leading to v2.0.
+This roadmap explains how each of these gets resolved across phases 11-20 leading to v2.0.
 
-**Status update (2026-05-28):** v1.0.1 released (Phase 11 done - both reference bugs fixed, 276 tests pass). Internet research Topics 1–11 completed and stored in `docs/research/`. The findings materially change Phases 13, 16, and 18 - see §1.5 below.
+**Status update (2026-05-28):** v1.0.1 released (Phase 11 done - both reference bugs fixed, 276 tests pass). Internet research Topics 1-11 completed and stored in `docs/research/`. The findings materially change Phases 13, 16, and 18 - see §1.5 below.
 
 **Status update (2026-05-29):** v1.0.2 released (Topic-13 audit: 3 unit errors + 2 ambiguous re-labelled, registry 12→14, 286 tests). All 14 research topics complete. **Phase 12 done** (vendor subclass refactor, 294 tests). **Execution-order revision (research-driven):** because GAIN's 96 nm/s²/√Hz is technically/vibration-limited, not projection-limited (F3), the benchmark phases need the noise machinery first. New order: **12 ✓ → 15 (noise realism) → 13 (Freier) → 16 (Hu/Ménoret/Xu/Wu) → 14 (YAML wiring) → 18 (calibration) → 17 (CI) → 19 (docs) → 20 (release).**
 
 ---
 
-## 1.5. Research-driven updates (from `docs/research/`, Topics 1–11)
+## 1.5. Research-driven updates (from `docs/research/`, Topics 1-11)
 
 The internet research (9 + 2 files in `docs/research/`, summarised in `docs/research/FINDINGS_SUMMARY.md`) corrects several assumptions baked into the original roadmap. **These corrections must be applied when Phases 13, 16, and 18 are implemented.**
 
@@ -90,7 +90,7 @@ Source: `RESEARCH_FREIER_2016.md` (Freier 2017 PhD thesis, doi:10.18452/17795, i
 | T | 260e-3 | 260e-3 ✓ | Hauth 2013's 230 ms is a *different* config - do not mix |
 | T_cycle | 1.5 | 1.5 ✓ | verbatim |
 | cloud temp | 2 µK | 2 µK ✓ | but **selected σ_v = 5.2e-3 m/s** is the interferometer-relevant width |
-| N_detected | - | **5e5** | NOT projection-limited; measured σ_P ≈ 6e-3 (≈4–6× above shot noise) |
+| N_detected | - | **5e5** | NOT projection-limited; measured σ_P ≈ 6e-3 (≈4-6× above shot noise) |
 | chirp rate | - | **25.14e6 Hz/s** (= k_eff·g/2π) | - |
 
 **Critical modelling note:** GAIN is **technically-limited, not projection-limited**. Do not model the 96 nm/s²/√Hz from √N detection noise alone - add an explicit detection-technical-noise floor σ_P ≈ 6e-3 (≤ 30 nm/s² in g). Raman-phase-noise term ≈ 40 nm/s²/shot (Onsala-maser-comparable). The per-τ ADEV values (10/100/1000 s) are **NOT tabulated** in the paper - regress only against the two verbatim numbers (96 nm/s²/√Hz at 1 s, 0.5 nm/s² long-term) and the white-noise τ⁻¹/² slope; mark any intermediate values as *derived*.
@@ -102,7 +102,7 @@ A complete qgrav-ready `FREIER_2016` dict is given at the end of `RESEARCH_FREIE
 Source: `RESEARCH_HU_2013.md`. **The roadmap's "Wuhan 10 m drop tower" premise is wrong.** Hu et al. PRA 88, 043610 (2013) is a **HUST short atomic fountain** (T = 300 ms, apex 0.75 m above the MOT). The 10 m apparatus is a *different group* (M.-S. Zhan / WIPM-CAS) and a different paper.
 
 Corrected Hu 2013 parameters:
-- T = **300 ms** (not "0.6–1 s"); 2T = 600 ms
+- T = **300 ms** (not "0.6-1 s"); 2T = 600 ms
 - N_MOT = **3e9**; N in interferometer = **5e7** (after state prep)
 - Transverse cloud temp = **7 µK**; longitudinal selected = **300 nK**
 - Launch velocity **3.83 m/s**; apex **0.75 m**
@@ -144,7 +144,7 @@ Both are leading-order-in-η (η = τ/T) equivalent. **Convention confirmed: T i
 
 **Also useful (Topic 14):** Bertoldi Eq. 32 gives a residual *single-shot* term δφ₂ = −4θ²(T)·sin(2φ₂) that **averages to zero over the velocity distribution** - i.e. for our ensemble simulation the velocity-averaged correction is exactly the multiplicative factor above, with no residual. This is reassuring for the calibration approach.
 
-**Implication:** Phase 18 no longer needs the 8–16 hr sub-pulse-integration (Approach B) as the first move. Instead:
+**Implication:** Phase 18 no longer needs the 8-16 hr sub-pulse-integration (Approach B) as the first move. Instead:
 1. Approach A (pulse-center time, ~2 hr) - already planned
 2. **Approach A2:** substitute the Bertoldi/Fang-Mielec closed form into the analytical comparison and the calibration so the residual offset is *predicted*, not just calibrated (~1 hr)
 
@@ -169,7 +169,7 @@ Source: `RESEARCH_JOSS_SUBMISSION.md`. JOSS now desk-rejects submissions lacking
 - CI with automated tests (→ **Phase 17 is now a JOSS blocker**)
 - demonstrated research use reproducing a published result (→ **Phase 13 Freier regression satisfies this**)
 - **AI Usage Disclosure** (NEW 2025 - must disclose the AI-assisted v1.0 plan/implementation)
-- 750–1100 word paper
+- 750-1100 word paper
 
 Closest JOSS precedents: GPUE (BEC solver, 10.21105/joss.01037) and RydIQule (Rydberg sensor, 10.21105/joss.08539). State-of-field tools to cite: PyLCP, AtomECS, ARC, QuTiP. → Add an AI-Usage-Disclosure task; Phase 19 must include it.
 
@@ -186,7 +186,7 @@ Source: `RESEARCH_VENUES.md`. Most 2026 deadlines have **passed** (ICAP 2026 Wuh
 |-------|------|------|------|
 | **JOSS** | rolling | software paper | first home; but see hard gates below |
 | **Computer Physics Communications** (QuTiP's venue) or **SoftwareX** (Pykat's venue) | rolling | substantial methods+software paper | for a fuller paper than JOSS |
-| YAO 2026 | Crete, ~Jun 7–12 2026 | student/early-career AMO | most accessible community meeting still open |
+| YAO 2026 | Crete, ~Jun 7-12 2026 | student/early-career AMO | most accessible community meeting still open |
 | SciPy 2027 | ~Jul 2027 | software visibility | next clean CFP after the passed 2026 one |
 | NCAMP (India) | ~2027 | domestic AMO | ISAMP biennial; good home venue |
 | GRC Atomic Physics / ICOLS 27 | ~2027 | domain | not yet announced |
@@ -205,7 +205,7 @@ Source: `RESEARCH_VENUES.md`. Most 2026 deadlines have **passed** (ICAP 2026 Wuh
 
 ## 3. Quick reference: who owns what
 
-**Times revised after the Topics 1–11 research (see §1.5).**
+**Times revised after the Topics 1-11 research (see §1.5).**
 
 | Phase | What | Who | Estimated time | Blocker for next phase? |
 |-------|------|-----|----------------|--------------------------|
@@ -216,14 +216,14 @@ Source: `RESEARCH_VENUES.md`. Most 2026 deadlines have **passed** (ICAP 2026 Wuh
 | 15 | Multi-drop realism (PID + correlated noise + V-fit) | Me | 6 hr | Yes - Phase 16 depends |
 | 16 | Hu + Ménoret + **Xu 2022 + Wu 2019** benchmarks (§1.5.3/4/6) | Me | ~~5 hr~~ **8 hr** | No (deliverable) |
 | 17 | CI / PyPI / Dockerfile (**JOSS blocker** §1.5.7) | Me + you (secrets) | 4 hr + your time | No (parallel) |
-| 18 | Eliminate empirical calibration (**Bertoldi closed form** §1.5.5) | Me | ~~8–16 hr~~ **3 hr** | No (research) |
+| 18 | Eliminate empirical calibration (**Bertoldi closed form** §1.5.5) | Me | ~~8-16 hr~~ **3 hr** | No (research) |
 | 19 | Documentation completion + AI-usage disclosure | Me | 4 hr | No |
 | 20 | Release v1.1.0 | Me + you | 2 hr | Yes |
 | ext | Independent physics review | **You + reviewer** | weeks | No (parallel) |
 
 **Phases 11, 13, 14, 17 can run in parallel** - they touch different files. **Phase 12 should land before 14** (because 14 will add YAML-config plumbing that we'd rather only do once).
 
-**Total my-side work: ~40–48 hours** spread across multiple sessions.
+**Total my-side work: ~40-48 hours** spread across multiple sessions.
 
 ---
 
@@ -716,7 +716,7 @@ fringe_slope_per_m_s2 = -0.5 * sim_visibility * k_eff * T**2
 ### Resolves: C5, C6, C9
 
 ### Dependency
-None (independent of Phases 11–14).
+None (independent of Phases 11-14).
 
 ---
 
@@ -932,7 +932,7 @@ def _prop_matrix(self, atoms, n_substeps=8):
     return full_matrix
 ```
 
-Time: 8–16 hours
+Time: 8-16 hours
 Risk: high - may break upstream tests, slow down everything by 8×
 Outcome: calibration step removed entirely; cross-validation tolerance can probably tighten to atol = 0.03 on populations
 
@@ -955,7 +955,7 @@ If the reviewer says "the calibration is legitimate", we can keep it forever and
 - Spawned to its own task list when greenlit
 
 ### Owner: me
-### Time: 2 hours for Approach A; 8–16 hours for Approach B
+### Time: 2 hours for Approach A; 8-16 hours for Approach B
 ### Success criteria
 - `_calibrate_gravity_phase_offset` returns a smaller magnitude
 - Cross-validation tolerance can be tightened in `test_gravity_mz_sequence.py`
@@ -1013,7 +1013,7 @@ Cut a clean release with all the above improvements.
 ### Tasks
 
 #### 20.1 Pre-release checklist
-- [ ] All Phase 11–19 work merged
+- [ ] All Phase 11-19 work merged
 - [ ] All 253+ tests pass (target: ~280)
 - [ ] CHANGELOG updated
 - [ ] Version bumped: 1.0.0 → 1.1.0 in `__init__.py`, `pyproject.toml`, README
@@ -1046,7 +1046,7 @@ The above takes us to v1.1.0 with ~280 tests, three published-reference regressi
 - Real interferometer-output ingestion (CSV → algorithm → metrics on real lab data, if available)
 - Wavefront aberrations driven from real Zernike-coefficient measurements
 
-### v2.0 candidates (~6–12 months out)
+### v2.0 candidates (~6-12 months out)
 - **Hardware control** - once IIT Patna gets to a point where lab atoms exist, replace synthetic bench with real photodiode data
 - **Quantum-projection-noise simulation at the atom level** (Monte Carlo over single-atom outcomes instead of mean populations)
 - **Bayesian inference for g** from the multi-drop time series with full ensemble likelihood
@@ -1070,14 +1070,14 @@ This is the long-game endgame: validate against your own hardware once it exists
 
 | When | What | Estimated time |
 |------|------|----------------|
-| **Now** | Send the physics review packet to 3–5 contacts (see `REVIEW_REQUEST_TEMPLATE.md`) | 30 min |
+| **Now** | Send the physics review packet to 3-5 contacts (see `REVIEW_REQUEST_TEMPLATE.md`) | 30 min |
 | **Now** | Confirm: should I start with Phase 11 (reference bugs) or Phase 12 (vendor refactor)? | 1 min |
 | **Within 2 weeks** | Provide GitHub repo URL + grant me visibility on it (or work on local copy) | 5 min |
 | **Within 1 month** | Set up PyPI trusted publisher token + add to GitHub secrets | 30 min |
 | **Within 2 months** | Follow up with physics reviewer contacts who haven't replied; consider conference visit | varies |
 | **Per release** | Approve CHANGELOG and version bump; run smoke test on your machine | 30 min |
 | **As needed** | Provide judgement calls on physics parameter choices (e.g., Freier 2016 setup) | 15 min each |
-| **Ongoing** | If a hardware setup ever becomes available, plug it into the bench layer (Phase v2.0) | days–weeks |
+| **Ongoing** | If a hardware setup ever becomes available, plug it into the bench layer (Phase v2.0) | days-weeks |
 
 ---
 

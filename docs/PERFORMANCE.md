@@ -17,7 +17,7 @@ the benchmark harness (`tests/benchmark_aisim.py`, run with
 
 | Operation | Parameters | Time |
 |-----------|------------|------|
-| Single Mach–Zehnder sequence | 1000 atoms, 3-pulse | **~1.3 ms** |
+| Single Mach-Zehnder sequence | 1000 atoms, 3-pulse | **~1.3 ms** |
 | Gravity sweep (hybrid) | 1000 atoms, 61 points | **~0.09 s** |
 | Gravity sweep (emergent) | 1000 atoms, 61 points (+ calibration scan) | **~0.20 s** |
 | Multi-drop cycle (emergent) | 100 drops, 1000 atoms/drop | **~0.30 s** |
@@ -30,7 +30,7 @@ the benchmark harness (`tests/benchmark_aisim.py`, run with
   the atom count roughly doubles the per-sequence time; the published-reference
   regressions run at N=4000 atoms in well under a second.
 - **The gravity sweep / multi-drop time is dominated by the number of MZ
-  sequences** (= number of gravity points or drops), each ~1–2 ms. The
+  sequences** (= number of gravity points or drops), each ~1-2 ms. The
   emergent-mode calibration scan adds one fixed ~73-sequence fringe scan
   (~0.1 s) per call, independent of the sweep/drop count.
 - **No O(n²) hot paths.** The per-drop fresh-ensemble creation in the
@@ -47,7 +47,7 @@ the hot path is caught by CI without being flaky on machine-speed variation.
 
 ## Practical guidance
 
-- For interactive exploration: 200–500 atoms, 11–21 sweep points → sub-second.
+- For interactive exploration: 200-500 atoms, 11-21 sweep points → sub-second.
 - For published-reference accuracy (floor below the injected noise budget):
   N=4000 atoms (see `docs/research/` and the Freier regression docstring).
 - The full fast test suite (`pytest -m "not slow"`) runs in ~30 s; the `@slow`

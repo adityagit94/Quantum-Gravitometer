@@ -2,7 +2,7 @@
 
 ## TL;DR
 - **The user's task premise is incorrect: Hu et al., Phys. Rev. A 88, 043610 (2013) is NOT a 10-meter drop-tower gravimeter.** It is a short atomic-fountain gravimeter at Huazhong University of Science and Technology (HUST), Wuhan, with free-evolution time **T = 300 ms** and an atomic apex of ≈ 0.75 m above the MOT. The "10-meter Wuhan" apparatus belongs to a different group (M.-S. Zhan, J. Wang, L. Zhou et al. at WIPM-CAS).
-- For Hu 2013 (⁸⁷Rb), the confirmed parameters useful for qgrav validation are: T = 300 ms; cycle time ≈ 1 s/shot; N ≈ 5 × 10⁷ atoms post-state-selection (3 × 10⁹ in the MOT); cloud temperature ≈ 7 µK (with longitudinal velocity-selected width ≈ 300 nK); single-photon detuning ≈ 1.5 GHz; normalized fluorescence detection; **4.2 µGal/√Hz** short-term sensitivity (= 4.2 × 10⁻⁸ m s⁻²/√Hz ≈ 4.3 × 10⁻⁹ g/√Hz) reached on a continuous 40-h Allan-deviation run during 14–16 April 2013.
+- For Hu 2013 (⁸⁷Rb), the confirmed parameters useful for qgrav validation are: T = 300 ms; cycle time ≈ 1 s/shot; N ≈ 5 × 10⁷ atoms post-state-selection (3 × 10⁹ in the MOT); cloud temperature ≈ 7 µK (with longitudinal velocity-selected width ≈ 300 nK); single-photon detuning ≈ 1.5 GHz; normalized fluorescence detection; **4.2 µGal/√Hz** short-term sensitivity (= 4.2 × 10⁻⁸ m s⁻²/√Hz ≈ 4.3 × 10⁻⁹ g/√Hz) reached on a continuous 40-h Allan-deviation run during 14-16 April 2013.
 - **Hu 2013 contains no explicit numeric systematic-error budget** (Coriolis, wavefront aberration, gravity gradient, light shift, etc.). It is a sensitivity / noise-budget paper. The first published HUST systematic-error budget appeared nine years later in Xu et al., Metrologia 59, 055001 (2022): "HUST-QG exhibited a short-term sensitivity of 24 μGal Hz⁻¹/² and a combined uncertainty of 3 μGal."
 
 ---
@@ -24,7 +24,7 @@ The 10-m Wuhan apparatus referenced in the user's task description is the WIPM-C
 
 The HUST-group's own 2015 review (Zhou, Duan, Chen, Luo, Xu, Hu, Chinese Physics B 24, 050401 (2015), citing Hu 2013 as ref. [72]) states verbatim in the caption of Fig. 7: "A typical atom-interferometry fringe at a pulse separation of T = 300 ms, the total measuring time is 40 s for 40 shots." The same review repeats elsewhere: "considering a fringe visibility of about 15% and a pulse separation time of 300 ms."
 
-The user's "0.6–1 s" working hypothesis is not supported by any source.
+The user's "0.6-1 s" working hypothesis is not supported by any source.
 
 ### 2. Cycle time
 **≈ 1.0 s per measurement shot; data binned at 2 shots / 2 s.**
@@ -66,7 +66,7 @@ Quote (Zhou et al. CPB 24, 050401, 2015, describing the Hu 2013 setup): "The Ram
 - **Residual vertical vibration contribution to g: 1.2 µGal/√Hz = 1.2 × 10⁻⁸ m s⁻²/√Hz.** Verbatim from the Hu 2013 abstract: "By a modulation experiment, we further indicate that the residual vibration noise contribution is about 1.2 μGal/√Hz, which implies a possible improvement over the present absolute gravity measurement level by about one order of magnitude."  
 - **System:** three-axis commercial seismometer + passive isolator (resonance 0.5 Hz) carrying the Raman retro-reflector; digital LabVIEW feedback at 1 kHz / 16-bit DAQ. Detailed isolator characterization is in the precursor Zhou, Hu, Duan, Sun, Chen, Zhang, Luo, Phys. Rev. A 86, 043630 (2012), DOI 10.1103/PhysRevA.86.043630.  
 - **Closed-loop natural frequency f₀ = 0.016 Hz** (step-response period 63 s).  
-- **Loop gain:** acceleration error signal reduced by ×100 over 0.1–1 Hz; below 2 Hz the in-loop residual is **< 1 × 10⁻⁹ g/√Hz ≈ 10⁻⁸ m s⁻²/√Hz**, limited by sensor intrinsic noise and DAQ digitization (HUST 2015 review).
+- **Loop gain:** acceleration error signal reduced by ×100 over 0.1-1 Hz; below 2 Hz the in-loop residual is **< 1 × 10⁻⁹ g/√Hz ≈ 10⁻⁸ m s⁻²/√Hz**, limited by sensor intrinsic noise and DAQ digitization (HUST 2015 review).
 
 There is no "10-m drop tower" seismic isolation specification associated with this paper.
 
@@ -103,7 +103,7 @@ The first formal per-effect HUST systematic-error budget (Coriolis, wavefront, l
 
 The Wuhan **10-m apparatus** is a separate WIPM-CAS project of M.-S. Zhan and colleagues, distinct from HUST:
 - Zhou, Xiong, Yang, Tang, Peng, Hao, Li, Liu, Wang, Zhan, Gen. Relativ. Gravit. 43, 1931 (2011), DOI 10.1007/s10714-011-1167-9 - first announcement of the 10-m apparatus, with the smaller precursor reaching "2.0 × 10⁻⁷ g for 1 s and 4.5 × 10⁻⁹ g for 1,888 s. The absolute g value was derived with a difference of 1.6 × 10⁻⁷ g compared to the gravity reference value."  
-- Zhou, Long, Tang, Chen, Gao, Peng, Duan, Zhong, Xiong, Wang, Zhang, Zhan, Phys. Rev. Lett. 115, 013004 (2015), arXiv:1503.00401 - ⁸⁵Rb–⁸⁷Rb double-diffraction WEP test: "The statistical uncertainty of the experimental data for Eötvös parameter η is 0.8 × 10⁻⁸ at 3200 s. With various systematic errors corrected the final value is η = (2.8 ± 3.0) × 10⁻⁸. The major uncertainty is attributed to the Coriolis effect."  
+- Zhou, Long, Tang, Chen, Gao, Peng, Duan, Zhong, Xiong, Wang, Zhang, Zhan, Phys. Rev. Lett. 115, 013004 (2015), arXiv:1503.00401 - ⁸⁵Rb-⁸⁷Rb double-diffraction WEP test: "The statistical uncertainty of the experimental data for Eötvös parameter η is 0.8 × 10⁻⁸ at 3200 s. With various systematic errors corrected the final value is η = (2.8 ± 3.0) × 10⁻⁸. The major uncertainty is attributed to the Coriolis effect."  
 - Zhou, He, Yan, Chen, Gao, Duan et al., Phys. Rev. A 104, 022822 (2021) - joint mass-and-energy WEP test at 10⁻¹⁰ level.
 
 ---
@@ -112,7 +112,7 @@ The Wuhan **10-m apparatus** is a separate WIPM-CAS project of M.-S. Zhan and co
 
 **Source pedigree.** Hu 2013 full text is paywalled at APS and has no arXiv preprint. Open-source verbatim quotation is limited to the abstract (4.2 µGal/√Hz, 1.2 µGal/√Hz residual vibration, ⁸⁷Rb, the "2D MOT was added" claim). All non-abstract parameter values originate from the HUST group's own 2015 review (Zhou et al., Chin. Phys. B 24, 050401), which describes the same apparatus and cites Hu 2013 as ref. [72]. Wording is the review's, not Hu 2013's, but the authors overlap (M.-K. Zhou, X.-C. Duan, L.-L. Chen, Z.-K. Hu) and the section explicitly labels the figures with the Hu 2013 data.
 
-**Cross-source consistency.** Multiple later citing papers consistently report 4.2 µGal/√Hz and 87Rb for Hu 2013; no source disputes T = 300 ms; the HUST group's later portable gravimeters use shorter T (29–55 ms) and warmer T_cloud (~2–5 µK) - those values must not be transplanted into a Hu 2013 simulation.
+**Cross-source consistency.** Multiple later citing papers consistently report 4.2 µGal/√Hz and 87Rb for Hu 2013; no source disputes T = 300 ms; the HUST group's later portable gravimeters use shorter T (29-55 ms) and warmer T_cloud (~2-5 µK) - those values must not be transplanted into a Hu 2013 simulation.
 
 **Unit-conversion checks**:
 - 4.2 µGal/√Hz × 10⁻⁸ m s⁻² per µGal = **4.2 × 10⁻⁸ m s⁻² Hz⁻¹ᐟ²**; in g: 4.2 × 10⁻⁸ / 9.80 ≈ **4.3 × 10⁻⁹ g/√Hz**.  
@@ -149,7 +149,7 @@ The Wuhan **10-m apparatus** is a separate WIPM-CAS project of M.-S. Zhan and co
 | Apex above MOT | 0.75 m | HUST 2015 review (verbatim) |
 | Single-photon detuning |Δ| | 1.5 × 10⁹ Hz from F=2→F'=3 cooling line | HUST 2015 review (verbatim); sign not in open sources |
 | Chirp rate α | 25.14 MHz s⁻¹ (closest open value: 25.12 MHz/s in Tao et al. Photonics 7, 32, 2020) | flag as unverified for Hu 2013 |
-| Raman phase noise | < −100 dBc/Hz, 200 Hz–200 kHz | HUST 2015 review (verbatim) |
+| Raman phase noise | < −100 dBc/Hz, 200 Hz-200 kHz | HUST 2015 review (verbatim) |
 | Detection | normalized fluorescence | HUST 2015 review (verbatim) |
 | Active isolator f₀ (closed-loop) | 0.016 Hz | Zhou et al. PRA 86, 043630 (2012); HUST 2015 review |
 | Residual vibration < 2 Hz | < 1 × 10⁻⁸ m s⁻²/√Hz (≈ 10⁻⁹ g/√Hz) | HUST 2015 review (verbatim) |
@@ -164,7 +164,7 @@ The Wuhan **10-m apparatus** is a separate WIPM-CAS project of M.-S. Zhan and co
 
 1. **Stage 1 - kinematics & phase scaling.** Verify qgrav reproduces Φ = k_eff·g·T² = 1.45 × 10⁶ rad / (m s⁻²) and the chirp rate α₀ = k_eff·g / (2π) ≈ 25.1 MHz s⁻¹ that nulls the phase. **Pass threshold:** ≤ 10⁻⁶ relative error in Φ vs analytic formula at fixed g.
 
-2. **Stage 2 - noise budget.** Inject (a) Raman phase noise with PSD floor −100 dBc/Hz across 200 Hz–200 kHz, (b) seismometer-residual PSD scaled to ≤ 10⁻⁸ m s⁻²/√Hz below 2 Hz, (c) shot noise from N = 5 × 10⁷ and C ≈ 0.15. **Pass threshold:** σ_g(1 s) ∈ [3.5, 5.0] µGal/√Hz and σ_g(100 s) ≤ 0.7 µGal. If σ_g(1 s) is high by > 25%, recheck the chirp rate, π-pulse duration, and contrast assumption.
+2. **Stage 2 - noise budget.** Inject (a) Raman phase noise with PSD floor −100 dBc/Hz across 200 Hz-200 kHz, (b) seismometer-residual PSD scaled to ≤ 10⁻⁸ m s⁻²/√Hz below 2 Hz, (c) shot noise from N = 5 × 10⁷ and C ≈ 0.15. **Pass threshold:** σ_g(1 s) ∈ [3.5, 5.0] µGal/√Hz and σ_g(100 s) ≤ 0.7 µGal. If σ_g(1 s) is high by > 25%, recheck the chirp rate, π-pulse duration, and contrast assumption.
 
 3. **Stage 3 - systematics.** Skip for Hu 2013 (no published per-effect table). For an accuracy benchmark, instead reproduce the HUST-QG (Xu et al. Metrologia 2022) per-effect budget (target combined uncertainty 3 µGal) or the LNE-SYRTE / SU-Berlin GAIN budgets.
 

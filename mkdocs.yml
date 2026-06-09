@@ -1,6 +1,11 @@
 site_name: qgrav
 site_description: Software-first R&D platform for atom-interferometric gravimetry
 docs_dir: docs
+# README.md is the GitHub folder index; index.md is the MkDocs home. Exclude the
+# README from the build so the two do not conflict.
+exclude_docs: |
+  README.md
+  research/
 # Use the built-in 'readthedocs' theme so the site builds with only `mkdocs`
 # installed (no extra theme dependency required for CI).
 theme:

@@ -7,7 +7,7 @@ This stage restructures the gravimeter simulation code so that the physics and v
 A research-quality simulation platform should not hide the important scientific assumptions inside one large adapter or pipeline function. The simulation layer is now separated into explicit pieces:
 
 - `src/qgrav/physics/atom_source.py` - source and detector description
-- `src/qgrav/physics/pulse_sequence.py` - Rabi and Mach–Zehnder sequence helpers
+- `src/qgrav/physics/pulse_sequence.py` - Rabi and Mach-Zehnder sequence helpers
 - `src/qgrav/physics/phase_models.py` - gravity and vibration phase models
 - `src/qgrav/physics/noise_models.py` - reusable stochastic perturbation functions
 - `src/qgrav/physics/readout_models.py` - population/readout helpers
@@ -51,7 +51,7 @@ Every AISim study now carries a `truth_checks` block in its result dictionary an
 
 Examples:
 - Rabi scan: occupation bounds, finite values, non-trivial response span
-- Mach–Zehnder phase scan: bounded populations, sinusoidal fit quality
+- Mach-Zehnder phase scan: bounded populations, sinusoidal fit quality
 - Gravity sweep: exact match to the closed-form gravity phase relation used by the hybrid study
 - Vibration sweep: exact match to the closed-form reference-mirror phase model and linearity in amplitude
 

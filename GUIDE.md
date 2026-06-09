@@ -144,7 +144,7 @@ The best next scientific milestone is:
 
 The project now includes three gravimeter-oriented AISim studies. Use them in this order:
 
-1. **Mach–Zehnder phase scan**
+1. **Mach-Zehnder phase scan**
    - proves the three-pulse interferometer fringe exists under the chosen ensemble/beam settings
 2. **Gravity sweep**
    - shows how the interferometer output changes with small gravity changes around an operating point

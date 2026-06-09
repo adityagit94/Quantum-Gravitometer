@@ -1,22 +1,22 @@
 # Research Venues for "qgrav": Conferences, Workshops & Journals for an Open-Source Atom-Interferometric Gravimetry Simulation Package
 
-*Compiled May 29, 2026. Prioritizes upcoming 2026–2027 events. Predatory/aggregator listings (WASET, conferenceindex.org, clocate) were identified and excluded from primary recommendations; only their existence is flagged.*
+*Compiled May 29, 2026. Prioritizes upcoming 2026-2027 events. Predatory/aggregator listings (WASET, conferenceindex.org, clocate) were identified and excluded from primary recommendations; only their existence is flagged.*
 
 ## TL;DR (overall)
 - The single best primary venue for the software itself is **JOSS**; pair it with a more substantial methods/software paper in **Computer Physics Communications** (the venue of QuTiP) or **SoftwareX** (the venue of Pykat), and present at the **SciPy** conference for community visibility.
-- Most flagship 2026 domain conferences have passed or imminent deadlines: **ICAP 2026 (Wuhan, Jun 14–19)** abstract deadline May 25, 2026 has just passed; **EFTF 2026 (Noordwijk, Apr 20–23)** and **IFCS 2026 (Tampa, May 11–13)** are already over. The next clean targets are **YAO 2026 (Crete, June)**, a likely **2027 GRC Atomic Physics**, the **27th ICOLS (~2027, not yet announced)**, and the biennial **NCAMP (India, ~2027)**.
+- Most flagship 2026 domain conferences have passed or imminent deadlines: **ICAP 2026 (Wuhan, Jun 14-19)** abstract deadline May 25, 2026 has just passed; **EFTF 2026 (Noordwijk, Apr 20-23)** and **IFCS 2026 (Tampa, May 11-13)** are already over. The next clean targets are **YAO 2026 (Crete, June)**, a likely **2027 GRC Atomic Physics**, the **27th ICOLS (~2027, not yet announced)**, and the biennial **NCAMP (India, ~2027)**.
 - Verified safe-to-cite example papers: Universal atom interferometer simulator (Sci. Rep., DOI 10.1038/s41598-020-78859-1); QuTiP (Comput. Phys. Commun., DOI 10.1016/j.cpc.2012.02.021); atom-gravimeter key comparison (Metrologia, DOI 10.1088/0026-1394/49/6/666).
 
 ---
 
-## 1. Upcoming Atom-Interferometry / Cold-Atom Workshops (2026–2027)
+## 1. Upcoming Atom-Interferometry / Cold-Atom Workshops (2026-2027)
 
-**TL;DR:** YAO 2026 (Crete, June) is the most accessible community meeting still open; the Gordon Research Conference on Atomic Physics is biennial and next due in 2027 (not yet posted); an ICTS cold-atom meeting in Bengaluru already happened (Mar–Apr 2026).
+**TL;DR:** YAO 2026 (Crete, June) is the most accessible community meeting still open; the Gordon Research Conference on Atomic Physics is biennial and next due in 2027 (not yet posted); an ICTS cold-atom meeting in Bengaluru already happened (Mar-Apr 2026).
 
-- **YAO 2026 (Young Atom Opticians), Crete, Greece.** Student/early-career AMO meeting. The official site states "It will take place from June 7 – June 12, 2026 at the Orthodox Academy of Crete (OAC) in Chania, Greece." A second official page says "the conference will take place on the stunning island of Crete from June 6th to 13th 2026," and an aggregator lists June 8–10 in Heraklion - **sources disagree on the exact town and dates; treat June 7–12, 2026, Crete as the best estimate.** URL: https://yao-conference.eu/yao-2026-crete/
-- **Gordon Research Conference (GRC) – Atomic Physics.** Held biennially at Salve Regina University (Newport, RI). Per GRC, the series is on a "24 Months" cycle and was "Last Held 2025" (June 15–20, 2025: "Cold Atoms and Molecules, Precision Measurements and Quantum Science"). The next edition is therefore expected in **2027, but is not yet posted on grc.org as of the search date.** This is the closest GRC analog to a dedicated atom-interferometry meeting; a stand-alone "Atom Interferometry" GRC could not be confirmed. URL: https://www.grc.org/atomic-physics-conference/
+- **YAO 2026 (Young Atom Opticians), Crete, Greece.** Student/early-career AMO meeting. The official site states "It will take place from June 7 - June 12, 2026 at the Orthodox Academy of Crete (OAC) in Chania, Greece." A second official page says "the conference will take place on the stunning island of Crete from June 6th to 13th 2026," and an aggregator lists June 8-10 in Heraklion - **sources disagree on the exact town and dates; treat June 7-12, 2026, Crete as the best estimate.** URL: https://yao-conference.eu/yao-2026-crete/
+- **Gordon Research Conference (GRC) - Atomic Physics.** Held biennially at Salve Regina University (Newport, RI). Per GRC, the series is on a "24 Months" cycle and was "Last Held 2025" (June 15-20, 2025: "Cold Atoms and Molecules, Precision Measurements and Quantum Science"). The next edition is therefore expected in **2027, but is not yet posted on grc.org as of the search date.** This is the closest GRC analog to a dedicated atom-interferometry meeting; a stand-alone "Atom Interferometry" GRC could not be confirmed. URL: https://www.grc.org/atomic-physics-conference/
 - **ICTS "Cold-Atom Based Quantum Simulators and Forthcoming Quantum Technology Applications," Bengaluru, India.** Already held: "30 March to 03 April 2026" at ICTS, co-supported by the National Quantum Mission. URL: https://www.icts.res.in/discussion-meeting/caqs
-- **AION/MAGIS/ELGAR community meetings:** These long-baseline atom-interferometry collaborations hold community meetings, but no 2026–2027 public meeting with confirmed dates was located during research; **not announced/found as of the search date.**
+- **AION/MAGIS/ELGAR community meetings:** These long-baseline atom-interferometry collaborations hold community meetings, but no 2026-2027 public meeting with confirmed dates was located during research; **not announced/found as of the search date.**
 
 ---
 
@@ -24,10 +24,10 @@
 
 **TL;DR:** ICAP 2026 (Wuhan) is imminent with its abstract deadline just passed; EFTF 2026 and IFCS 2026 are already over; ICOLS's next (27th) edition is not yet announced.
 
-- **ICAP - International Conference on Atomic Physics (29th).** Wuhan, China, **June 14–19, 2026**, East Lake International Conference Center. Official "Important Dates": registration/abstract submission opened February 1, 2026; early-bird deadline March 31, 2026; "Registration and abstract submission deadline" **May 25, 2026**. Topics explicitly include "Atomic Clocks and Interferometers." This abstract deadline has passed as of May 29, 2026. URLs: https://www.icap29.com/home.html and https://www.icap29.com/exhibitors.html
-- **ICOLS - International Conference on Laser Spectroscopy (26th was the most recent).** ICOLS 2025 was held in La Biodola, Elba Island, Tuscany, Italy. Topics "cover a wide range of exciting physics, such as precision tests of fundamental symmetries with atoms and molecules, atomic clocks, atom interferometry, quantum many-body physics with ultra-cold atoms." Dates are reported inconsistently across sources (one official-linked page says July 2–7, 2025; another source quotes June 2–7, 2025). The **27th ICOLS (expected ~2027) host city and dates are not yet announced** as of the search date. ⚠️ Note: many "ICOLS 2026/2027" listings (Zurich, Nicosia, London, Paris) are a **different WASET-run "International Conference on Optics, Lasers and Spectroscopy" - a flagged predatory series, not the real ICOLS.** URL: https://www.icols2025.it/
-- **EFTF - European Frequency and Time Forum (39th).** Noordwijk, The Netherlands, hosted by ESA/ESTEC, **April 20–23, 2026** - already over. URL: https://www.eftf.org/next-meeting
-- **IFCS - IEEE International Frequency Control Symposium 2026.** Tampa, Florida; tutorials May 10, symposia **May 11–13, 2026** - already over. Abstract submission deadline was **December 14, 2025**. Note: 2025 was the joint IFCS-EFTF (Querétaro, Mexico, May 12–16, 2025); 2026 was IFCS-only. URLs: https://ieee-uffc.org/symposia/ifcs and https://first-tf.com/ieee-ifcs-2026-call-for-abstracts/
+- **ICAP - International Conference on Atomic Physics (29th).** Wuhan, China, **June 14-19, 2026**, East Lake International Conference Center. Official "Important Dates": registration/abstract submission opened February 1, 2026; early-bird deadline March 31, 2026; "Registration and abstract submission deadline" **May 25, 2026**. Topics explicitly include "Atomic Clocks and Interferometers." This abstract deadline has passed as of May 29, 2026. URLs: https://www.icap29.com/home.html and https://www.icap29.com/exhibitors.html
+- **ICOLS - International Conference on Laser Spectroscopy (26th was the most recent).** ICOLS 2025 was held in La Biodola, Elba Island, Tuscany, Italy. Topics "cover a wide range of exciting physics, such as precision tests of fundamental symmetries with atoms and molecules, atomic clocks, atom interferometry, quantum many-body physics with ultra-cold atoms." Dates are reported inconsistently across sources (one official-linked page says July 2-7, 2025; another source quotes June 2-7, 2025). The **27th ICOLS (expected ~2027) host city and dates are not yet announced** as of the search date. ⚠️ Note: many "ICOLS 2026/2027" listings (Zurich, Nicosia, London, Paris) are a **different WASET-run "International Conference on Optics, Lasers and Spectroscopy" - a flagged predatory series, not the real ICOLS.** URL: https://www.icols2025.it/
+- **EFTF - European Frequency and Time Forum (39th).** Noordwijk, The Netherlands, hosted by ESA/ESTEC, **April 20-23, 2026** - already over. URL: https://www.eftf.org/next-meeting
+- **IFCS - IEEE International Frequency Control Symposium 2026.** Tampa, Florida; tutorials May 10, symposia **May 11-13, 2026** - already over. Abstract submission deadline was **December 14, 2025**. Note: 2025 was the joint IFCS-EFTF (Querétaro, Mexico, May 12-16, 2025); 2026 was IFCS-only. URLs: https://ieee-uffc.org/symposia/ifcs and https://first-tf.com/ieee-ifcs-2026-call-for-abstracts/
 
 ---
 
@@ -46,9 +46,9 @@
 
 **TL;DR:** The biennial NCAMP is the flagship Indian AMO conference (24th edition Jan 2025; 25th expected ~2027); the National Quantum Mission and its hubs run frequent quantum-tech workshops, and ICTS Bengaluru hosts cold-atom meetings.
 
-- **NCAMP - National Conference on Atomic and Molecular Physics (biennial, organized by ISAMP).** The 24th edition (NCAMP 2025) was held at IIT (ISM) Dhanbad, **January 8–11, 2025**, marking ISAMP's Golden Jubilee. As a biennial conference, **the 25th NCAMP is expected ~2027 (host/dates not yet announced).** URLs: https://people.iitism.ac.in/~ncamp2025/ and https://www.isamp.in/society-activities/conferences
-- **ICTS cold-atom discussion meeting (Bengaluru):** "Cold-Atom Based Quantum Simulators and Forthcoming Quantum Technology Applications," March 30–April 3, 2026 (already held); focuses on dipolar gases, ultracold molecules, Rydberg atoms, quantum simulation and sensing. URL: https://www.icts.res.in/discussion-meeting/caqs
-- **National Quantum Mission (NQM) and hubs.** NQM (DST, ₹6,003 crore, 2023–24 to 2030–31) runs a Quantum Sensing & Metrology thematic hub and many workshops (e.g., NWQCQT-2026 at JAIN University Bengaluru, Feb 18, 2026; IISER Pune workshop on quantum algorithms, Feb 13, 2026). These are organized by the DST-NQM hubs (IISc Bengaluru, IIT Madras/Bombay/Delhi). URL: https://qcinnovation.co.in/category/events/
+- **NCAMP - National Conference on Atomic and Molecular Physics (biennial, organized by ISAMP).** The 24th edition (NCAMP 2025) was held at IIT (ISM) Dhanbad, **January 8-11, 2025**, marking ISAMP's Golden Jubilee. As a biennial conference, **the 25th NCAMP is expected ~2027 (host/dates not yet announced).** URLs: https://people.iitism.ac.in/~ncamp2025/ and https://www.isamp.in/society-activities/conferences
+- **ICTS cold-atom discussion meeting (Bengaluru):** "Cold-Atom Based Quantum Simulators and Forthcoming Quantum Technology Applications," March 30-April 3, 2026 (already held); focuses on dipolar gases, ultracold molecules, Rydberg atoms, quantum simulation and sensing. URL: https://www.icts.res.in/discussion-meeting/caqs
+- **National Quantum Mission (NQM) and hubs.** NQM (DST, ₹6,003 crore, 2023-24 to 2030-31) runs a Quantum Sensing & Metrology thematic hub and many workshops (e.g., NWQCQT-2026 at JAIN University Bengaluru, Feb 18, 2026; IISER Pune workshop on quantum algorithms, Feb 13, 2026). These are organized by the DST-NQM hubs (IISc Bengaluru, IIT Madras/Bombay/Delhi). URL: https://qcinnovation.co.in/category/events/
 - These Indian events are oriented to AMO/quantum-tech generally; a qgrav talk/poster at NCAMP 2027 or an NQM Quantum Sensing hub workshop would be well-targeted.
 
 ---
@@ -59,7 +59,7 @@
 
 ### JOSS - Journal of Open Source Software
 - **Scope:** "JOSS publishes articles about research software. This definition includes software that: solves complex modeling problems in a scientific context (physics, mathematics...); supports the functioning of research instruments or the execution of research experiments..." A qgrav-type simulator fits squarely.
-- **Article type / requirements:** Short (250–1000 word) paper; software must be open-source (OSI license), feature-complete, in a public repo with issue tracker. **Important 2026 scope changes:** submissions under 1000 lines of code are auto-flagged and under 300 are desk-rejected; and "Projects developed in private are not eligible until there is a public record of open development: at least six months of public history prior to submission, with evidence of releases, public issues/pull requests." Also a new AI-usage disclosure requirement.
+- **Article type / requirements:** Short (250-1000 word) paper; software must be open-source (OSI license), feature-complete, in a public repo with issue tracker. **Important 2026 scope changes:** submissions under 1000 lines of code are auto-flagged and under 300 are desk-rejected; and "Projects developed in private are not eligible until there is a public record of open development: at least six months of public history prior to submission, with evidence of releases, public issues/pull requests." Also a new AI-usage disclosure requirement.
 - **Open access / cost:** Free; "zero article processing charges or subscription fees"; CrossRef DOI minted on acceptance.
 - URLs: https://joss.theoj.org/about and https://joss.readthedocs.io/en/latest/submitting.html
 
@@ -67,7 +67,7 @@
 - **Scope (verbatim):** "Computer Physics Communications publishes research papers and application software in the broad field of computational physics... The focus of CPC is on contemporary computational methods and techniques and their implementation, the effectiveness of which will normally be evidenced by the author(s) within the context of a substantive problem in physics."
 - **Software papers:** Yes - the "Computer Programs in Physics (CPiP)" article type, with archiving in the CPC Program Library (now hosted in Mendeley Data).
 - **Open access / APC:** Hybrid; gold-OA APC USD 4,190.
-- **Representative DOI:** QuTiP, Comput. Phys. Commun. 183(8) 1760–1772 (2012), DOI 10.1016/j.cpc.2012.02.021 (verified). The sequel QuTiP 2 is Comput. Phys. Commun. 184 (2013), DOI 10.1016/j.cpc.2012.11.019. This is the gold-standard precedent for an AMO/quantum Python package.
+- **Representative DOI:** QuTiP, Comput. Phys. Commun. 183(8) 1760-1772 (2012), DOI 10.1016/j.cpc.2012.02.021 (verified). The sequel QuTiP 2 is Comput. Phys. Commun. 184 (2013), DOI 10.1016/j.cpc.2012.11.019. This is the gold-standard precedent for an AMO/quantum Python package.
 - URL: https://www.sciencedirect.com/journal/computer-physics-communications
 
 ### SoftwareX (Elsevier)
@@ -80,13 +80,13 @@
 - **Scope (verbatim):** "Metrologia covers the fundamentals of measurements, particularly those dealing with the seven base units of the International System of Units... The journal also publishes papers that contribute to the solution of difficult measurement problems and improve the accuracy of derived units and constants..."
 - **Software/methods:** Not a software-package journal, but the journal of record for absolute-gravimeter Key Comparisons (CCM.G-K series) and uncertainty/methods papers - directly relevant to gravimetry validation.
 - **Open access / APC:** **Metrologia became a FULLY open-access journal as of January 2026** (no longer hybrid): "All articles published in Metrologia from January 2026 will be immediately free to read and reuse anywhere in the world under a Creative Commons Attribution (CC BY) licence... Original submissions received after August 18th 2025 will incur our updated article publication charge (APC)." (The previous hybrid-OA APC was £1700.)
-- **Representative DOIs:** Jiang et al., "The 8th International Comparison of Absolute Gravimeters 2009: the first Key Comparison (CCM.G-K1)...," Metrologia 49(6) 666–684 (2012), DOI 10.1088/0026-1394/49/6/666 (verified); Merlet et al. (optical vs atomic gravimeter comparison), DOI 10.1088/0026-1394/47/4/L01; and the classic Peters, Chung & Chu atom-gravimeter paper, "High-precision gravity measurements using atom interferometry," Metrologia 38, 25 (2001), DOI 10.1088/0026-1394/38/1/4.
+- **Representative DOIs:** Jiang et al., "The 8th International Comparison of Absolute Gravimeters 2009: the first Key Comparison (CCM.G-K1)...," Metrologia 49(6) 666-684 (2012), DOI 10.1088/0026-1394/49/6/666 (verified); Merlet et al. (optical vs atomic gravimeter comparison), DOI 10.1088/0026-1394/47/4/L01; and the classic Peters, Chung & Chu atom-gravimeter paper, "High-precision gravity measurements using atom interferometry," Metrologia 38, 25 (2001), DOI 10.1088/0026-1394/38/1/4.
 - URL: https://iopscience.iop.org/journal/0026-1394
 
 ### Physical Review Applied (APS)
 - **Scope (verbatim):** "Physical Review Applied is a trusted and multidisciplinary journal for high-quality, significant developments in applied science. It publishes work at the interfaces of physics with engineering, materials science, chemistry, biology, and medicine."
 - **Software/methods:** Research Articles (no dedicated software type); best for atom-interferometric sensor results.
-- **Open access / APC:** Hybrid; APS gold-OA APCs apply (roughly USD 2,100–2,700 in 2026, length-dependent), with APC waivers for corresponding authors in 115+ lower-income countries and central coverage under APS institutional OA agreements/SCOAP3.
+- **Open access / APC:** Hybrid; APS gold-OA APCs apply (roughly USD 2,100-2,700 in 2026, length-dependent), with APC waivers for corresponding authors in 115+ lower-income countries and central coverage under APS institutional OA agreements/SCOAP3.
 - **Representative DOI:** Chen et al., "Single-Source Multiaxis Cold-Atom Interferometer in a Centimeter-Scale Cell," Phys. Rev. Applied 12, 014019 (2019), DOI 10.1103/PhysRevApplied.12.014019.
 - URL: https://journals.aps.org/prapplied/about
 
@@ -94,7 +94,7 @@
 - **Scope (verbatim):** "Applied Physics B covers the broad field of: laser physics... quantum optics, laser spectroscopy of atoms, molecules and clusters..."
 - **Software/methods:** Regular papers + Rapid Communications; experimental/theoretical atom-optics methods fit, not a software-library journal.
 - **Open access / APC:** Hybrid (Open Choice); an exact Open Choice APC figure could not be verified from an authoritative page.
-- **Representative DOI:** The foundational light-pulse atom-gravimeter paper, **Kasevich, M., Chu, S., "Measurement of the gravitational acceleration of an atom with a light-pulse atom interferometer," Appl. Phys. B 54, 321–332 (1992), DOI 10.1007/BF00325375** (verified - note this is Kasevich & Chu, not "Peters, Chung, Chu," which is the separate Metrologia 2001 paper above).
+- **Representative DOI:** The foundational light-pulse atom-gravimeter paper, **Kasevich, M., Chu, S., "Measurement of the gravitational acceleration of an atom with a light-pulse atom interferometer," Appl. Phys. B 54, 321-332 (1992), DOI 10.1007/BF00325375** (verified - note this is Kasevich & Chu, not "Peters, Chung, Chu," which is the separate Metrologia 2001 paper above).
 - URL: https://www.springer.com/journal/340/aims-and-scope
 
 ### Sensors (MDPI)
@@ -118,22 +118,22 @@
 
 | Event | Type | Location | Dates | Abstract deadline | URL |
 |---|---|---|---|---|---|
-| YAO 2026 (Young Atom Opticians) | Workshop (early-career AMO) | Crete, Greece | Jun 7–12, 2026 (sources vary) | Check site | https://yao-conference.eu/yao-2026-crete/ |
-| ICAP 2026 (29th) | Conference (atomic physics) | Wuhan, China | Jun 14–19, 2026 | May 25, 2026 (PASSED) | https://www.icap29.com/home.html |
+| YAO 2026 (Young Atom Opticians) | Workshop (early-career AMO) | Crete, Greece | Jun 7-12, 2026 (sources vary) | Check site | https://yao-conference.eu/yao-2026-crete/ |
+| ICAP 2026 (29th) | Conference (atomic physics) | Wuhan, China | Jun 14-19, 2026 | May 25, 2026 (PASSED) | https://www.icap29.com/home.html |
 | GRC Atomic Physics | Conference (Gordon) | Newport, RI, USA | ~2027 (not posted) | TBA | https://www.grc.org/atomic-physics-conference/ |
 | ICOLS (27th) | Conference (laser spectroscopy) | Not announced | ~2027 (not announced) | TBA | https://www.icols2025.it/ |
-| EFTF 2026 (39th) | Conference (frequency/time) | Noordwijk, Netherlands | Apr 20–23, 2026 (OVER) | Passed | https://www.eftf.org/next-meeting |
-| IFCS 2026 | Conference (frequency control) | Tampa, FL, USA | May 11–13, 2026 (OVER) | Dec 14, 2025 (PASSED) | https://ieee-uffc.org/symposia/ifcs |
-| SciPy 2026 (25th) | Conference (scientific Python) | Minneapolis, MN, USA | Jul 13–19, 2026 | Mar 4, 2026 (PASSED) | https://www.scipy2026.scipy.org/ |
-| EuroSciPy 2026 | Conference (scientific Python) | Europe | Jul 18–23, 2026 | Mar 1, 2026 (PASSED) | https://euroscipy.org/call-for-proposals/ |
-| ICTS Cold-Atom meeting | Discussion meeting | Bengaluru, India | Mar 30–Apr 3, 2026 (OVER) | Passed | https://www.icts.res.in/discussion-meeting/caqs |
+| EFTF 2026 (39th) | Conference (frequency/time) | Noordwijk, Netherlands | Apr 20-23, 2026 (OVER) | Passed | https://www.eftf.org/next-meeting |
+| IFCS 2026 | Conference (frequency control) | Tampa, FL, USA | May 11-13, 2026 (OVER) | Dec 14, 2025 (PASSED) | https://ieee-uffc.org/symposia/ifcs |
+| SciPy 2026 (25th) | Conference (scientific Python) | Minneapolis, MN, USA | Jul 13-19, 2026 | Mar 4, 2026 (PASSED) | https://www.scipy2026.scipy.org/ |
+| EuroSciPy 2026 | Conference (scientific Python) | Europe | Jul 18-23, 2026 | Mar 1, 2026 (PASSED) | https://euroscipy.org/call-for-proposals/ |
+| ICTS Cold-Atom meeting | Discussion meeting | Bengaluru, India | Mar 30-Apr 3, 2026 (OVER) | Passed | https://www.icts.res.in/discussion-meeting/caqs |
 | NCAMP (25th) | Conference (Indian AMO) | India (TBA) | ~2027 (not announced) | TBA | https://www.isamp.in/society-activities/conferences |
 
 ---
 
 ## Recommendations
 
-**Best 3–5 venues for a Python atom-interferometry simulation package targeting JOSS:**
+**Best 3-5 venues for a Python atom-interferometry simulation package targeting JOSS:**
 
 1. **JOSS (primary software paper).** Free, fast, GitHub-native, DOI-minting. **Action now:** ensure qgrav has ≥6 months of public commit history, ≥1000 lines of code, OSI license, public issue tracker, and an AI-usage disclosure before submitting - these are 2026 hard gates. **Threshold that changes plan:** if the codebase is <1000 LOC or <6 months public, delay submission and build history first, or route to SoftwareX instead.
 2. **Computer Physics Communications OR SoftwareX (substantial methods+software paper).** Use CPC (QuTiP's home, CPiP article type) if you want maximum prestige and have a substantive physics validation; use SoftwareX (Pykat's home, lower APC USD 1,560, full OA) if you want a faster, software-focused open-access paper. Pick one to avoid redundant publication.
@@ -150,7 +150,7 @@
 
 ## Caveats
 - **Predatory listings:** "ICOLS," "ICAP," and "ICAMOP" appear heavily on WASET (waset.org) and conferenceindex.org with many city/date permutations - these are **not** the legitimate conferences and were excluded.
-- **Date conflicts:** YAO 2026 dates/town differ across official pages (Jun 6–13 vs Jun 7–12; Chania vs Heraklion). ICOLS 2025 dates are reported as both June 2–7 and July 2–7, 2025.
-- **Not yet announced:** 27th ICOLS, 2027 GRC Atomic Physics, NCAMP 25, AION/MAGIS/ELGAR 2026–27 community meetings, PyCon US 2026 and JuliaCon 2026 specifics.
+- **Date conflicts:** YAO 2026 dates/town differ across official pages (Jun 6-13 vs Jun 7-12; Chania vs Heraklion). ICOLS 2025 dates are reported as both June 2-7 and July 2-7, 2025.
+- **Not yet announced:** 27th ICOLS, 2027 GRC Atomic Physics, NCAMP 25, AION/MAGIS/ELGAR 2026-27 community meetings, PyCon US 2026 and JuliaCon 2026 specifics.
 - **Unverified figures:** Applied Physics B's Open Choice APC could not be confirmed; the Sensors example DOIs should be confirmed on the MDPI article pages before citing. PR Applied APC range is approximate.
 - **Deadlines already passed** as of May 29, 2026: ICAP 2026 (May 25), IFCS 2026 (Dec 14, 2025), SciPy 2026 (Mar 4), EuroSciPy 2026 (Mar 1); EFTF 2026, IFCS 2026, ICTS Bengaluru, and the ICAP early-bird are over.

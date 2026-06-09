@@ -12,7 +12,7 @@
 > **one-click reproductions** of five published transportable gravimeters;
 > an independent **QuTiP** cross-check of the Raman dynamics (agreement
 > ~1.6×10⁻⁶); real **IGETS** superconducting-gravimeter analysis; and a
-> six-tab desktop **GUI**. **378 tests, green on Python 3.11–3.12.**
+> six-tab desktop **GUI**. **378 tests, green on Python 3.11-3.12.**
 > See [CHANGELOG.md](CHANGELOG.md) and [docs/ROADMAP_V1_TO_V2.md](docs/ROADMAP_V1_TO_V2.md).
 
 **qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim) with **emergent gravity-phase physics**, a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), multi-drop measurement cycles, and an auto-generated HTML report - all driven from a single YAML config.
@@ -52,7 +52,7 @@ qgrav is checked against the published literature and an independent solver, not
 - **Independent cross-validation.** The single-pulse Raman dynamics are reproduced by an independent **QuTiP** Schrödinger integration to ~1.6×10⁻⁶, and match the closed-form Rabi solution to ~1×10⁻¹⁵.
 - **Real precision-gravity data.** The analysis chain is validated on bundled real **IGETS** superconducting-gravimeter data against the published instrument noise floor.
 - **Emergent physics.** In fully-simulated mode the `k_eff·g·T²` gravity phase emerges from first principles (ballistic free-fall + chirped laser), confirmed against the analytical result and the **Bertoldi 2019** finite-pulse closed form.
-- **378 automated tests**, green on Linux and Windows across Python 3.11–3.12.
+- **378 automated tests**, green on Linux and Windows across Python 3.11-3.12.
 
 ---
 
@@ -352,7 +352,7 @@ python -m pytest -q
 python -m pytest -v --tb=short
 ```
 
-**378 tests** run green on Linux and Windows (Python 3.11–3.12). The v1.0 physics upgrade contributed 61 of them:
+**378 tests** run green on Linux and Windows (Python 3.11-3.12). The v1.0 physics upgrade contributed 61 of them:
 
 - Gravity-free ballistic propagator (10)
 - Chirped-laser detuning (5)
@@ -421,6 +421,6 @@ The current release centres on **validation and usability**:
 - **Multi-drop measurement cycles** with a realistic per-shot noise budget and a fringe-lock servo, producing ASD / Allan curves like a real instrument.
 - **One-click reproductions** of five published transportable gravimeters and an independent **QuTiP** cross-check, surfaced in a six-tab desktop **GUI**.
 - **Real IGETS** superconducting-gravimeter analysis and a refreshed documentation set.
-- **378 tests**, green on Python 3.11–3.12.
+- **378 tests**, green on Python 3.11-3.12.
 
 See **[CHANGELOG.md](CHANGELOG.md)** for the complete, version-by-version history.

@@ -6,7 +6,7 @@
 
 - **The Ménoret 2018 paper provides full simulator parameters for the AQG-A01 except the Raman beam waist, which is never numerically stated.** Key values: T = 60 ms; ~10⁷ ⁸⁷Rb atoms; cycle ≈ 500 ms (2 Hz); λ = 780 nm; k_eff ≈ 1.61 × 10⁷ m⁻¹; contrast C = 0.40; detection SNR = 150 (effective SNR = 60). Pyramid single-beam geometry; mu-metal shielded vacuum chamber; measurement height 55 cm; verticality known to ~10 µrad.
 - **Vibration handling is feed-forward active correction of the Raman laser phase using a hard-mounted Nanometrics Titan classical accelerometer - NOT a passive table, NOT an active isolation platform, and NOT post-correction.** No mechanical isolation device is used; the gravimeter sits directly on the ground / pillar. The Larzac sensitivity number cited in the prompt - **750 nm s⁻² Hz⁻¹/²** - is the as-operated short-term sensitivity during the 2017 month-long campaign at the Larzac plateau (NOT LSBB Rustrel), and is one of *five* distinct sensitivity numbers reported (best-Larzac 500; campaign-Larzac 750; Talence quiet 600; Talence typical 700; abstract/nominal 500). The long-term stability is below 10 nm s⁻² (= 1 µGal ≈ 1 × 10⁻⁹ g), reached at τ ≈ 24 h.
-- **Tide, atmospheric pressure (admittance −3 nm s⁻² hPa⁻¹), tilt, and microwave-quartz-drift corrections were applied before the Allan deviation; polar motion and ocean loading are in the software pipeline but not explicitly stated to have been applied to the analyzed data.** Three peer-reviewed follow-up evaluations (Cooke 2021, Antoni-Micollier 2022, Glässel 2025) and one fleet-wide proceedings paper (Antoni-Micollier 2024) extend the benchmarks: the modern AQG fleet (16 units, AQG-A01–A04 and AQG-B01–B12) reproducibly achieves < 800 nm s⁻² Hz⁻¹/² short-term in noisy conditions and < 500 nm s⁻² Hz⁻¹/² at quiet sites, with long-term stability < 10 nm s⁻² independent of site - i.e. the 2018 numbers are still the target.
+- **Tide, atmospheric pressure (admittance −3 nm s⁻² hPa⁻¹), tilt, and microwave-quartz-drift corrections were applied before the Allan deviation; polar motion and ocean loading are in the software pipeline but not explicitly stated to have been applied to the analyzed data.** Three peer-reviewed follow-up evaluations (Cooke 2021, Antoni-Micollier 2022, Glässel 2025) and one fleet-wide proceedings paper (Antoni-Micollier 2024) extend the benchmarks: the modern AQG fleet (16 units, AQG-A01-A04 and AQG-B01-B12) reproducibly achieves < 800 nm s⁻² Hz⁻¹/² short-term in noisy conditions and < 500 nm s⁻² Hz⁻¹/² at quiet sites, with long-term stability < 10 nm s⁻² independent of site - i.e. the 2018 numbers are still the target.
 
 ---
 
@@ -77,7 +77,7 @@ DOI: 10.1029/2022GL097814. *"The measurement sequence of the AQG-B includes four
 
 ## 2. Vibration-Isolation Method at the Larzac Measurement
 
-**TL;DR:** Real-time **active feed-forward correction of the Raman laser phase** using a hard-mounted **Nanometrics Titan** classical accelerometer. **No passive seismic isolation table, no active isolation platform, no superspring.** The accelerometer signal is bandpass-filtered (0.05 Hz – 1 kHz), digitized, weighted by the triangular sensitivity function of the atom interferometer, and a phase correction is applied to the Raman lasers less than 1 ms before the final π/2 pulse - i.e., within the same measurement cycle.
+**TL;DR:** Real-time **active feed-forward correction of the Raman laser phase** using a hard-mounted **Nanometrics Titan** classical accelerometer. **No passive seismic isolation table, no active isolation platform, no superspring.** The accelerometer signal is bandpass-filtered (0.05 Hz - 1 kHz), digitized, weighted by the triangular sensitivity function of the atom interferometer, and a phase correction is applied to the Raman lasers less than 1 ms before the final π/2 pulse - i.e., within the same measurement cycle.
 
 **Exact passages:**
 
@@ -105,7 +105,7 @@ DOI: 10.1029/2022GL097814. *"The measurement sequence of the AQG-B includes four
 - *"Each point corresponds to 1 measurement cycle (approx. 500 ms)."* (Figure 6 caption.)
 - *"f_hp has been chosen much lower than the cycle frequency of the AQG (2 Hz)."* (Methods.)
 
-**Arithmetic:** 2 Hz → T_cyc = 1/2 = 0.500 s. Internal accounting: MOT 250 ms + state-selection + 30 ms pre-interferometer free-fall + 2T = 120 ms + detection ≈ 0.4–0.5 s ✓.
+**Arithmetic:** 2 Hz → T_cyc = 1/2 = 0.500 s. Internal accounting: MOT 250 ms + state-selection + 30 ms pre-interferometer free-fall + 2T = 120 ms + detection ≈ 0.4-0.5 s ✓.
 
 **Successor:** AQG-B at Etna runs at **1.85 Hz** (cycle ≈ 540 ms) per Antoni-Micollier 2022.
 
@@ -166,13 +166,13 @@ The paper distinguishes the instrumental best (500) from the as-operated campaig
 | Campaign length | 5 days continuous (Dec 2016) | **1 month continuous (Summer 2017)** with no measurable drift |
 | FG5#228 cross-check | n/a | two measurements (25 Jul / 4 Sep 2017) differ by 20 nm s⁻² within statistical uncertainty |
 
-**Interpretation:** The σ(1 day) values are 8.5 vs 9.4 nm s⁻² - within ~10% across the two extreme-noise sites. Long-term stability is therefore **site-independent** at the ≈ 1 µGal floor; only short-term sensitivity is site-dependent (500–750 nm s⁻² Hz⁻¹/²).
+**Interpretation:** The σ(1 day) values are 8.5 vs 9.4 nm s⁻² - within ~10% across the two extreme-noise sites. Long-term stability is therefore **site-independent** at the ≈ 1 µGal floor; only short-term sensitivity is site-dependent (500-750 nm s⁻² Hz⁻¹/²).
 
 ### 5C. Successor-instrument extension of the site map
 
 - **AQG#B01 at Larzac (Cooke et al. 2021, DOI 10.5194/gi-10-65-2021):** σ(τ = 1 h) = **10 nm s⁻²** at Larzac (low-noise); **20 nm s⁻² at 1 h** in Montpellier; **26 nm s⁻² at 1 h** in a garage. Repeatability *"better than 50 nm s⁻²"*; small-scale repeatability 3 nm s⁻², σ = 25 nm s⁻². Drift = −0.02 ± 0.04 nm s⁻² d⁻¹ over ≈ 2 months. *"a 100 nm s⁻² gravity change is detected with the AQG#B01 after a rainfall event at the Larzac geodetic observatory (southern France). The data agreed with the gravity changes measured with a superconducting relative gravimeter (GWR, iGrav#002) and the expected gravity change simulated as an infinite Bouguer slab approximation."*
 - **AQG-A02 and AQG-B10 at BKG sites (Glässel et al. 2025, DOI 10.1007/s00190-025-01995-x):** *"Our measurements confirm a sensitivity of 500 nm s⁻² Hz⁻¹/² at a quiet site, as specified, equivalent to a precision of 10 nm/s² after 1-h integration time, and a combined uncertainty on the order of 100 nm/s²."* AQG-B10 at Wettzell: 430 nm s⁻² Hz⁻¹/². AQG-A02 at Bad Homburg: 300 nm s⁻² Hz⁻¹/² *"during the night of 30/10/2020 to 01/11/2020, the 1st November being a bank holiday in Germany."*
-- **AQG-B at Mt Etna PDN (Antoni-Micollier et al. 2022):** σ(τ = 1 s) ≈ **1,200 nm s⁻² (low tremor)** and **≈ 1,600 nm s⁻² (high tremor)** - 2–3× degraded vs. quiet lab, after switching to the Trillium Compact 120 s seismometer.
+- **AQG-B at Mt Etna PDN (Antoni-Micollier et al. 2022):** σ(τ = 1 s) ≈ **1,200 nm s⁻² (low tremor)** and **≈ 1,600 nm s⁻² (high tremor)** - 2-3× degraded vs. quiet lab, after switching to the Trillium Compact 120 s seismometer.
 - **Fleet-wide reproducibility (Antoni-Micollier et al. 2024, arXiv:2405.10844, published in IEEE Instrumentation & Measurement Magazine):** *"For all units the short-term sensitivity is below 800 nm/s²/τ¹/²"* at the noisy Talence factory site (16 units). *"At a dedicated geodetic site, it is typically better than 500 nm/s²/τ¹/². The long-term sensitivity is better than 10 nm/s² = 1 µGal."*
 
 ---
@@ -243,7 +243,7 @@ Supporting text: *"measure the absolute gravitational acceleration continuously 
 **TL;DR:** Three peer-reviewed evaluations (Cooke 2021, Antoni-Micollier 2022, Glässel 2025) and one IEEE magazine article (Antoni-Micollier et al. 2024) extend the benchmarks. The 1 µGal sensitivity/stability class has held for 8 years across 16 fabricated units; the Ménoret-2018 numbers remain valid simulation targets.
 
 ### 8A. Cooke, Champollion, Le Moigne (2021)
-Geosci. Instrum. Method. Data Syst. 10, 65–79. DOI: 10.5194/gi-10-65-2021. URL: https://gi.copernicus.org/articles/10/65/2021/
+Geosci. Instrum. Method. Data Syst. 10, 65-79. DOI: 10.5194/gi-10-65-2021. URL: https://gi.copernicus.org/articles/10/65/2021/
 
 *"The AQG#B01 is the field version follow-up of the AQG#A01 portable absolute quantum gravimeter developed by the French quantum sensor company Muquans."* (Manufacturer at time of publication was Muquans, not Exail.)
 
@@ -280,7 +280,7 @@ BKG operational evaluation at Wettzell and Bad Homburg:
 ### 8D. Antoni-Micollier, L. et al. (2024)
 "Absolute quantum gravimeters and gradiometers for field measurements." Published in **IEEE Instrumentation & Measurement Magazine** (IEEE Xplore document 10654720); also arXiv:2405.10844. Authors: L. Antoni-Micollier, M. Arnal, R. Gautier, C. Janvier, V. Ménoret, J. Richard, P. Vermeulen, P. Rosenbusch, C. Majek, B. Desruelle.
 
-Fleet-wide reproducibility across 16 units (AQG-A01–A04, AQG-B01–B12):
+Fleet-wide reproducibility across 16 units (AQG-A01-A04, AQG-B01-B12):
 
 - *"For all units the short-term sensitivity is below 800 nm/s²/τ¹/²"* at the noisy Talence factory site.
 - *"At a dedicated geodetic site, it is typically better than 500 nm/s²/τ¹/². The long-term sensitivity is better than 10 nm/s² = 1 µGal."*
@@ -294,7 +294,7 @@ Fleet-wide reproducibility across 16 units (AQG-A01–A04, AQG-B01–B12):
 | T | 60 ms | same architecture | not re-stated | not re-stated |
 | Atoms / cycle | ~10⁷ | (same) | **10⁶** | not re-stated |
 | Cycle / rate | ~500 ms / 2 Hz | 2 Hz | 540 ms / **1.85 Hz** | not re-stated |
-| Short-term sensitivity (best) | 500 nm s⁻² Hz⁻¹/² (Larzac nominal) | only Allan-time units | σ(τ=1s) ≈ 1200–1600 nm s⁻² with tremor | 430 (Wettzell) / 300 (Bad Homburg quiet) nm s⁻² Hz⁻¹/² |
+| Short-term sensitivity (best) | 500 nm s⁻² Hz⁻¹/² (Larzac nominal) | only Allan-time units | σ(τ=1s) ≈ 1200-1600 nm s⁻² with tremor | 430 (Wettzell) / 300 (Bad Homburg quiet) nm s⁻² Hz⁻¹/² |
 | Long-term stability | < 10 nm s⁻² in 24 h | 10 nm s⁻² in 1 h (Larzac) | "few tens to few hundreds nm s⁻²" detected | "10 nm/s² after 1 h" |
 | Vibration channel | Nanometrics Titan + real-time phase correction | same | **CHANGED: Nanometrics Trillium Compact 120 s** | same as Ménoret 2018 |
 
@@ -321,21 +321,21 @@ The 2018 paper does **NOT publish an absolute g-value at the Larzac pillar.** It
 ## Recommendations
 
 **Stage 1 - minimum-viable validation against Ménoret 2018 Larzac:**
-Configure qgrav with T = 60 ms, τ_π/2 = 10 µs, τ_π = 20 µs, λ = 780 nm, k_eff = 1.61 × 10⁷ m⁻¹, ⁸⁷Rb D2, 2 Hz cycle, ~10⁷ atoms, MOT 250 ms, 30 ms pre-interferometer free-fall, contrast C = 0.40, detection SNR = 150, effective SNR = 60, periodic k-reversal. Inject a Nanometrics-Titan-like accelerometer noise profile and apply real-time feed-forward Raman-phase correction using the triangular sensitivity function with high-pass at 0.05 Hz and low-pass at 1 kHz. Apply corrections: tilt, pressure (admittance −3 nm s⁻² hPa⁻¹), microwave clock drift, locally-trained Larzac synthetic Earth tide. **Target match:** δg_single-shot ≈ 3 × 10⁻⁸ g; white-noise extrapolation to 1 s = 750 nm s⁻² Hz⁻¹/²; σ(1 day) = 9.4 nm s⁻²; no measurable drift over 30 days. The simulator passes if these three numbers reproduce within ±10–20%.
+Configure qgrav with T = 60 ms, τ_π/2 = 10 µs, τ_π = 20 µs, λ = 780 nm, k_eff = 1.61 × 10⁷ m⁻¹, ⁸⁷Rb D2, 2 Hz cycle, ~10⁷ atoms, MOT 250 ms, 30 ms pre-interferometer free-fall, contrast C = 0.40, detection SNR = 150, effective SNR = 60, periodic k-reversal. Inject a Nanometrics-Titan-like accelerometer noise profile and apply real-time feed-forward Raman-phase correction using the triangular sensitivity function with high-pass at 0.05 Hz and low-pass at 1 kHz. Apply corrections: tilt, pressure (admittance −3 nm s⁻² hPa⁻¹), microwave clock drift, locally-trained Larzac synthetic Earth tide. **Target match:** δg_single-shot ≈ 3 × 10⁻⁸ g; white-noise extrapolation to 1 s = 750 nm s⁻² Hz⁻¹/²; σ(1 day) = 9.4 nm s⁻²; no measurable drift over 30 days. The simulator passes if these three numbers reproduce within ±10-20%.
 
 **Stage 2 - instrument-best benchmark:**
-Re-run with full atom number (no transient reduction) and target the 500 nm s⁻² Hz⁻¹/² white-noise floor and 8.5 nm s⁻² σ(24 h). This validates the SNR–floor coupling through paper equation (4).
+Re-run with full atom number (no transient reduction) and target the 500 nm s⁻² Hz⁻¹/² white-noise floor and 8.5 nm s⁻² σ(24 h). This validates the SNR-floor coupling through paper equation (4).
 
 **Stage 3 - cross-site / cross-noise benchmark:**
 Re-run with Talence-like vibration spectra (microseismic, tramway, sediment-supported floor) targeting 600 nm s⁻² Hz⁻¹/² (quiet 5 d) and 700 nm s⁻² Hz⁻¹/² (typical). Confirm vibration rejection factor > 60 (2.3 rad rms → 36 mrad rms post-correction).
 
 **Stage 4 - successor-instrument extension:**
-For the AQG-B family, switch to 1.85 Hz / 10⁶ atoms / 270 ms MOT. For Etna-like noise also switch to the broadband Trillium Compact 120 s seismometer model and target σ(τ=1 s) ≈ 1200–1600 nm s⁻². For BKG-like quiet sites, target 300–500 nm s⁻² Hz⁻¹/². For AQG#B01 hydrology demonstrations, target σ(1 h) = 10 nm s⁻² at Larzac and the ability to detect a 100 nm s⁻² step.
+For the AQG-B family, switch to 1.85 Hz / 10⁶ atoms / 270 ms MOT. For Etna-like noise also switch to the broadband Trillium Compact 120 s seismometer model and target σ(τ=1 s) ≈ 1200-1600 nm s⁻². For BKG-like quiet sites, target 300-500 nm s⁻² Hz⁻¹/². For AQG#B01 hydrology demonstrations, target σ(1 h) = 10 nm s⁻² at Larzac and the ability to detect a 100 nm s⁻² step.
 
 **Thresholds that would change these recommendations:**
-- If the simulator white-noise floor is more than ±30% off the 750 nm s⁻² Hz⁻¹/² Larzac target with all Stage-1 parameters set, audit the vibration channel and the detection-noise model (eq. 4–5 of the paper) before tuning anything else.
+- If the simulator white-noise floor is more than ±30% off the 750 nm s⁻² Hz⁻¹/² Larzac target with all Stage-1 parameters set, audit the vibration channel and the detection-noise model (eq. 4-5 of the paper) before tuning anything else.
 - If σ(1 day) is < 7 nm s⁻² or > 13 nm s⁻², audit the pressure-admittance and Earth-tide-residual treatment.
-- If σ(10 min) at Talence is outside 19–32 nm s⁻² (±25% around 25.2), verify (k+, k−) Raman-reversal pair averaging.
+- If σ(10 min) at Talence is outside 19-32 nm s⁻² (±25% around 25.2), verify (k+, k−) Raman-reversal pair averaging.
 - If the rejection factor between raw and corrected vibration phase noise falls below 30, audit the sensitivity-function timing alignment (delay-optimization is mentioned in the paper Methods).
 
 ---
@@ -348,6 +348,6 @@ For the AQG-B family, switch to 1.85 Hz / 10⁶ atoms / 270 ms MOT. For Etna-lik
 4. **Allan deviation values at intermediate τ (10 s, 100 s, 1000 s) are NOT stated in the paper text or any table** - only in Fig. 5. Do not quote them as authoritative; only the τ → 1 s asymptote (750 nm s⁻² Hz⁻¹/²) and the long-time anchors (σ(1 h) = 10.7 and 8.5 nm s⁻²; σ(1 day) = 9.4 nm s⁻²) are reliable.
 5. **Ocean loading and polar motion are implemented in the AQG control software (TSoft routine) but are not explicitly listed as having been applied to the Talence-5-day or Larzac-month-long datasets whose Allan deviations are shown in Figs. 4 and 5.** Only tilt + microwave clock + pressure + synthetic Earth tide are explicitly stated for the analysis data.
 6. **Antoni-Micollier et al. (2022) Wiley full-text and ESS Open Archive preprint returned HTTP 403 to direct fetch**; the verbatim passages quoted in Section 8B and successor tables were extracted via indexed search snippets cross-checked across two independent sources. Wording is internally consistent, but a small risk of paraphrase remains. The DOI 10.1029/2022GL097814 and the supporting preprint URL are stable.
-7. **Vendor specifications are dated 2024–2025** (current Exail product page as of May 2026). They do not include T, n_atoms, cycle time, or Raman beam waist.
+7. **Vendor specifications are dated 2024-2025** (current Exail product page as of May 2026). They do not include T, n_atoms, cycle time, or Raman beam waist.
 8. **Manufacturer name evolution:** Muquans → iXblue (acquired) → Exail (rebranded). Older papers and Cooke 2021 refer to Muquans; Antoni-Micollier 2022 to iXblue; Glässel 2025 and the 2024 magazine article to Exail.
 9. **For the gradient instrument (DQG) cited in Section 8D, the 1 E figure is a specification target; the achieved long-term gradient stability is 0.15 E = 1.5 × 10⁻¹⁰ s⁻²** per the body of Antoni-Micollier et al. 2024 (arXiv:2405.10844).
