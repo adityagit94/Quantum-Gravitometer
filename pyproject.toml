@@ -38,6 +38,7 @@ dependencies = [
 test = ["pytest>=7", "hypothesis>=6.80"]
 qutip = ["qutip>=4.7"]  # optional: independent cross-validation backend (v1.2.1)
 benchmark = ["pytest-benchmark>=4.0"]  # optional: performance harness (v1.2.3)
+docs = ["mkdocs-material>=9.5"]  # optional: build the documentation site locally
 
 [project.scripts]
 qgrav = "qgrav.cli:main"
