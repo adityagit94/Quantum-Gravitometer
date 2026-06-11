@@ -249,6 +249,24 @@ class IntegratedPhaseSpatialSuperpositionTransitionPropagator(
     it resolves to
     :meth:`IntegratedPhaseTwoLevelTransitionPropagator._prop_matrix` (the
     integrated-phase + AC-Stark two-level matrix).
+
+    Sub-pulse integration (v1.5, ``raman_substeps``)
+    ------------------------------------------------
+    With ``raman_substeps = N > 1`` the pulse of duration ``tau`` is applied
+    as ``N`` composed slices of ``tau/N``.  Per slice the atoms advance
+    *ballistically under gravity* (``substep_g_m_s2`` with optional linear
+    gradient), and the slice's rotation matrix is evaluated at the slice
+    **midpoint**: mid-slice position (Rabi frequency, ``-k_eff*z`` imprint),
+    mid-slice velocity (Doppler detuning) and mid-slice time (chirp term,
+    both in the detuning and in the ``0.5*chirp*t**2`` imprint).  As N grows
+    the composition converges to the time-ordered evolution of the
+    two-level Hamiltonian with the time-dependent laser phase, so the
+    finite-tau pulse physics (Bertoldi 2019 / Fang 2018 closed forms)
+    *emerges* numerically instead of being injected as a correction.
+
+    ``raman_substeps = 1`` (default) leaves the upstream single-matrix path
+    byte-identical, including its known finite-pulse discretisation artefact
+    (removed by ``_calibrate_gravity_phase_offset``).
     """
 
     def __init__(
@@ -262,6 +280,10 @@ class IntegratedPhaseSpatialSuperpositionTransitionPropagator(
         phase_scan=0,
         single_photon_detuning_hz=0.0,
         pulse_center_timing=False,
+        raman_substeps=1,
+        substep_g_m_s2=0.0,
+        substep_gravity_gradient_per_m=0.0,
+        substep_z_ref_m=0.0,
     ):
         # Routes through SpatialSuperposition.__init__ (sets n_pulses/n_pulse)
         # which calls super().__init__ -> IntegratedPhaseTwoLevel.__init__.
@@ -276,3 +298,53 @@ class IntegratedPhaseSpatialSuperpositionTransitionPropagator(
         )
         self.single_photon_detuning_hz = float(single_photon_detuning_hz)
         self.pulse_center_timing = bool(pulse_center_timing)
+        self.raman_substeps = int(raman_substeps)
+        self.substep_g_m_s2 = float(substep_g_m_s2)
+        self.substep_gravity_gradient_per_m = float(substep_gravity_gradient_per_m)
+        self.substep_z_ref_m = float(substep_z_ref_m)
+
+    def _substep_fall(self, atoms, dt: float) -> None:
+        """Advance the ensemble ballistically under gravity for ``dt``.
+
+        Same exact kinematics as :class:`GravityFreePropagator` (in place,
+        on an already-deep-copied ensemble).
+        """
+        g_local = self.substep_g_m_s2 + self.substep_gravity_gradient_per_m * (
+            atoms.position[:, 2] - self.substep_z_ref_m
+        )
+        atoms.position[:, 2] += atoms.velocity[:, 2] * dt - 0.5 * g_local * dt**2
+        atoms.position[:, 0] += atoms.velocity[:, 0] * dt
+        atoms.position[:, 1] += atoms.velocity[:, 1] * dt
+        atoms.velocity[:, 2] -= g_local * dt
+
+    def propagate(self, atoms):
+        """Apply the pulse, in N composed slices when ``raman_substeps > 1``.
+
+        The N = 1 path defers entirely to the upstream
+        ``Propagator.propagate`` (half-step drift, single matrix, half-step
+        drift) so the default behaviour is bit-identical to before.
+        """
+        n = int(self.raman_substeps)
+        if n <= 1:
+            return super().propagate(atoms)
+
+        atoms = copy.deepcopy(atoms)
+        full_tau = self.time_delta
+        dt = full_tau / n
+        try:
+            # _prop_matrix reads the slice duration from self.time_delta.
+            self.time_delta = dt
+            for _ in range(n):
+                # First half-slice: fall, and advance the clock so the matrix
+                # sees mid-slice z (Rabi/imprint), v (Doppler) and t (chirp).
+                self._substep_fall(atoms, dt / 2.0)
+                atoms.time += dt / 2.0
+                atoms.state_kets = np.einsum(
+                    "ijk,ikl->ijl", self._prop_matrix(atoms), atoms.state_kets
+                )
+                # Second half-slice.
+                self._substep_fall(atoms, dt / 2.0)
+                atoms.time += dt / 2.0
+        finally:
+            self.time_delta = full_tau
+        return atoms

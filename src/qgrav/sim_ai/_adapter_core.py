@@ -242,6 +242,7 @@ def _run_mach_zehnder_sequence_with_gravity(
     phase_offset_rad: float = 0.0,
     wavefront=None,
     single_photon_detuning_hz: float = 0.0,
+    raman_substeps: int = 1,
 ) -> dict[str, float]:
     """Run a three-pulse MZ sequence with ballistic gravity propagation.
 
@@ -286,6 +287,15 @@ def _run_mach_zehnder_sequence_with_gravity(
     #           = final_phase_rad   (matches hybrid)
     corrected_phase_scan = float(final_phase_rad) + float(phase_offset_rad)
 
+    # Sub-pulse integration (raman_substeps > 1) needs the gravity parameters
+    # inside each pulse so the atoms keep falling during the slices.
+    _substep_kwargs = dict(
+        raman_substeps=int(raman_substeps),
+        substep_g_m_s2=float(g_m_s2),
+        substep_gravity_gradient_per_m=float(gravity_gradient_per_m),
+        substep_z_ref_m=float(z_ref_m),
+    )
+
     bs1 = IntegratedPhaseSpatialSuperpositionTransitionPropagator(
         float(tau_pi_half_s),
         n_pulse=1,
@@ -294,6 +304,7 @@ def _run_mach_zehnder_sequence_with_gravity(
         wave_vectors=wave_vectors,
         wf=wavefront,
         single_photon_detuning_hz=float(single_photon_detuning_hz),
+        **_substep_kwargs,
     )
     mirror = IntegratedPhaseSpatialSuperpositionTransitionPropagator(
         2.0 * float(tau_pi_half_s),
@@ -303,6 +314,7 @@ def _run_mach_zehnder_sequence_with_gravity(
         wave_vectors=wave_vectors,
         wf=wavefront,
         single_photon_detuning_hz=float(single_photon_detuning_hz),
+        **_substep_kwargs,
     )
     bs2 = IntegratedPhaseSpatialSuperpositionTransitionPropagator(
         float(tau_pi_half_s),
@@ -313,6 +325,7 @@ def _run_mach_zehnder_sequence_with_gravity(
         phase_scan=corrected_phase_scan,
         wf=wavefront,
         single_photon_detuning_hz=float(single_photon_detuning_hz),
+        **_substep_kwargs,
     )
     grav_prop = GravityFreePropagator(
         T,
@@ -392,6 +405,7 @@ def _calibrate_gravity_phase_offset(
     gravity_gradient_per_m: float = 0.0,
     z_ref_m: float = 0.0,
     n_calibration_phases: int = 73,
+    raman_substeps: int = 1,
 ) -> float:
     """Determine the constant phase offset between simulated and hybrid modes.
 
@@ -422,6 +436,7 @@ def _calibrate_gravity_phase_offset(
         gravity_gradient_per_m=gravity_gradient_per_m,
         z_ref_m=z_ref_m,
         n_calibration_phases=n_calibration_phases,
+        raman_substeps=raman_substeps,
     )
     return offset
 
@@ -437,6 +452,7 @@ def _calibrate_gravity_phase_and_visibility(
     gravity_gradient_per_m: float = 0.0,
     z_ref_m: float = 0.0,
     n_calibration_phases: int = 73,
+    raman_substeps: int = 1,
 ) -> tuple[float, float]:
     """Calibration fringe scan returning ``(phase_offset_rad, visibility)``.
 
@@ -465,6 +481,7 @@ def _calibrate_gravity_phase_and_visibility(
             gravity_gradient_per_m=float(gravity_gradient_per_m),
             z_ref_m=float(z_ref_m),
             phase_offset_rad=0.0,  # no offset during calibration
+            raman_substeps=int(raman_substeps),
         )
         p3_values[i] = result["port_3"]
     # Sinusoidal fit gives a robust estimate of the peak phase even with

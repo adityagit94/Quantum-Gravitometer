@@ -125,6 +125,7 @@ def run_aisim_multi_drop_cycle(
     servo_kp: float = 0.5,
     servo_ki: float = 0.1,
     servo_kd: float = 0.0,
+    raman_substeps: int = 1,
 ) -> dict[str, Any]:
     """Run a multi-drop gravimeter measurement cycle.
 
@@ -195,6 +196,8 @@ def run_aisim_multi_drop_cycle(
         raise ValueError("n_drops must be >= 1")
     if cycle_time_s <= 0:
         raise ValueError("cycle_time_s must be > 0")
+    if int(raman_substeps) < 1:
+        raise ValueError("raman_substeps must be >= 1.")
     if n_detected_per_drop is None:
         n_detected_per_drop = int(n_atoms)
     # Effective detected-atom count for the detection-noise sigma.  If an
@@ -253,6 +256,7 @@ def run_aisim_multi_drop_cycle(
             wave_vectors=wave_vectors,
             g_chirp_m_s2=float(gravity_true_m_s2),
             gravity_gradient_per_m=float(gravity_gradient_per_m),
+            raman_substeps=int(raman_substeps),
         )
         if fit_visibility and fitted_visibility > 1e-3:
             visibility_estimate = fitted_visibility
@@ -342,6 +346,7 @@ def run_aisim_multi_drop_cycle(
                 g_m_s2=float(gravity_true_m_s2),
                 gravity_gradient_per_m=float(gravity_gradient_per_m),
                 phase_offset_rad=sim_phase_offset,
+                raman_substeps=int(raman_substeps),
             )
         else:
             out = _run_mach_zehnder_sequence(
@@ -413,6 +418,7 @@ def run_aisim_multi_drop_cycle(
         "cycle_time_s": float(cycle_time_s),
         "gravity_true_m_s2": float(gravity_true_m_s2),
         "gravity_propagation": bool(gravity_propagation),
+        "raman_substeps": int(raman_substeps),
         "detection_noise_enabled": bool(detection_noise_enabled),
         "n_detected_per_drop": int(n_detected_per_drop),
         "n_detected_effective": int(n_detected_effective),

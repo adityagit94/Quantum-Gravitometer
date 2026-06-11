@@ -59,9 +59,12 @@ def run_aisim_gravity_sweep(
     single_photon_detuning_hz: float = 0.0,
     wavefront_zernike_coeffs: dict | None = None,
     wavefront_radius_m: float = 0.05,
+    raman_substeps: int = 1,
 ) -> dict[str, Any]:
     if n_gravity_points < 5:
         raise ValueError("n_gravity_points must be at least 5.")
+    if int(raman_substeps) < 1:
+        raise ValueError("raman_substeps must be >= 1.")
     _wavefront = _build_wavefront(
         wavefront_zernike_coeffs=wavefront_zernike_coeffs,
         wavefront_radius_m=wavefront_radius_m,
@@ -149,6 +152,7 @@ def run_aisim_gravity_sweep(
             wave_vectors=wave_vectors,
             g_chirp_m_s2=float(gravity_center_m_s2),
             gravity_gradient_per_m=float(gravity_gradient_per_m),
+            raman_substeps=int(raman_substeps),
         )
 
     port2 = np.zeros_like(g_values)
@@ -169,6 +173,7 @@ def run_aisim_gravity_sweep(
                 phase_offset_rad=sim_phase_offset,
                 wavefront=_wavefront,
                 single_photon_detuning_hz=float(single_photon_detuning_hz),
+                raman_substeps=int(raman_substeps),
             )
         else:
             out = _run_mach_zehnder_sequence(
@@ -214,6 +219,7 @@ def run_aisim_gravity_sweep(
         "model": "gravity_sweep",
         "study_type": _study_type,
         "gravity_propagation": bool(gravity_propagation),
+        "raman_substeps": int(raman_substeps),
         "n_atoms_total": int(n_atoms),
         "n_atoms_detected": detected_count,
         "detected_fraction": float(detected_count / float(n_atoms)),

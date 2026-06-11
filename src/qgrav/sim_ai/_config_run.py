@@ -92,6 +92,7 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
                 sim_cfg.get("wavefront_zernike_coeffs")
             ),
             wavefront_radius_m=float(sim_cfg.get("wavefront_radius_m", 0.05)),
+            raman_substeps=int(sim_cfg.get("raman_substeps", 1)),
         )
     if model == "multi_drop_cycle":
         return run_aisim_multi_drop_cycle(
@@ -131,6 +132,7 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             servo_kp=float(sim_cfg.get("servo_kp", 0.5)),
             servo_ki=float(sim_cfg.get("servo_ki", 0.1)),
             servo_kd=float(sim_cfg.get("servo_kd", 0.0)),
+            raman_substeps=int(sim_cfg.get("raman_substeps", 1)),
         )
     if model == "vibration_sensitivity_sweep":
         return run_aisim_vibration_sensitivity_sweep(

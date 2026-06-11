@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Physics
+- **Sub-pulse integration of finite-duration Raman pulses**
+  (`raman_substeps: N`, default 1 = exact previous behaviour). Each pulse
+  is applied as N composed slices with ballistic fall *during* the pulse
+  and midpoint-evaluated Rabi/Doppler/chirp per slice, so the finite-τ
+  physics emerges numerically: φ(N) converges (≈0.35× per doubling) to
+  the Bertoldi 2019 / Fang 2018 closed form within 2×10⁻³ relative at
+  η = 0.04, and the g-independent calibration artefact falls ≈1/N.
+  Implemented entirely in the override layer (vendored AISim untouched);
+  threaded through gravity sweep, multi-drop cycle, and YAML config.
+  New `tests/test_subpulse_integration.py`;
+  `docs/research/RESEARCH_SUBPULSE.md` records the discretisation
+  choices and measured convergence numbers.
+
 ### Real-data corrections
 - **Polar-motion (pole tide) and ocean-loading reductions** complete the
   standard SG residual chain (tide → pressure → polar motion → ocean
