@@ -14,8 +14,8 @@ authors:
     given-names: Aditya
     affiliation: "Indian Institute of Technology Patna"
     email: aditya_2312res46@iitp.ac.in
-version: "1.3.0"
-date-released: "2026-05-30"
+version: "1.4.0"
+date-released: "2026-06-11"
 license: GPL-3.0-or-later
 repository-code: "https://github.com/adityagit94/Quantum-Gravitometer"
 url: "https://github.com/adityagit94/Quantum-Gravitometer"

@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased - GUI integration
+## Unreleased
+
+## v1.4.0 (2026-06-11) - GUI integration
+
+Brings the full v1.0-v1.3 simulation/validation engine into the desktop
+workbench (`qgrav-gui`) and hardens CI: enforced lint/format/type gates,
+coverage measurement, and Python 3.13 in the matrix.
+**419 tests (full suite incl. slow + QuTiP), 0 regressions.**
 
 ### CI
 - The test matrix now includes Python 3.13 on both ubuntu and windows,
@@ -11,15 +18,14 @@
   ruff findings fixed (dead locals, `raise ... from`, isinstance unions,
   import sorting); `[tool.mypy]` config added and the source tree is
   mypy-clean (62 files), with scoped TODO(typing) overrides for the
-  config-dispatcher and pipeline modules.
+  config-dispatcher and pipeline modules. Scripts and notebooks are linted
+  by the same rules (pre-commit passes on all files).
 - Coverage is now measured in CI (`pytest --cov`, vendored code omitted) with
   targeted new tests for the weakest modules: `sim_ai/simple_ai.py`
   38% → 100%, `bench_ifo/real_ifo.py` 59% → 98%, `datasets/corrections.py`
   62% → 100% (the PyGTide code path is now exercised via a fake module).
   Also modernised the deprecated `utcfromtimestamp` call that path used.
-
-Brings the full v1.0-v1.3 simulation/validation engine into the desktop
-workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 regressions.**
+  Non-vendor total: 78.5%.
 
 ### Setup & Run tab
 - Added the flagship **`multi_drop_cycle`** model to the study-model dropdown (it
