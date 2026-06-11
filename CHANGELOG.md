@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### GUI
+- **Multi-run Allan-curve comparison** in the Results tab: a
+  `Compare runs…` dialog overlays σ(τ) from any number of run folders on
+  one log-log figure (newest-first listing, optional normalization to
+  each curve's σ(τ=1 s), PNG export). Runs without Allan data are
+  skipped with a status-bar note. +3 GUI tests.
+
 ### Internal
 - `sim_ai/aisim_adapter.py` (~2,000 lines) split into private modules
   (`_adapter_core`, `_scans`, `_sweeps`, `_multi_drop`, `_config_run`);

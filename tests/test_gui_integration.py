@@ -246,3 +246,82 @@ def _find_combo_with_value(widget, needle):
         if _find_combo_with_value(child, needle):
             return True
     return False
+
+
+# ----------------------------------------------------------------------
+# Multi-run Allan comparison (Results tab)
+# ----------------------------------------------------------------------
+def _make_fake_run(root, name, *, with_allan=True):
+    """Minimal run folder satisfying load_run_bundle: metrics.json + data.npz."""
+    import json
+
+    import numpy as np
+
+    run_dir = root / name
+    run_dir.mkdir(parents=True)
+    (run_dir / "metrics.json").write_text(
+        json.dumps({"bench_type": "virtual", "run_name": name}), encoding="utf-8"
+    )
+    arrays = {"x": np.arange(4, dtype=np.float64)}
+    if with_allan:
+        taus = np.logspace(0, 2, 12)
+        arrays["allan_taus"] = taus
+        arrays["allan_series"] = 1e-8 / np.sqrt(taus)
+    np.savez_compressed(run_dir / "data.npz", **arrays)
+    return run_dir
+
+
+def test_compare_runs_overlays_two_curves(app, tmp_path):
+    runs_root = tmp_path / "runs"
+    _make_fake_run(runs_root, "20260611-0001_a")
+    _make_fake_run(runs_root, "20260611-0002_b")
+
+    app.open_compare_runs_dialog(runs_root)
+    assert app._compare_listbox is not None
+    assert app._compare_listbox.size() == 2
+    # Newest first by name.
+    assert app._compare_listbox.get(0) == "20260611-0002_b"
+
+    app._compare_listbox.selection_set(0, 1)
+    app._overlay_selected_runs()
+
+    fig = app._compare_figure
+    assert fig is not None
+    ax = fig.axes[0]
+    assert len(ax.get_lines()) == 2
+    legend = ax.get_legend()
+    assert legend is not None
+    assert len(legend.get_texts()) == 2
+    app._compare_window.destroy()
+
+
+def test_compare_runs_skips_bundle_without_allan(app, tmp_path):
+    runs_root = tmp_path / "runs"
+    _make_fake_run(runs_root, "20260611-0003_good")
+    _make_fake_run(runs_root, "20260611-0004_noallan", with_allan=False)
+
+    plotted = app._overlay_runs(
+        [runs_root / "20260611-0003_good", runs_root / "20260611-0004_noallan"]
+    )
+    assert plotted == 1
+    ax = app._compare_figure.axes[0]
+    assert len(ax.get_lines()) == 1
+    assert "20260611-0004_noallan" in app.status_var.get()
+
+
+def test_compare_runs_normalized_curves_start_at_unity(app, tmp_path):
+    import numpy as np
+
+    runs_root = tmp_path / "runs"
+    _make_fake_run(runs_root, "20260611-0005_n1")
+    _make_fake_run(runs_root, "20260611-0006_n2")
+
+    plotted = app._overlay_runs(
+        [runs_root / "20260611-0005_n1", runs_root / "20260611-0006_n2"],
+        normalize=True,
+    )
+    assert plotted == 2
+    for line in app._compare_figure.axes[0].get_lines():
+        x, y = line.get_xdata(), line.get_ydata()
+        # sigma(tau=1 s) normalized to 1 (tau grid starts at 1 s here).
+        assert np.isclose(y[np.argmin(np.abs(x - 1.0))], 1.0)

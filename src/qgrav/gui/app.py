@@ -27,6 +27,7 @@ from tkinter import BOTH, END, X, messagebox, ttk
 
 import yaml
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
 
 from qgrav.config import find_project_root, validate_config_structure
 from qgrav.gui._tab_data_browser import DataBrowserTabMixin
@@ -140,6 +141,12 @@ class QGravApp(
         self._browser_canvas: FigureCanvasTkAgg | None = None
         self._browser_toolbar: NavigationToolbar2Tk | None = None
         self._browser_data: dict[str, Any] | None = None
+        # Multi-run Allan comparison (Results tab "Compare runs..." dialog).
+        self.compare_normalize_var = tk.BooleanVar(value=False)
+        self._compare_figure: Figure | None = None
+        self._compare_window: tk.Toplevel | None = None
+        self._compare_listbox: tk.Listbox | None = None
+        self._compare_run_dirs: list[Path] = []
         self._run_in_progress = False
         self._last_temp_config_path: Path | None = None
         self._temp_config_paths: list[Path] = []

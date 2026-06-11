@@ -9,14 +9,16 @@ from __future__ import annotations
 import logging
 import tkinter as tk
 import webbrowser
-from tkinter import END, LEFT, VERTICAL, messagebox, ttk
+from pathlib import Path
+from tkinter import END, LEFT, VERTICAL, filedialog, messagebox, ttk
 from typing import Any
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
-from qgrav.visuals import build_run_figure
+from qgrav.visuals import build_run_figure, load_run_bundle
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,12 @@ class ResultsTabMixin:
         only via ``self._queue.put(...)`` - never touch Tk widgets directly
         from a thread (the Tk thread polls the queue via ``_poll_queue``).
     """
+
+    # Declared so the types match QGravApp.__init__ (None until the
+    # Compare runs... dialog is opened / an overlay is drawn).
+    _compare_figure: Figure | None
+    _compare_window: tk.Toplevel | None
+    _compare_listbox: tk.Listbox | None
 
     def _build_results_tab(self, parent: ttk.Frame) -> None:
         parent.rowconfigure(0, weight=1)
@@ -104,6 +112,9 @@ class ResultsTabMixin:
         self.plot_kind_combo.pack(side=LEFT, padx=8)
         self.plot_kind_combo.bind("<<ComboboxSelected>>", lambda _e: self.refresh_plot())
         ttk.Button(top, text="Refresh", command=self.refresh_plot).pack(side=LEFT, padx=4)
+        ttk.Button(top, text="Compare runs...", command=self.open_compare_runs_dialog).pack(
+            side=LEFT, padx=4
+        )
         self.plot_toolbar_frame = ttk.Frame(visuals_box)
         self.plot_toolbar_frame.grid(row=2, column=0, sticky="ew", padx=6, pady=(4, 4))
         self.plot_frame = ttk.Frame(visuals_box)
@@ -208,6 +219,151 @@ class ResultsTabMixin:
             frame=self.plot_frame,
             toolbar_frame=self.plot_toolbar_frame,
         )
+
+    # ------------------------------------------------------------------
+    # Multi-run Allan comparison
+    # ------------------------------------------------------------------
+    def _runs_root(self) -> Path:
+        """Directory whose subfolders are candidate runs for comparison."""
+        if self.last_report is not None:
+            return self.last_report.resolve().parent.parent
+        return self._project_root / "runs"
+
+    def open_compare_runs_dialog(self, runs_root: Path | None = None) -> None:
+        """Open a dialog listing run folders for Allan-curve comparison."""
+        root_dir = Path(runs_root) if runs_root is not None else self._runs_root()
+        run_dirs = (
+            sorted(
+                (d for d in root_dir.iterdir() if d.is_dir()),
+                key=lambda d: d.name,
+                reverse=True,  # timestamped names: newest first
+            )
+            if root_dir.is_dir()
+            else []
+        )
+        if not run_dirs:
+            messagebox.showinfo("qgrav", f"No run folders found under {root_dir}.")
+            return
+
+        window = tk.Toplevel(self.root)
+        window.title("Compare runs - Allan deviation overlay")
+        window.geometry("520x420")
+        window.transient(self.root)
+        window.rowconfigure(1, weight=1)
+        window.columnconfigure(0, weight=1)
+
+        ttk.Label(
+            window,
+            text="Select two or more runs to overlay their Allan deviation curves.",
+            wraplength=480,
+        ).grid(row=0, column=0, sticky="ew", padx=8, pady=(8, 4))
+
+        list_frame = ttk.Frame(window)
+        list_frame.grid(row=1, column=0, sticky="nsew", padx=8)
+        list_frame.rowconfigure(0, weight=1)
+        list_frame.columnconfigure(0, weight=1)
+        listbox = tk.Listbox(list_frame, selectmode="extended", exportselection=False)
+        listbox.grid(row=0, column=0, sticky="nsew")
+        list_scroll = ttk.Scrollbar(list_frame, orient=VERTICAL, command=listbox.yview)
+        list_scroll.grid(row=0, column=1, sticky="ns")
+        listbox.configure(yscrollcommand=list_scroll.set)
+        for run_dir in run_dirs:
+            listbox.insert(END, run_dir.name)
+
+        controls = ttk.Frame(window)
+        controls.grid(row=2, column=0, sticky="ew", padx=8, pady=8)
+        ttk.Checkbutton(
+            controls,
+            text="Normalize to each curve's σ(τ=1 s)",
+            variable=self.compare_normalize_var,
+        ).pack(side=LEFT)
+        ttk.Button(controls, text="Overlay", command=self._overlay_selected_runs).pack(
+            side=LEFT, padx=8
+        )
+        ttk.Button(controls, text="Export PNG...", command=self._export_comparison_png).pack(
+            side=LEFT
+        )
+
+        self._compare_window = window
+        self._compare_listbox = listbox
+        self._compare_run_dirs = run_dirs
+
+    def _overlay_selected_runs(self) -> None:
+        """Overlay the Allan curves of the runs selected in the dialog."""
+        listbox = self._compare_listbox
+        if listbox is None:
+            return
+        selected = [self._compare_run_dirs[i] for i in listbox.curselection()]
+        if not selected:
+            messagebox.showinfo("qgrav", "Select at least one run to overlay.")
+            return
+        self._overlay_runs(selected, normalize=bool(self.compare_normalize_var.get()))
+
+    def _overlay_runs(self, run_dirs: list[Path], *, normalize: bool = False) -> int:
+        """Build and show the comparison figure. Returns the number of curves."""
+        fig = Figure(figsize=(9.2, 6.2), dpi=110)
+        ax = fig.add_subplot(111)
+        plotted = 0
+        skipped: list[str] = []
+        for run_dir in run_dirs:
+            try:
+                bundle = load_run_bundle(run_dir)
+                arrays = bundle["arrays"]
+                taus = np.asarray(arrays["allan_taus"], dtype=np.float64)
+                adev = np.asarray(arrays["allan_series"], dtype=np.float64)
+            except (FileNotFoundError, KeyError, ValueError, OSError):
+                skipped.append(run_dir.name)
+                continue
+            if taus.size == 0 or adev.size == 0:
+                skipped.append(run_dir.name)
+                continue
+            label = run_dir.name
+            if normalize:
+                # Normalize to sigma(tau = 1 s) (log-log interpolated).
+                ref = float(np.exp(np.interp(0.0, np.log(taus), np.log(adev))))
+                if ref > 0 and np.isfinite(ref):
+                    adev = adev / ref
+                    label = f"{label} / σ(1 s)"
+            ax.loglog(taus, adev, marker="o", markersize=3, label=label)
+            plotted += 1
+        ax.set_xlabel("τ (s)")
+        ax.set_ylabel("normalized σ(τ)" if normalize else "Allan deviation σ(τ)")
+        ax.set_title(f"Allan deviation comparison ({plotted} runs)")
+        ax.grid(True, which="both", alpha=0.3)
+        if plotted:
+            ax.legend(fontsize=8)
+        if skipped:
+            self.status_var.set(
+                "Skipped (no Allan data): "
+                + ", ".join(skipped[:5])
+                + ("..." if len(skipped) > 5 else "")
+            )
+        self._compare_figure = fig
+        self._render_figure(
+            fig,
+            canvas_attr="_current_canvas",
+            toolbar_attr="_current_toolbar",
+            frame=self.plot_frame,
+            toolbar_frame=self.plot_toolbar_frame,
+        )
+        self.plot_title_var.set(
+            f"Comparison: Allan deviation overlay of {plotted} run(s)."
+            + (f" {len(skipped)} run(s) skipped without Allan data." if skipped else "")
+        )
+        return plotted
+
+    def _export_comparison_png(self) -> None:
+        if self._compare_figure is None:
+            messagebox.showinfo("qgrav", "Overlay some runs first.")
+            return
+        path = filedialog.asksaveasfilename(
+            title="Export comparison PNG",
+            defaultextension=".png",
+            filetypes=[("PNG image", "*.png")],
+        )
+        if path:
+            self._compare_figure.savefig(path, dpi=150, bbox_inches="tight")
+            self.status_var.set(f"Comparison exported: {path}")
 
     def open_report(self) -> None:
         if self.last_report:

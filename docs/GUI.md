@@ -71,6 +71,14 @@ Metric cards, a full metrics tree, interactive plots (single plots first, then
 the dashboard), and one-click access to the HTML report, `metrics.json`, and
 `SUMMARY.md`.
 
+**Compare runs…** (button next to *Refresh*) overlays the Allan-deviation
+curves of several runs on one log-log figure — the standard servo-on vs
+servo-off or noise-budget A/B workflow. It lists the subfolders of your
+`runs/` directory (newest first); multi-select two or more, hit *Overlay*,
+and optionally normalize each curve to its σ(τ = 1 s) value to compare
+slopes independent of absolute level. Runs without Allan data are skipped
+with a status-bar note. *Export PNG…* saves the comparison figure.
+
 ### 5. Validation
 - **Published reference library** - the registry of measured values from
   published atom-gravimeter papers that the automated regression suite checks
