@@ -1,8 +1,9 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
-from qgrav.bench_ifo.real_ifo import load_real_ifo_csv
+from qgrav.bench_ifo.real_ifo import _ensure_array, _infer_sample_rate, load_real_ifo_csv
 from qgrav.datasets.gravimetry import (
     _gap_report,
     _normalize_unit,
@@ -126,3 +127,124 @@ def test_normalize_unit_canonical_forms():
 def test_normalize_unit_unknown_passthrough():
     """Unknown unit strings should pass through lowered and stripped."""
     assert _normalize_unit("furlongs/fortnight") == "furlongs/fortnight"
+
+
+# ----------------------------------------------------------------------
+# Targeted real_ifo coverage: headerless formats and error branches
+# ----------------------------------------------------------------------
+def test_real_ifo_missing_file_raises(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        load_real_ifo_csv(csv_path=tmp_path / "nope.csv")
+
+
+def test_real_ifo_missing_required_column_raises(tmp_path: Path) -> None:
+    csv_path = tmp_path / "no_q.csv"
+    csv_path.write_text("t,I_meas\n0.0,1.0\n0.01,1.0\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Missing required columns"):
+        load_real_ifo_csv(csv_path=csv_path)
+
+
+def test_real_ifo_header_no_t_and_no_rate_raises(tmp_path: Path) -> None:
+    csv_path = tmp_path / "no_t.csv"
+    csv_path.write_text("I_meas,Q_meas\n1.0,2.0\n1.1,2.1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="sample_rate_hz"):
+        load_real_ifo_csv(csv_path=csv_path)
+
+
+def test_real_ifo_header_with_x_true_column(tmp_path: Path) -> None:
+    csv_path = tmp_path / "with_truth.csv"
+    csv_path.write_text(
+        "t,I_meas,Q_meas,x_true\n0.0,1.0,2.0,0.5\n0.01,1.1,2.1,nan\n0.02,1.2,2.2,0.7\n",
+        encoding="utf-8",
+    )
+    data = load_real_ifo_csv(csv_path=csv_path)
+    # The NaN x_true row is dropped by the finite mask.
+    assert data["dropped_rows"] == 1
+    assert data["x_true"].tolist() == [0.5, 0.7]
+
+
+def test_real_ifo_headerless_two_columns(tmp_path: Path) -> None:
+    csv_path = tmp_path / "two_col.csv"
+    csv_path.write_text("1.0,2.0\n1.1,2.1\n1.2,2.2\n", encoding="utf-8")
+    data = load_real_ifo_csv(csv_path=csv_path, sample_rate_hz=100.0, has_header=False)
+    assert data["I_meas"].tolist() == [1.0, 1.1, 1.2]
+    assert data["Q_meas"].tolist() == [2.0, 2.1, 2.2]
+    np.testing.assert_allclose(np.diff(data["t"]), 0.01)
+
+
+def test_real_ifo_headerless_two_columns_needs_rate(tmp_path: Path) -> None:
+    csv_path = tmp_path / "two_col_no_rate.csv"
+    csv_path.write_text("1.0,2.0\n1.1,2.1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="sample_rate_hz"):
+        load_real_ifo_csv(csv_path=csv_path, has_header=False)
+
+
+def test_real_ifo_headerless_three_columns(tmp_path: Path) -> None:
+    csv_path = tmp_path / "three_col.csv"
+    csv_path.write_text("0.0,1.0,2.0\n0.5,1.1,2.1\n1.0,1.2,2.2\n", encoding="utf-8")
+    data = load_real_ifo_csv(csv_path=csv_path, has_header=False)
+    assert data["t"].tolist() == [0.0, 0.5, 1.0]
+    assert float(data["sample_rate_hz"][0]) == pytest.approx(2.0)
+
+
+def test_real_ifo_headerless_four_columns_with_truth(tmp_path: Path) -> None:
+    csv_path = tmp_path / "four_col.csv"
+    csv_path.write_text("0.0,1.0,2.0,0.1\n0.5,1.1,2.1,0.2\n", encoding="utf-8")
+    data = load_real_ifo_csv(csv_path=csv_path, has_header=False)
+    assert data["x_true"].tolist() == [0.1, 0.2]
+
+
+def test_real_ifo_headerless_flat_input_treated_as_one_row(tmp_path: Path) -> None:
+    # A 1-D parse (single column over two lines) is normalized to one row,
+    # so the two values become a single (I, Q) sample.
+    csv_path = tmp_path / "one_col.csv"
+    csv_path.write_text("1.0\n2.0\n", encoding="utf-8")
+    data = load_real_ifo_csv(csv_path=csv_path, sample_rate_hz=10.0, has_header=False)
+    assert data["I_meas"].tolist() == [1.0]
+    assert data["Q_meas"].tolist() == [2.0]
+
+
+def test_real_ifo_headerless_single_scalar_raises(tmp_path: Path) -> None:
+    csv_path = tmp_path / "scalar.csv"
+    csv_path.write_text("1.0\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="at least 2 columns"):
+        load_real_ifo_csv(csv_path=csv_path, has_header=False)
+
+
+def test_real_ifo_all_rows_invalid_raises(tmp_path: Path) -> None:
+    csv_path = tmp_path / "all_nan.csv"
+    csv_path.write_text("t,I_meas,Q_meas\n0.0,nan,2.0\n0.01,1.0,nan\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="No valid finite rows"):
+        load_real_ifo_csv(csv_path=csv_path)
+
+
+def test_real_ifo_reverse_timestamps_raise(tmp_path: Path) -> None:
+    csv_path = tmp_path / "reverse_t.csv"
+    csv_path.write_text("t,I_meas,Q_meas\n0.02,1.0,2.0\n0.01,1.1,2.1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="monotonic"):
+        load_real_ifo_csv(csv_path=csv_path)
+
+
+def test_infer_sample_rate_too_few_samples() -> None:
+    with pytest.raises(ValueError, match="at least two"):
+        _infer_sample_rate(np.array([0.0]))
+
+
+def test_infer_sample_rate_non_finite_spacing() -> None:
+    with pytest.raises(ValueError, match="non-finite"):
+        _infer_sample_rate(np.array([0.0, np.inf]))
+
+
+def test_infer_sample_rate_no_positive_spacing() -> None:
+    with pytest.raises(ValueError, match="Cannot infer"):
+        _infer_sample_rate(np.array([1.0, 1.0, 1.0]))
+
+
+def test_infer_sample_rate_median_spacing() -> None:
+    assert _infer_sample_rate(np.array([0.0, 0.1, 0.2, 0.3])) == pytest.approx(10.0)
+
+
+def test_ensure_array_scalar_promoted_to_1d() -> None:
+    out = _ensure_array(3.5)
+    assert out.shape == (1,)
+    assert out[0] == 3.5

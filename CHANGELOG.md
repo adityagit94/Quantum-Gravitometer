@@ -12,6 +12,11 @@
   import sorting); `[tool.mypy]` config added and the source tree is
   mypy-clean (62 files), with scoped TODO(typing) overrides for the
   config-dispatcher and pipeline modules.
+- Coverage is now measured in CI (`pytest --cov`, vendored code omitted) with
+  targeted new tests for the weakest modules: `sim_ai/simple_ai.py`
+  38% → 100%, `bench_ifo/real_ifo.py` 59% → 98%, `datasets/corrections.py`
+  62% → 100% (the PyGTide code path is now exercised via a fake module).
+  Also modernised the deprecated `utcfromtimestamp` call that path used.
 
 Brings the full v1.0-v1.3 simulation/validation engine into the desktop
 workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 regressions.**

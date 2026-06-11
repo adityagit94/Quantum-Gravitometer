@@ -1,4 +1,4 @@
-"""Tests for the v0.8 real-data corrections module."""
+﻿"""Tests for the v0.8 real-data corrections module."""
 
 from __future__ import annotations
 
@@ -389,11 +389,11 @@ def test_corrected_run_preserves_raw_data():
 def test_synthetic_tide_correction_improves_allan_deviation():
     """Synthetic integration test: create data = tide + white noise, apply tide
     correction, and verify that the corrected Allan deviation is lower than the
-    uncorrected one.  This tests the full corrections → metrics chain."""
+    uncorrected one.  This tests the full corrections â†’ metrics chain."""
     from qgrav.metrics.allan import allan_deviation_overlapping
 
     rng = np.random.default_rng(2024)
-    # 3 days of 1-minute samples ⇒ 4320 points
+    # 3 days of 1-minute samples â‡’ 4320 points
     n = 4320
     dt_s = 60.0
     t0 = 1_700_000_000.0
@@ -406,7 +406,7 @@ def test_synthetic_tide_correction_improves_allan_deviation():
     tide_ugal = gravity_tide_ugal(t, latitude_deg=45.0, longitude_deg=0.0)
     tide_m_s2 = tide_ugal * 1e-8
 
-    # White noise at 0.1 µGal level (1e-9 m/s²)
+    # White noise at 0.1 ÂµGal level (1e-9 m/sÂ²)
     noise = rng.normal(scale=1e-9, size=n)
     raw_signal = tide_m_s2 + noise
 
@@ -498,3 +498,193 @@ def test_html_report_escapes_special_characters():
         assert "&lt;script&gt;" in html, "Expected escaped script tag in HTML"
         # The XSS payload in corrections_warnings should be escaped
         assert "<img src=x" not in html, "corrections_warnings was not escaped"
+
+
+# ----------------------------------------------------------------------
+# Edge-case coverage: raises, custom reference pressure, PyGTide paths
+# ----------------------------------------------------------------------
+def test_apply_tide_correction_shape_mismatch_raises():
+    with pytest.raises(ValueError, match="same shape"):
+        apply_tide_correction(
+            np.array([1.0, 2.0]),
+            np.array([0.0]),
+            latitude_deg=0.0,
+            longitude_deg=0.0,
+        )
+
+
+def test_apply_tide_correction_pygtide_backend_raises_when_missing(monkeypatch):
+    import qgrav.datasets.corrections as corr
+
+    monkeypatch.setattr(corr, "_try_import_pygtide", lambda: None)
+    with pytest.raises(ImportError, match="PyGTide backend requested"):
+        apply_tide_correction(
+            np.array([1_700_000_000.0]),
+            np.array([0.0]),
+            latitude_deg=49.0,
+            longitude_deg=12.0,
+            backend="pygtide",
+        )
+
+
+def test_try_import_pygtide_returns_module_when_present(monkeypatch):
+    import sys
+
+    import qgrav.datasets.corrections as corr
+
+    sentinel = type(sys)("pygtide")
+    monkeypatch.setitem(sys.modules, "pygtide", sentinel)
+    assert corr._try_import_pygtide() is sentinel
+
+
+class _FakeColumn:
+    def __init__(self, values):
+        self._values = np.asarray(values)
+
+    def to_numpy(self):
+        return self._values
+
+    def astype(self, dtype):
+        return _FakeColumn(self._values.astype(dtype))
+
+
+class _FakeResults:
+    """Minimal stand-in for the pandas DataFrame PyGTide returns."""
+
+    def __init__(self, utc_ns, signal_nm_s2):
+        self._data = {
+            "UTC": _FakeColumn(utc_ns),
+            "Signal [nm/s**2]": _FakeColumn(signal_nm_s2),
+        }
+
+    @property
+    def columns(self):
+        return list(self._data)
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+
+class _FakePyGTide:
+    """Fake pygtide module: predict() is recorded, results() returns a grid."""
+
+    def __init__(self, utc_ns, signal_nm_s2):
+        self._utc_ns = utc_ns
+        self._signal = signal_nm_s2
+        self.predict_kwargs = None
+
+    def pygtide(self):
+        return self
+
+    def predict(self, **kwargs):
+        self.predict_kwargs = kwargs
+
+    def results(self):
+        return _FakeResults(self._utc_ns, self._signal)
+
+
+def test_apply_tide_correction_pygtide_path_with_fake_module(monkeypatch):
+    """Exercise the full pygtide code path using a fake module."""
+    import qgrav.datasets.corrections as corr
+
+    t0 = 1_700_000_000.0
+    # PyGTide grid: 3 points at 60 s spacing; constant 100 nm/s^2 signal.
+    grid_unix = np.array([t0, t0 + 60.0, t0 + 120.0])
+    fake = _FakePyGTide(utc_ns=(grid_unix * 1e9).astype(np.int64), signal_nm_s2=[100.0] * 3)
+    monkeypatch.setattr(corr, "_try_import_pygtide", lambda: fake)
+
+    t = np.array([t0, t0 + 30.0, t0 + 90.0])
+    v = np.zeros(3)
+    result = apply_tide_correction(t, v, latitude_deg=49.0, longitude_deg=12.0, backend="pygtide")
+
+    assert result["backend_used"] == "pygtide"
+    # 100 nm/s^2 = 1e-7 m/s^2 subtracted everywhere
+    np.testing.assert_allclose(result["tide_subtracted"], 1e-7)
+    np.testing.assert_allclose(result["corrected"], -1e-7)
+    assert result["rms_subtracted_ugal"] == pytest.approx(10.0, rel=1e-6)
+    assert fake.predict_kwargs["latitude"] == 49.0
+
+
+def test_apply_tide_correction_pygtide_empty_input_returns_empty(monkeypatch):
+    import qgrav.datasets.corrections as corr
+
+    fake = _FakePyGTide(utc_ns=np.array([], dtype=np.int64), signal_nm_s2=[])
+    monkeypatch.setattr(corr, "_try_import_pygtide", lambda: fake)
+    result = apply_tide_correction(
+        np.zeros(0), np.zeros(0), latitude_deg=0.0, longitude_deg=0.0, backend="pygtide"
+    )
+    assert result["tide_subtracted"].size == 0
+
+
+def test_compute_tide_pygtide_falls_back_to_any_signal_column():
+    from qgrav.datasets.corrections import _compute_tide_pygtide
+
+    t0 = 1_700_000_000.0
+    grid_unix = np.array([t0, t0 + 60.0])
+
+    class _OddNameResults(_FakeResults):
+        def __init__(self):
+            self._data = {
+                "UTC": _FakeColumn((grid_unix * 1e9).astype(np.int64)),
+                "Signal weird name": _FakeColumn([50.0, 50.0]),
+            }
+
+    class _OddFake(_FakePyGTide):
+        def results(self):
+            return _OddNameResults()
+
+    fake = _OddFake(utc_ns=None, signal_nm_s2=None)
+    tide = _compute_tide_pygtide(
+        fake, np.array([t0]), latitude_deg=0.0, longitude_deg=0.0, height_m=0.0
+    )
+    np.testing.assert_allclose(tide, 5e-8)
+
+
+def test_compute_tide_pygtide_no_signal_column_raises():
+    from qgrav.datasets.corrections import _compute_tide_pygtide
+
+    t0 = 1_700_000_000.0
+
+    class _NoSignalResults(_FakeResults):
+        def __init__(self):
+            self._data = {"UTC": _FakeColumn(np.array([int(t0 * 1e9)], dtype=np.int64))}
+
+    class _NoSignalFake(_FakePyGTide):
+        def results(self):
+            return _NoSignalResults()
+
+    fake = _NoSignalFake(utc_ns=None, signal_nm_s2=None)
+    with pytest.raises(RuntimeError, match="no 'Signal' column"):
+        _compute_tide_pygtide(
+            fake, np.array([t0]), latitude_deg=0.0, longitude_deg=0.0, height_m=0.0
+        )
+
+
+def test_apply_pressure_correction_custom_reference_pressure():
+    t = np.linspace(0, 10, 3)
+    g = np.zeros(3)
+    p = np.array([1000.0, 1010.0, 1020.0])
+    out = apply_pressure_correction(
+        t, g, p, admittance_nm_s2_per_hpa=-3.0, reference_pressure_hpa=1000.0
+    )
+    # At P = P_ref the correction is zero by construction.
+    assert out[0] == 0.0
+    # corrected = g - (-3e-9)*(P - 1000): +20 hPa -> +6e-8
+    assert out[2] == pytest.approx(6e-8, rel=1e-9)
+
+
+def test_apply_pressure_correction_shape_mismatch_raises():
+    with pytest.raises(ValueError, match="share shape"):
+        apply_pressure_correction(np.zeros(3), np.zeros(3), np.zeros(2))
+
+
+def test_apply_pressure_correction_propagates_nan_pressure():
+    """NaN pressure samples produce NaN corrected values (and a NaN mean
+    reference would poison everything -- callers pass reference_pressure_hpa)."""
+    t = np.linspace(0, 1, 4)
+    g = np.zeros(4)
+    p = np.array([1000.0, np.nan, 1010.0, 1020.0])
+    out = apply_pressure_correction(t, g, p, reference_pressure_hpa=1010.0)
+    assert np.isnan(out[1])
+    finite = np.isfinite(out)
+    assert finite.tolist() == [True, False, True, True]

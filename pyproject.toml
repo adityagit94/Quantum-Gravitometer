@@ -35,7 +35,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=7", "hypothesis>=6.80"]
+test = ["pytest>=7", "hypothesis>=6.80", "pytest-cov>=4"]
 qutip = ["qutip>=4.7"]  # optional: independent cross-validation backend (v1.2.1)
 benchmark = ["pytest-benchmark>=4.0"]  # optional: performance harness (v1.2.3)
 docs = ["mkdocs-material>=9.5"]  # optional: build the documentation site locally
@@ -83,6 +83,14 @@ target-version = ["py311", "py312", "py313"]
 # Vendored code is third-party; never reformat it (also applies when
 # pre-commit passes filenames explicitly).
 force-exclude = "qgrav/vendor/"
+
+[tool.coverage.run]
+source = ["qgrav"]
+omit = ["src/qgrav/vendor/*", "*/qgrav/vendor/*"]
+
+[tool.coverage.report]
+precision = 1
+show_missing = false
 
 [tool.mypy]
 python_version = "3.11"

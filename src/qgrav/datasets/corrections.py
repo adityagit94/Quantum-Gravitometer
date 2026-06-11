@@ -188,7 +188,8 @@ def _compute_tide_pygtide(
     t1 = float(t[-1])
     duration_s = max(t1 - t0, 60.0)
     samples_per = 60.0  # seconds per sample
-    start_dt = _dt.datetime.utcfromtimestamp(t0)
+    # Naive-UTC datetime (what PyGTide expects); utcfromtimestamp is deprecated.
+    start_dt = _dt.datetime.fromtimestamp(t0, _dt.UTC).replace(tzinfo=None)
     pt.predict(
         latitude=latitude_deg,
         longitude=longitude_deg,
