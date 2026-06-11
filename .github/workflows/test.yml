@@ -18,7 +18,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         # Match qgrav's requires-python (>=3.11). The vendored AISim uses
         # match/case (3.10+) and enum.StrEnum (3.11+), so 3.9/3.10 are unsupported.
-        python: ["3.11", "3.12"]
+        # 3.13 is tested in CI to back the Python :: 3.13 classifier.
+        # TODO: add "3.14" once actions/setup-python resolves it reliably on
+        # both ubuntu-latest and windows-latest.
+        python: ["3.11", "3.12", "3.13"]
     env:
       MPLBACKEND: Agg  # headless matplotlib for fringe-scan tests
     steps:
