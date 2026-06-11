@@ -13,6 +13,7 @@ import argparse
 from pathlib import Path
 from urllib.request import urlretrieve
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", required=True, help="Direct download URL")
@@ -24,6 +25,7 @@ def main():
     print(f"Downloading to: {out}")
     urlretrieve(args.url, out)
     print("Done.")
+
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ Usage:
     python scripts/batch_scan_stations.py --source data/raw/sg_sample
     python scripts/batch_scan_stations.py --source archive.zip --output results.csv
 """
+
 from __future__ import annotations
 
 import argparse
@@ -49,7 +50,9 @@ def scan_station(source_path: Path, station_code: str) -> dict[str, object]:
     sample_rate = data.get("sample_rate_hz", 1.0)
     try:
         taus = np.logspace(0, 2, 10)
-        adev_result = allan_deviation_overlapping(values, sample_rate, taus, backend="auto", data_type="freq")
+        adev_result = allan_deviation_overlapping(
+            values, sample_rate, taus, backend="auto", data_type="freq"
+        )
         if len(adev_result["adev"]) > 0:
             row["adev_min"] = float(np.min(adev_result["adev"]))
     except Exception:
@@ -67,8 +70,15 @@ def scan_station(source_path: Path, station_code: str) -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Batch scan gravity stations for quality metrics.")
-    parser.add_argument("--source", required=True, type=Path, help="Path to data source (directory, .zip, .ggp, .csv)")
-    parser.add_argument("--output", type=Path, default=Path("batch_station_metrics.csv"), help="Output CSV path")
+    parser.add_argument(
+        "--source",
+        required=True,
+        type=Path,
+        help="Path to data source (directory, .zip, .ggp, .csv)",
+    )
+    parser.add_argument(
+        "--output", type=Path, default=Path("batch_station_metrics.csv"), help="Output CSV path"
+    )
     args = parser.parse_args()
 
     if not args.source.exists():

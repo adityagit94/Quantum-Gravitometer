@@ -74,6 +74,10 @@ lint.ignore = ["E501", "E741"]
 "src/qgrav/gui/app.py" = ["E402"]
 "src/qgrav/pipeline/_common.py" = ["E402"]
 "src/qgrav/visuals.py" = ["E402"]
+# Standalone script: sys.path bootstrap + Agg backend before pyplot.
+"scripts/multi_station_comparison.py" = ["E402"]
+# Notebook demo code: lambdas are idiomatic in cells.
+"docs/reviewer_notebook.ipynb" = ["E731"]
 # Regression-locked tide catalogue: lint config bends so the file never changes.
 "src/qgrav/datasets/_tides_hw95.py" = ["B007"]
 

@@ -5,6 +5,7 @@ Usage:
     python scripts/multi_station_comparison.py --source data/raw/sg_sample
     python scripts/multi_station_comparison.py --source archive.zip --output comparison.png
 """
+
 from __future__ import annotations
 
 import argparse
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -29,7 +31,12 @@ from qgrav.metrics import allan_deviation_overlapping, compute_psd
 def main() -> None:
     parser = argparse.ArgumentParser(description="Multi-station comparison plots.")
     parser.add_argument("--source", required=True, type=Path, help="Path to data source")
-    parser.add_argument("--output", type=Path, default=Path("multi_station_comparison.png"), help="Output image path")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("multi_station_comparison.png"),
+        help="Output image path",
+    )
     args = parser.parse_args()
 
     if not args.source.exists():
@@ -69,7 +76,9 @@ def main() -> None:
         taus = np.logspace(0, 2, 20)
         try:
             result = allan_deviation_overlapping(values, sr, taus, backend="auto", data_type="freq")
-            ax_adev.loglog(result["taus_s"], result["adev"], label=sd["code"], marker="o", markersize=3)
+            ax_adev.loglog(
+                result["taus_s"], result["adev"], label=sd["code"], marker="o", markersize=3
+            )
             if len(result["adev"]) > 0:
                 station_adev_mins.append((sd["code"], float(np.min(result["adev"]))))
         except Exception:

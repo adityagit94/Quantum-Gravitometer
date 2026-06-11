@@ -1,4 +1,4 @@
-﻿"""Tests for the v0.8 real-data corrections module."""
+"""Tests for the v0.8 real-data corrections module."""
 
 from __future__ import annotations
 
