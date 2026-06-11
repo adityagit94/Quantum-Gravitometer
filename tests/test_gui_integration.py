@@ -104,6 +104,7 @@ def test_multi_drop_controls_roundtrip(app):
     app.sim_detection_sigma_p_var.set("6e-3")
     app.sim_raman_phase_noise_var.set("0.012")
     app.sim_fit_visibility_var.set(True)
+    app.sim_projection_noise_var.set(True)
     app.sim_gravity_propagation_var.set(True)
     app.sim_single_photon_detuning_var.set("-700e6")
     app.sim_wavefront_zernike_var.set("0, 0, 0, 5e-9")
@@ -118,6 +119,7 @@ def test_multi_drop_controls_roundtrip(app):
     assert sim["detection_sigma_p"] == pytest.approx(6e-3)
     assert sim["raman_phase_noise_rad"] == pytest.approx(0.012)
     assert sim["fit_visibility"] is True
+    assert sim["projection_noise"] is True
     assert sim["gravity_propagation"] is True
     assert sim["single_photon_detuning_hz"] == pytest.approx(-700e6)
     assert sim["wavefront_zernike_coeffs"] == [0.0, 0.0, 0.0, 5e-9]
@@ -126,10 +128,12 @@ def test_multi_drop_controls_roundtrip(app):
     # And it reads back into the controls (mutate, then re-sync from the dict).
     app.sim_n_drops_var.set("999")
     app.sim_fit_visibility_var.set(False)
+    app.sim_projection_noise_var.set(False)
     app.sim_model_var.set("rabi_scan")
     app.sync_controls_from_dict(cfg)
     assert app.sim_n_drops_var.get() == "40"
     assert app.sim_fit_visibility_var.get() is True
+    assert app.sim_projection_noise_var.get() is True
     assert app.sim_model_var.get() == "multi_drop_cycle"
 
 

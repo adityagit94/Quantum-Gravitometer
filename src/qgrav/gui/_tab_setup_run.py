@@ -466,6 +466,18 @@ class SetupRunTabMixin:
         )
         self._labeled_check(
             nf,
+            "Emergent projection noise",
+            self.sim_projection_noise_var,
+            5,
+            1,
+            tip=(
+                "Draw each drop's detected count from Binomial(N_det, P) so quantum "
+                "projection noise emerges from single-atom statistics instead of a "
+                "configured Gaussian. Technical sigma_p (if set) adds on top."
+            ),
+        )
+        self._labeled_check(
+            nf,
             "Enable fringe-lock servo",
             self.sim_servo_enabled_var,
             4,
@@ -724,6 +736,8 @@ class SetupRunTabMixin:
                 )
         if bool(self.sim_fit_visibility_var.get()):
             sim["fit_visibility"] = True
+        if bool(self.sim_projection_noise_var.get()):
+            sim["projection_noise"] = True
         if bool(self.sim_servo_enabled_var.get()):
             sim["servo_enabled"] = True
             sim["servo_type"] = self.sim_servo_type_var.get().strip() or "integrator"

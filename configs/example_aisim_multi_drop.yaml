@@ -41,6 +41,10 @@ simulation:
   detection_noise_enabled: true
   detection_sigma_p: 6.0e-3        # technical detection noise on excited fraction
   raman_phase_noise_rad: 1.2e-2    # laser + residual-vibration phase noise
+  # projection_noise: true         # emergent QPN: per-drop detected count drawn
+  #                                # from Binomial(n_detected_per_drop, P); any
+  #                                # technical detection_sigma_p adds on top
+  # n_detected_per_drop: 10000     # detected-atom count for the binomial draw
   fit_visibility: true             # keep P->g inversion consistent with real contrast
   # --- fringe-lock servo ---
   servo_enabled: true

@@ -29,14 +29,19 @@ def _multi_drop_noise_description(
     raman_phase_noise_rad: float,
     correlated_vibration: bool,
     seismic_model: str,
+    projection_noise: bool = False,
 ) -> str:
     """Human-readable summary of the active noise terms in a multi-drop run."""
     terms = []
-    if detection_noise_enabled:
+    if projection_noise:
+        terms.append("quantum projection noise (binomial per-atom readout)")
+        if detection_noise_enabled and detection_sigma_p is not None and detection_sigma_p > 0:
+            terms.append(f"technical detection sigma_P={detection_sigma_p:.1e}")
+    elif detection_noise_enabled:
         if detection_sigma_p is not None and detection_sigma_p > 0:
             terms.append(f"technical detection sigma_P={detection_sigma_p:.1e}")
         else:
-            terms.append("projection detection (sigma=1/sqrt(N_det))")
+            terms.append("projection detection (Gaussian sigma=1/sqrt(N_det))")
     if raman_phase_noise_rad > 0:
         terms.append(f"Raman phase noise {raman_phase_noise_rad:.1e} rad/shot")
     if correlated_vibration:
@@ -126,6 +131,7 @@ def run_aisim_multi_drop_cycle(
     servo_ki: float = 0.1,
     servo_kd: float = 0.0,
     raman_substeps: int = 1,
+    projection_noise: bool = False,
 ) -> dict[str, Any]:
     """Run a multi-drop gravimeter measurement cycle.
 
@@ -150,6 +156,16 @@ def run_aisim_multi_drop_cycle(
         trajectory + chirped laser).  If False, use the hybrid mode.
     detection_noise_enabled : bool
         If True, add detection noise to each drop's P3.
+    projection_noise : bool
+        If True, the per-drop readout draws the detected excited-state count
+        from ``Binomial(n_detected_per_drop, P3)`` (seeded from the run's
+        RNG stream), so quantum projection noise *emerges* from single-atom
+        statistics instead of being injected as a configured Gaussian.
+        Composition order: the binomial draw happens FIRST (it is the
+        measurement physics); an explicit technical ``detection_sigma_p``
+        then adds on top of ``P_hat``.  The legacy default Gaussian
+        ``sigma = 1/sqrt(N)`` draw is skipped when this flag is on (it
+        approximates the same physics and would double-count QPN).
     n_detected_per_drop : int, optional
         Number of atoms detected per drop (sets sigma = 1/sqrt(N)).  Defaults
         to ``n_atoms``.
@@ -187,6 +203,7 @@ def run_aisim_multi_drop_cycle(
     from qgrav.physics.noise_models import add_detection_noise
     from qgrav.physics.readout_models import (
         PIDServoState,
+        binomial_projection_readout,
         servo_integrator_step,
         servo_pid_step,
     )
@@ -297,6 +314,10 @@ def run_aisim_multi_drop_cycle(
             z2T = _z_at(t_i + 2.0 * T)
             vib_phase_per_drop[i] = k_eff * (z0 - 2.0 * zT + z2T)
 
+    # Per-shot quantum-projection-noise stream (deterministic from seed,
+    # same discipline as the Raman / vibration streams below).
+    projection_rng = np.random.default_rng(int(seed) + 88_000)
+
     # Per-shot Raman phase-noise stream (deterministic from seed).
     raman_rng = np.random.default_rng(int(seed) + 77_000)
     raman_phase_per_drop = (
@@ -359,8 +380,28 @@ def run_aisim_multi_drop_cycle(
             )
         p3_raw[i] = out["port_3"]
 
-        # Apply detection noise (technical sigma_P if given, else 1/sqrt(N)).
-        if detection_noise_enabled:
+        # Readout-noise composition (order matters and is documented in the
+        # docstring): quantum projection noise is drawn FIRST — it is the
+        # physics of the measurement, k ~ Binomial(N_det, P) — and any
+        # configured TECHNICAL detection noise (explicit detection_sigma_p)
+        # adds on top of the projected P_hat.  When projection_noise is on,
+        # the legacy default Gaussian sigma = 1/sqrt(N) draw is skipped:
+        # it is the Gaussian approximation of the same physics and keeping
+        # both would double-count QPN.
+        if projection_noise:
+            p_hat = binomial_projection_readout(
+                p3_raw[i], int(n_detected_per_drop), rng=projection_rng
+            )
+            if detection_noise_enabled and detection_sigma_p is not None and detection_sigma_p > 0:
+                noisy = add_detection_noise(
+                    np.array([p_hat]),
+                    n_detected=int(n_detected_effective),
+                    seed=int(seed) + 10_000 + i,
+                )
+                p_hat = float(noisy[0])
+            p3_noisy[i] = p_hat
+        elif detection_noise_enabled:
+            # Legacy path: technical sigma_P if given, else Gaussian 1/sqrt(N).
             noisy = add_detection_noise(
                 np.array([p3_raw[i]]),
                 n_detected=int(n_detected_effective),
@@ -420,6 +461,7 @@ def run_aisim_multi_drop_cycle(
         "gravity_propagation": bool(gravity_propagation),
         "raman_substeps": int(raman_substeps),
         "detection_noise_enabled": bool(detection_noise_enabled),
+        "projection_noise": bool(projection_noise),
         "n_detected_per_drop": int(n_detected_per_drop),
         "n_detected_effective": int(n_detected_effective),
         "detection_sigma_p": (None if detection_sigma_p is None else float(detection_sigma_p)),
@@ -453,6 +495,7 @@ def run_aisim_multi_drop_cycle(
                 raman_phase_noise_rad,
                 correlated_vibration,
                 seismic_model,
+                projection_noise=bool(projection_noise),
             ),
             "feedback": (f"{servo_type} servo on phase bias" if servo_enabled else "open loop"),
         },

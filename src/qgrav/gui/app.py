@@ -115,6 +115,7 @@ class QGravApp(
         self.sim_seismic_model_var = tk.StringVar(value="nlnm")
         self.sim_isolation_cutoff_var = tk.StringVar(value="0.0")
         self.sim_fit_visibility_var = tk.BooleanVar(value=False)
+        self.sim_projection_noise_var = tk.BooleanVar(value=False)
         self.sim_servo_enabled_var = tk.BooleanVar(value=False)
         self.sim_servo_type_var = tk.StringVar(value="integrator")
         self.sim_servo_kp_var = tk.StringVar(value="0.5")

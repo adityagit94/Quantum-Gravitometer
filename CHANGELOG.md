@@ -3,6 +3,15 @@
 ## Unreleased
 
 ### Physics
+- **Emergent Monte-Carlo quantum projection noise** in multi-drop cycles
+  (`projection_noise: true`, off by default): each drop's detected count
+  is drawn from `Binomial(N_det, P)` via the run's seeded RNG streams, so
+  the QPN floor emerges from single-atom statistics. Measured floor
+  matches the analytic `σ_g = 1/(√N_det·k_eff·T²)` to 0.2 % (2000 drops,
+  N_det = 10⁴) and halves when N_det quadruples. Technical
+  `detection_sigma_p` composes on top of the binomial draw (documented
+  ordering); GUI checkbox in the multi-drop noise-budget section. New
+  `tests/test_projection_noise.py` (7 tests).
 - **Sub-pulse integration of finite-duration Raman pulses**
   (`raman_substeps: N`, default 1 = exact previous behaviour). Each pulse
   is applied as N composed slices with ballistic fall *during* the pulse

@@ -25,6 +25,47 @@ def port_differential_summary(port2: np.ndarray, port3: np.ndarray) -> dict[str,
     }
 
 
+def binomial_projection_readout(
+    p_excited: float,
+    n_detected: int,
+    *,
+    rng: np.random.Generator,
+) -> float:
+    """Single-shot state readout with emergent quantum projection noise.
+
+    Each of the ``n_detected`` atoms is projected independently onto the
+    excited state with probability ``p_excited``, so the detected count is
+
+        k ~ Binomial(N_det, P)
+
+    and the measured population fraction is ``P_hat = k / N_det``.  For
+    ``P = 1/2`` this gives the standard quantum-projection-noise (QPN)
+    standard deviation ``sigma_P = 1/(2*sqrt(N_det))``, i.e. a per-shot
+    phase noise ``sigma_phi = 1/(C*sqrt(N_det))`` at mid-fringe with
+    contrast C.
+
+    Parameters
+    ----------
+    p_excited:
+        Ideal (pre-measurement) excited-state probability from the
+        simulated fringe; clipped to [0, 1].
+    n_detected:
+        Number of atoms detected in this shot.
+    rng:
+        Seeded NumPy generator — callers must reuse the run's RNG
+        discipline so results stay reproducible.
+
+    Returns
+    -------
+    The measured population fraction ``k / n_detected``.
+    """
+    n = int(n_detected)
+    if n <= 0:
+        raise ValueError("n_detected must be > 0")
+    p = float(np.clip(p_excited, 0.0, 1.0))
+    return float(rng.binomial(n, p)) / float(n)
+
+
 def servo_integrator_step(
     *,
     population: float,

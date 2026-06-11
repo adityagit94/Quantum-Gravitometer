@@ -199,6 +199,7 @@ class EditorTabMixin:
             str(simulation.get("vibration_isolation_cutoff_hz", "0.0"))
         )
         self.sim_fit_visibility_var.set(bool(simulation.get("fit_visibility", False)))
+        self.sim_projection_noise_var.set(bool(simulation.get("projection_noise", False)))
         self.sim_servo_enabled_var.set(bool(simulation.get("servo_enabled", False)))
         self.sim_servo_type_var.set(str(simulation.get("servo_type", "integrator")))
         self.sim_servo_kp_var.set(str(simulation.get("servo_kp", "0.5")))

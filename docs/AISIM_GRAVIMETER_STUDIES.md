@@ -277,6 +277,35 @@ The intended use is to feed long acceleration/displacement traces into a future 
 
 `_build_wavefront(wavefront_zernike_coeffs, wavefront_radius_m)` constructs an AISim `Wavefront` from a dictionary of Zernike coefficients (Wyant ordering by default). When passed to `_run_mach_zehnder_sequence`, the wavefront imprints a position-dependent phase on each of the three pulses; thermal-velocity-driven drift between pulses makes the wavefront contribution per-atom-non-cancelling, which **reduces** ensemble visibility and shifts the operating point.
 
+### 6.7 Projection-noise-limited study (`projection_noise`, v1.5)
+
+With `projection_noise: true` in the multi-drop block, each drop's readout
+draws the detected excited-state count from `k ~ Binomial(N_det, P)`
+(`N_det = n_detected_per_drop`, seeded from the run's RNG streams), so the
+quantum-projection-noise floor **emerges from single-atom statistics**
+instead of being injected as a configured Gaussian `σ_P`. Composition
+order: the binomial draw happens first (it is the measurement physics);
+an explicit technical `detection_sigma_p` adds on top of `P̂ = k/N_det`.
+The legacy default Gaussian `σ = 1/√N` draw is skipped while the flag is
+on — it is the Gaussian approximation of the same physics and keeping both
+would double-count QPN.
+
+Analytic cross-check at mid-fringe (contrast C, inversion slope `½·C·k_eff·T²`):
+
+```
+σ_P = sqrt(P(1−P)/N_det) = 1/(2·sqrt(N_det))      at P = 1/2
+σ_φ = σ_P / (C/2)        = 1/(C·sqrt(N_det))
+σ_g = σ_φ / (k_eff·T²)   ;   ASD = σ_g · sqrt(T_c)
+```
+
+Measured (tests/test_projection_noise.py, 2000 drops, N_det = 10⁴,
+T = 0.26 s, all technical noise off): predicted σ_g = 9.18×10⁻⁹ m/s²,
+measured per-drop σ_g = 9.20×10⁻⁹ m/s² — **0.2 % agreement** — with the
+first Allan point at 9.14×10⁻⁹ m/s² and white-noise averaging beyond.
+Quadrupling `N_det` halves the floor as expected. Off by default; the
+flag is recorded in the result/report and round-trips through the GUI's
+multi-drop noise-budget section.
+
 ---
 
 ## 7. Recommended thesis/report wording (v1.0)

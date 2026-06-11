@@ -133,6 +133,7 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             servo_ki=float(sim_cfg.get("servo_ki", 0.1)),
             servo_kd=float(sim_cfg.get("servo_kd", 0.0)),
             raman_substeps=int(sim_cfg.get("raman_substeps", 1)),
+            projection_noise=bool(sim_cfg.get("projection_noise", False)),
         )
     if model == "vibration_sensitivity_sweep":
         return run_aisim_vibration_sensitivity_sweep(
