@@ -9,6 +9,7 @@ makes re-vendoring a newer release trivial).
 These tests fail if a future edit re-introduces a local patch into the
 vendored package, or if the override subclasses go missing.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -106,7 +107,9 @@ class TestOverridesEquivalentToUpstreamAtZeroExtension:
             tau, intensity_profile=beam, wave_vectors=Wavevectors()
         ).propagate(atoms)
         ov = IntegratedPhaseTwoLevelTransitionPropagator(
-            tau, intensity_profile=beam, wave_vectors=ChirpedWavevectors(),
+            tau,
+            intensity_profile=beam,
+            wave_vectors=ChirpedWavevectors(),
         ).propagate(atoms)
         np.testing.assert_allclose(
             np.abs(np.asarray(up.state_kets)),

@@ -31,6 +31,7 @@ The square-root (acceleration amplitude spectral density) is therefore
 
     ASD = sqrt(PSD_linear)           in (m/s^2)/sqrt(Hz)
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -40,14 +41,14 @@ import numpy as np
 # these knots reproduces the Peterson 1993 curve to within ~3 dB anywhere in
 # the seismic band (0.01 to 100 s).
 _NLNM_KNOTS_PERIOD_DB: list[tuple[float, float]] = [
-    (0.01, -130.0),   # 100 Hz, very short period
-    (0.10, -162.0),   # 10 Hz, near short-period minimum
+    (0.01, -130.0),  # 100 Hz, very short period
+    (0.10, -162.0),  # 10 Hz, near short-period minimum
     (0.20, -165.0),
     (0.50, -168.0),
-    (1.0,  -168.0),
-    (2.0,  -158.0),
-    (5.0,  -150.0),
-    (10.0, -149.0),   # storm microseism band (typically the minimum)
+    (1.0, -168.0),
+    (2.0, -158.0),
+    (5.0, -150.0),
+    (10.0, -149.0),  # storm microseism band (typically the minimum)
     (30.0, -155.0),
     (100.0, -149.0),  # long-period band
     (300.0, -135.0),
@@ -62,9 +63,9 @@ _NHNM_KNOTS_PERIOD_DB: list[tuple[float, float]] = [
     (0.10, -108.0),
     (0.20, -110.0),
     (0.50, -118.0),
-    (1.0,  -120.0),
-    (2.0,  -123.0),
-    (5.0,  -120.0),
+    (1.0, -120.0),
+    (2.0, -123.0),
+    (5.0, -120.0),
     (10.0, -120.0),
     (30.0, -118.0),
     (100.0, -110.0),
@@ -130,4 +131,4 @@ def interpolate_psd(
     log_knot_f = np.log10(freqs)
     log_knot_psd = np.log10(psd_linear)
     log_psd = np.interp(log_f, log_knot_f, log_knot_psd)
-    return 10.0 ** log_psd
+    return 10.0**log_psd

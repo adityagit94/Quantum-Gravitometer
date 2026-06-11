@@ -27,7 +27,9 @@ def _periodogram(x: np.ndarray, sample_rate_hz: float) -> dict[str, np.ndarray]:
     return {"f_hz": f, "psd": psd}
 
 
-def _welch(x: np.ndarray, sample_rate_hz: float, nperseg: int, noverlap: int) -> dict[str, np.ndarray]:
+def _welch(
+    x: np.ndarray, sample_rate_hz: float, nperseg: int, noverlap: int
+) -> dict[str, np.ndarray]:
     if nperseg < 4:
         raise ValueError("nperseg must be >= 4 for Welch PSD.")
     if noverlap < 0 or noverlap >= nperseg:
@@ -43,7 +45,7 @@ def _welch(x: np.ndarray, sample_rate_hz: float, nperseg: int, noverlap: int) ->
     psd_accum = None
     count = 0
     for start in starts:
-        seg = x[start:start + nperseg]
+        seg = x[start : start + nperseg]
         seg = seg - np.mean(seg)
         segw = seg * window
         X = np.fft.rfft(segw)

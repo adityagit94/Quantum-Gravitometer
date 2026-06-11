@@ -11,25 +11,26 @@ for qgrav.  See `docs/research/RESEARCH_MENORET_2018.md` for verbatim quotes.
   - 5 distinct sensitivity values in the paper; the 750 nm/s²/√Hz (Larzac
     campaign value) was the v1.0.2 corrected registry value
 """
+
 from __future__ import annotations
 
 import math
 
 MENORET_2018_PARAMS: dict[str, float] = {
-    "interferometer_time_s": 0.060,   # verbatim "T = 60 ms"
-    "cycle_time_s": 0.500,             # ~2 Hz repetition rate
-    "tau_pi_half_s": 10e-6,            # verbatim "10 us pi/2, 20 us pi"
+    "interferometer_time_s": 0.060,  # verbatim "T = 60 ms"
+    "cycle_time_s": 0.500,  # ~2 Hz repetition rate
+    "tau_pi_half_s": 10e-6,  # verbatim "10 us pi/2, 20 us pi"
     "tau_pi_s": 20e-6,
-    "n_atoms": 1e7,                    # ~10^7 atoms per MOT load
+    "n_atoms": 1e7,  # ~10^7 atoms per MOT load
     "n_detected_per_drop": 1e7,
-    "temp_cloud_K": 2e-6,              # "below 2 µK"
+    "temp_cloud_K": 2e-6,  # "below 2 µK"
     "mot_load_time_s": 0.250,
-    "single_photon_detuning_hz": -1.5e9,   # Muquans-style, not stated explicitly
-    "chirp_rate_hz_per_s": 25.16e6,    # α ≈ 25 MHz/s (verbatim)
+    "single_photon_detuning_hz": -1.5e9,  # Muquans-style, not stated explicitly
+    "chirp_rate_hz_per_s": 25.16e6,  # α ≈ 25 MHz/s (verbatim)
     "k_eff_rad_per_m": 1.611e7,
-    "contrast": 0.40,                   # verbatim "C = 40%"
-    "detection_snr": 150.0,             # verbatim
-    "effective_snr": 60.0,              # = C * SNR = 0.4 * 150
+    "contrast": 0.40,  # verbatim "C = 40%"
+    "detection_snr": 150.0,  # verbatim
+    "effective_snr": 60.0,  # = C * SNR = 0.4 * 150
     "verticality_uncertainty_rad": 10e-6,
     "gravity_true_m_s2": 9.81,
 }
@@ -48,9 +49,9 @@ MENORET_2018_NOISE_BUDGET: dict[str, float] = {
 }
 
 MENORET_2018_TARGETS: dict[str, float] = {
-    "short_term_noise_m_s2_per_sqrt_hz": 7.5e-7,   # 750 nm/s²/√Hz (Larzac campaign)
-    "long_term_stability_m_s2": 1e-8,              # < 10 nm/s² = 1 µGal
-    "tolerance_factor": 2.5,                        # field-deployed → wider envelope
+    "short_term_noise_m_s2_per_sqrt_hz": 7.5e-7,  # 750 nm/s²/√Hz (Larzac campaign)
+    "long_term_stability_m_s2": 1e-8,  # < 10 nm/s² = 1 µGal
+    "tolerance_factor": 2.5,  # field-deployed → wider envelope
 }
 
 
@@ -75,7 +76,10 @@ def _detection_sigma_p_for_target() -> float:
     p = MENORET_2018_PARAMS
     return (
         total_per_shot_g_noise_m_s2()
-        * 0.5 * p["contrast"] * p["k_eff_rad_per_m"] * p["interferometer_time_s"] ** 2
+        * 0.5
+        * p["contrast"]
+        * p["k_eff_rad_per_m"]
+        * p["interferometer_time_s"] ** 2
     )
 
 

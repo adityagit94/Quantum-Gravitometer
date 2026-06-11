@@ -14,7 +14,9 @@ def add_bias(x: np.ndarray, bias: float) -> np.ndarray:
     return np.asarray(x, dtype=np.float64) + float(bias)
 
 
-def add_random_walk_drift(x: np.ndarray, step_std: float, *, rng: np.random.Generator) -> np.ndarray:
+def add_random_walk_drift(
+    x: np.ndarray, step_std: float, *, rng: np.random.Generator
+) -> np.ndarray:
     arr = np.asarray(x, dtype=np.float64)
     if step_std <= 0:
         return arr.copy()

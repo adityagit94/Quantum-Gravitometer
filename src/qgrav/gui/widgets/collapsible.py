@@ -4,6 +4,7 @@ Used to keep the Setup form approachable: the everyday controls stay visible
 while the advanced physics and noise-budget knobs live inside sections that are
 collapsed by default.  Add children to the ``.body`` frame.
 """
+
 from __future__ import annotations
 
 import tkinter as tk

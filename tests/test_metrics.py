@@ -1,4 +1,5 @@
 import numpy as np
+
 from qgrav.metrics import (
     allan_deviation_overlapping,
     available_allan_backends,
@@ -42,8 +43,12 @@ def test_allan_backends_match_freq():
     taus = np.array([1 / fs, 2 / fs, 5 / fs, 10 / fs, 20 / fs])
     custom = allan_deviation_overlapping(x, fs, taus, backend="custom", data_type="freq")
     ref = allan_deviation_overlapping(x, fs, taus, backend="allantools", data_type="freq")
-    np.testing.assert_allclose(np.asarray(custom["taus_s"]), np.asarray(ref["taus_s"]), rtol=0, atol=0)
-    np.testing.assert_allclose(np.asarray(custom["adev"]), np.asarray(ref["adev"]), rtol=1e-12, atol=1e-12)
+    np.testing.assert_allclose(
+        np.asarray(custom["taus_s"]), np.asarray(ref["taus_s"]), rtol=0, atol=0
+    )
+    np.testing.assert_allclose(
+        np.asarray(custom["adev"]), np.asarray(ref["adev"]), rtol=1e-12, atol=1e-12
+    )
 
 
 def test_allan_backends_match_phase():
@@ -52,8 +57,12 @@ def test_allan_backends_match_phase():
     taus = np.array([1 / fs, 2 / fs, 5 / fs, 10 / fs])
     custom = allan_deviation_overlapping(x, fs, taus, backend="custom", data_type="phase")
     ref = allan_deviation_overlapping(x, fs, taus, backend="allantools", data_type="phase")
-    np.testing.assert_allclose(np.asarray(custom["taus_s"]), np.asarray(ref["taus_s"]), rtol=0, atol=0)
-    np.testing.assert_allclose(np.asarray(custom["adev"]), np.asarray(ref["adev"]), rtol=1e-10, atol=1e-10)
+    np.testing.assert_allclose(
+        np.asarray(custom["taus_s"]), np.asarray(ref["taus_s"]), rtol=0, atol=0
+    )
+    np.testing.assert_allclose(
+        np.asarray(custom["adev"]), np.asarray(ref["adev"]), rtol=1e-10, atol=1e-10
+    )
 
 
 def test_error_stats():
@@ -69,6 +78,7 @@ def test_identify_noise_type_white_freq():
     rng = np.random.default_rng(42)
     x = rng.normal(size=10000)
     from qgrav.metrics.allan import allan_deviation_overlapping, identify_noise_type
+
     taus_req = np.logspace(0, 2, 20)
     result = allan_deviation_overlapping(x, 100.0, taus_req, backend="custom", data_type="freq")
     noise = identify_noise_type(np.asarray(result["taus_s"]), np.asarray(result["adev"]))
@@ -81,6 +91,7 @@ def test_identify_noise_type_random_walk():
     rng = np.random.default_rng(123)
     x = np.cumsum(rng.normal(size=5000))
     from qgrav.metrics.allan import allan_deviation_overlapping, identify_noise_type
+
     taus_req = np.logspace(0, 2, 15)
     result = allan_deviation_overlapping(x, 100.0, taus_req, backend="custom", data_type="freq")
     noise = identify_noise_type(np.asarray(result["taus_s"]), np.asarray(result["adev"]))
@@ -89,6 +100,7 @@ def test_identify_noise_type_random_walk():
 
 def test_identify_noise_type_insufficient_data():
     from qgrav.metrics.allan import identify_noise_type
+
     noise = identify_noise_type(np.array([1.0]), np.array([0.5]))
     assert noise["noise_type"] == "insufficient_data"
 
@@ -97,6 +109,7 @@ def test_allan_minimum_basic():
     taus = np.array([1, 2, 4, 8, 16, 32], dtype=float)
     adev = np.array([0.5, 0.3, 0.1, 0.05, 0.08, 0.2])
     from qgrav.metrics.allan import allan_minimum
+
     result = allan_minimum(taus, adev)
     assert result["min_adev"] == 0.05
     assert result["min_tau_s"] == 8.0
@@ -105,6 +118,7 @@ def test_allan_minimum_basic():
 
 def test_match_taus_with_float_perturbation():
     from qgrav.pipeline._common import _match_taus
+
     t1 = np.array([1.0, 2.0, 4.0, 8.0])
     t2 = np.array([1.0 + 1e-14, 2.0 - 1e-14, 4.0, 8.0 + 1e-15])
     i1, i2 = _match_taus(t1, t2)
@@ -117,6 +131,7 @@ def test_match_taus_with_float_perturbation():
 def test_match_taus_no_duplicate_targets():
     """Each taus2 element should be matched at most once."""
     from qgrav.pipeline._common import _match_taus
+
     t1 = np.array([1.0, 1.0 + 1e-15])  # two nearly identical source values
     t2 = np.array([1.0])  # one target
     i1, i2 = _match_taus(t1, t2)
@@ -128,6 +143,7 @@ def test_match_taus_no_duplicate_targets():
 
 def test_match_taus_empty():
     from qgrav.pipeline._common import _match_taus
+
     i1, i2 = _match_taus(np.array([]), np.array([1.0]))
     assert len(i1) == 0
     i1, i2 = _match_taus(np.array([1.0]), np.array([]))

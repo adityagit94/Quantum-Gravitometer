@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import numpy as np
 
-def estimate_displacement_baseline(I: np.ndarray, Q: np.ndarray, *, wavelength_m: float) -> dict[str, np.ndarray]:
+
+def estimate_displacement_baseline(
+    I: np.ndarray, Q: np.ndarray, *, wavelength_m: float
+) -> dict[str, np.ndarray]:
     """Baseline quadrature demodulation.
 
     1) subtract global means (assumes constant offsets)

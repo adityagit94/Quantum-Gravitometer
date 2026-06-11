@@ -39,11 +39,12 @@ References
 - Peterson, J., *Observations and modeling of seismic background noise*,
   USGS OFR 93-322 (1993).
 """
+
 from __future__ import annotations
 
 import numpy as np
 
-from qgrav.physics._seismic_models import NLNM_PSD, NHNM_PSD, interpolate_psd
+from qgrav.physics._seismic_models import NHNM_PSD, NLNM_PSD, interpolate_psd
 
 # NumPy 2.0 renamed trapz -> trapezoid. Stay compatible with both.
 _trapezoid = getattr(np, "trapezoid", None) or np.trapz  # type: ignore[attr-defined]
@@ -194,7 +195,7 @@ def transfer_function_vibration(
     nonzero = f != 0.0
     f_nz = f[nonzero]
     omega = 2.0 * np.pi * f_nz
-    base = 16.0 * np.sin(np.pi * f_nz * T) ** 4 / (omega ** 2)
+    base = 16.0 * np.sin(np.pi * f_nz * T) ** 4 / (omega**2)
     if tau > 0:
         sinc_factor = np.where(
             f_nz == 0.0,
@@ -242,7 +243,7 @@ def acceleration_to_phase_transfer_function_sq(
     nz = f != 0.0
     f_nz = f[nz]
     omega = 2.0 * np.pi * f_nz
-    base = 16.0 * (k_eff_rad_per_m ** 2) * np.sin(np.pi * f_nz * T) ** 4 / (omega ** 4)
+    base = 16.0 * (k_eff_rad_per_m**2) * np.sin(np.pi * f_nz * T) ** 4 / (omega**4)
     if pulse_duration_s > 0:
         sinc_sq = (np.sin(np.pi * f_nz * pulse_duration_s) / (np.pi * f_nz * pulse_duration_s)) ** 2
         base = base * sinc_sq
@@ -310,7 +311,7 @@ def integrate_vibration_noise(
     sigma_phi_sq = float(_trapezoid(integrand, f))
     sigma_phi = float(np.sqrt(max(sigma_phi_sq, 0.0)))
     T = interferometer_time_s
-    sigma_g = sigma_phi / (k_eff_rad_per_m * (T ** 2))
+    sigma_g = sigma_phi / (k_eff_rad_per_m * (T**2))
     return {
         "sigma_phi_rad": sigma_phi,
         "sigma_g_m_s2": sigma_g,

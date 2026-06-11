@@ -1,8 +1,8 @@
 """Tests for multi-drop measurement cycle (Phase 6)."""
+
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from qgrav.sim_ai.aisim_adapter import (
     STUDY_SCOPE_FULLY_SIMULATED,
@@ -10,7 +10,6 @@ from qgrav.sim_ai.aisim_adapter import (
     run_aisim_multi_drop_cycle,
     run_simulation_from_config,
 )
-
 
 # Small parameter set to keep tests fast
 _COMMON_FAST = dict(
@@ -47,7 +46,10 @@ class TestMultiDropMeanNearTrueGravity:
     def test_multi_drop_mean_near_true_gravity(self):
         # Use larger n_drops + many detected atoms for tight std
         result = run_aisim_multi_drop_cycle(
-            n_atoms=100, seed=42, n_drops=50, cycle_time_s=1.0,
+            n_atoms=100,
+            seed=42,
+            n_drops=50,
+            cycle_time_s=1.0,
             gravity_propagation=False,
             detection_noise_enabled=True,
             n_detected_per_drop=10000,
@@ -79,7 +81,10 @@ class TestMultiDropAllanDeviationComputed:
         """For white noise (independent drops), adev should decrease as 1/sqrt(tau)."""
         # Use enough atoms so every seed produces detected atoms
         result = run_aisim_multi_drop_cycle(
-            n_atoms=500, seed=42, n_drops=64, cycle_time_s=1.0,
+            n_atoms=500,
+            seed=42,
+            n_drops=64,
+            cycle_time_s=1.0,
             gravity_propagation=False,
             detection_noise_enabled=True,
             n_detected_per_drop=1000,
@@ -97,13 +102,19 @@ class TestMultiDropIndependentNoise:
     def test_multi_drop_independent_noise(self):
         # Run two cycles with different seeds; they should give different g_estimates
         r1 = run_aisim_multi_drop_cycle(
-            n_atoms=100, seed=1, n_drops=5,
-            cycle_time_s=1.0, gravity_propagation=False,
+            n_atoms=100,
+            seed=1,
+            n_drops=5,
+            cycle_time_s=1.0,
+            gravity_propagation=False,
             detection_noise_enabled=True,
         )
         r2 = run_aisim_multi_drop_cycle(
-            n_atoms=100, seed=2, n_drops=5,
-            cycle_time_s=1.0, gravity_propagation=False,
+            n_atoms=100,
+            seed=2,
+            n_drops=5,
+            cycle_time_s=1.0,
+            gravity_propagation=False,
             detection_noise_enabled=True,
         )
         assert not np.array_equal(r1["g_estimates_m_s2"], r2["g_estimates_m_s2"])
@@ -119,8 +130,11 @@ class TestMultiDropStudyScope:
 
     def test_study_scope_fully_simulated(self):
         result = run_aisim_multi_drop_cycle(
-            n_atoms=100, seed=1, n_drops=3,
-            cycle_time_s=1.0, gravity_propagation=True,
+            n_atoms=100,
+            seed=1,
+            n_drops=3,
+            cycle_time_s=1.0,
+            gravity_propagation=True,
         )
         assert result["study_scope_category"] == STUDY_SCOPE_FULLY_SIMULATED
         assert result["gravity_propagation"] is True

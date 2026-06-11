@@ -58,11 +58,58 @@ Changelog = "https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CHANG
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Vendored third-party code (AISim, allantools) is never linted or reformatted;
+# tests/test_vendor_aisim_unmodified.py guards its byte-level integrity.
+extend-exclude = ["src/qgrav/vendor"]
 lint.select = ["E", "F", "I", "B", "UP"]
-lint.ignore = ["E501"]
+# E741: single-letter physics notation (I for intensity, l for angular momentum)
+# is standard in this domain; renaming numerics code is churn, not clarity.
+lint.ignore = ["E501", "E741"]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ files re-export the public API surface.
+"**/__init__.py" = ["F401"]
+# These modules must configure MPLCONFIGDIR / the matplotlib backend before
+# importing matplotlib.pyplot, so some imports cannot sit at the top.
+"src/qgrav/gui/app.py" = ["E402"]
+"src/qgrav/pipeline/_common.py" = ["E402"]
+"src/qgrav/visuals.py" = ["E402"]
+# Regression-locked tide catalogue: lint config bends so the file never changes.
+"src/qgrav/datasets/_tides_hw95.py" = ["B007"]
 
 [tool.black]
 line-length = 100
+target-version = ["py311", "py312", "py313"]
+# Vendored code is third-party; never reformat it (also applies when
+# pre-commit passes filenames explicitly).
+force-exclude = "qgrav/vendor/"
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/qgrav"]
+exclude = ["src/qgrav/vendor"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = true
+
+# Vendored code is third-party; never type-check it.
+[[tool.mypy.overrides]]
+module = "qgrav.vendor.*"
+ignore_errors = true
+
+# TODO(typing): the YAML-config dispatcher builds **kwargs dicts whose values
+# mypy widens to `float | None`; typing it properly needs a TypedDict per study
+# model. Disabled per-module rather than fixed to keep the diff mechanical.
+[[tool.mypy.overrides]]
+module = "qgrav.sim_ai.aisim_adapter"
+disable_error_code = ["arg-type"]
+
+# TODO(typing): pipeline modules pass config-derived `str` where Literal[...]
+# is expected and index Optional bundles guarded by runtime checks mypy cannot
+# see; needs cast()/TypedDict work.
+[[tool.mypy.overrides]]
+module = "qgrav.pipeline.*"
+disable_error_code = ["arg-type", "index"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

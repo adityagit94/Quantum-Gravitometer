@@ -35,16 +35,22 @@ stats:
   compare_allan_backends: true
 """
 
+
 def test_pipeline_creates_report_allantools(tmp_path: Path):
     cfg = tmp_path / "config.yaml"
-    cfg.write_text(BASE_CFG + "  metrics_backend: allantools\n  comparison_backend: custom\n", encoding="utf-8")
+    cfg.write_text(
+        BASE_CFG + "  metrics_backend: allantools\n  comparison_backend: custom\n", encoding="utf-8"
+    )
     report = run_pipeline(cfg)
     metrics = json.loads((report.parent / "metrics.json").read_text())
     assert metrics["allan_backend_used"] == "allantools"
 
+
 def test_pipeline_creates_report_custom(tmp_path: Path):
     cfg = tmp_path / "config.yaml"
-    cfg.write_text(BASE_CFG + "  metrics_backend: custom\n  comparison_backend: allantools\n", encoding="utf-8")
+    cfg.write_text(
+        BASE_CFG + "  metrics_backend: custom\n  comparison_backend: allantools\n", encoding="utf-8"
+    )
     report = run_pipeline(cfg)
     metrics = json.loads((report.parent / "metrics.json").read_text())
     assert metrics["allan_backend_used"] == "custom"

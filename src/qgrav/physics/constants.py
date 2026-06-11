@@ -17,6 +17,7 @@ References
 - IERS Conventions 2010, IERS Technical Note 36
 - Heiskanen, W. and Moritz, H., *Physical Geodesy*, Freeman (1967)
 """
+
 from __future__ import annotations
 
 import math
@@ -255,6 +256,7 @@ EARTH_RADIUS_MEAN = PhysicalConstant(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def all_constants() -> dict[str, PhysicalConstant]:
     """Return every :class:`PhysicalConstant` defined at module scope.

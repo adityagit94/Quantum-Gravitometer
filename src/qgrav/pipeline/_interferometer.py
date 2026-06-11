@@ -1,4 +1,5 @@
 """Interferometer (virtual / real IFO) pipeline stage."""
+
 from __future__ import annotations
 
 import json
@@ -12,10 +13,12 @@ from qgrav import __version__
 from qgrav.algorithms import estimate_displacement_baseline, estimate_displacement_improved
 from qgrav.bench_ifo import generate_virtual_ifo, load_real_ifo_csv
 from qgrav.config import resolve_project_relative_path
-from qgrav.metrics import allan_deviation_overlapping, compute_error_statistics, compute_psd, improvement_percent
-from qgrav.reporting import build_html_report
-from qgrav.validation import curve_correlation
-
+from qgrav.metrics import (
+    allan_deviation_overlapping,
+    compute_error_statistics,
+    compute_psd,
+    improvement_percent,
+)
 from qgrav.pipeline._common import (
     RunPaths,
     _compare_allan_backends,
@@ -27,11 +30,20 @@ from qgrav.pipeline._common import (
 )
 from qgrav.pipeline._plots import _make_ifo_plots
 from qgrav.pipeline._simulation import _add_simulation
+from qgrav.reporting import build_html_report
+from qgrav.validation import curve_correlation
 
 logger = logging.getLogger(__name__)
 
 
-def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path, *, project_root: Path | None = None) -> Path:
+def _run_interferometer_pipeline(
+    cfg: dict[str, Any],
+    cfg_text: str,
+    paths: RunPaths,
+    config_path: Path,
+    *,
+    project_root: Path | None = None,
+) -> Path:
     bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
     bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
     if bench_type == "real":
@@ -39,7 +51,10 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
         if not isinstance(real_cfg, dict):
             raise ValueError("Config missing required section 'bench_real_ifo'")
         data = load_real_ifo_csv(
-            csv_path=resolve_project_relative_path(config_path, real_cfg["csv_path"], project_root=project_root) or real_cfg["csv_path"],
+            csv_path=resolve_project_relative_path(
+                config_path, real_cfg["csv_path"], project_root=project_root
+            )
+            or real_cfg["csv_path"],
             sample_rate_hz=real_cfg.get("sample_rate_hz"),
             delimiter=str(real_cfg.get("delimiter", ",")),
             has_header=bool(real_cfg.get("has_header", True)),
@@ -51,9 +66,15 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
         else:
             dt = np.diff(np.asarray(data["t"], dtype=np.float64))
             if len(dt) == 0:
-                raise ValueError("Need at least two samples to infer sample rate for real interferometer data.")
+                raise ValueError(
+                    "Need at least two samples to infer sample rate for real interferometer data."
+                )
             fs = float(1.0 / np.median(dt))
-        lam = float(real_cfg.get("wavelength_m", cfg.get("bench_virtual_ifo", {}).get("wavelength_m", 1.55e-6)))
+        lam = float(
+            real_cfg.get(
+                "wavelength_m", cfg.get("bench_virtual_ifo", {}).get("wavelength_m", 1.55e-6)
+            )
+        )
     else:
         virtual_cfg = cfg.get("bench_virtual_ifo")
         if not isinstance(virtual_cfg, dict):
@@ -82,7 +103,15 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
 
     alg_cfg = cfg.get("algorithms", {}) if isinstance(cfg.get("algorithms", {}), dict) else {}
     imp_cfg = alg_cfg.get("improved", {}) if isinstance(alg_cfg.get("improved", {}), dict) else {}
-    psd_method, nperseg, noverlap, metrics_backend, allan_data_type, compare_allan_backends, comparison_backend = _stats_cfg(cfg)
+    (
+        psd_method,
+        nperseg,
+        noverlap,
+        metrics_backend,
+        allan_data_type,
+        compare_allan_backends,
+        comparison_backend,
+    ) = _stats_cfg(cfg)
     nperseg = min(max(8, nperseg), len(t))
     noverlap = min(max(1, noverlap), max(1, nperseg - 1))
 
@@ -105,13 +134,22 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     have_truth = bool(np.all(np.isfinite(x_true)))
     taus = _logspace_taus(duration_s=float(t[-1] - t[0]) if len(t) > 1 else 1.0, sample_rate_hz=fs)
 
-    psd_true = compute_psd(x_true, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap) if have_truth else None
+    psd_true = (
+        compute_psd(x_true, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
+        if have_truth
+        else None
+    )
     psd_b = compute_psd(x_b, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
     psd_i = compute_psd(x_i, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
-    adev_b = allan_deviation_overlapping(x_b, fs, taus, backend=metrics_backend, data_type=allan_data_type)
-    adev_i = allan_deviation_overlapping(x_i, fs, taus, backend=metrics_backend, data_type=allan_data_type)
+    adev_b = allan_deviation_overlapping(
+        x_b, fs, taus, backend=metrics_backend, data_type=allan_data_type
+    )
+    adev_i = allan_deviation_overlapping(
+        x_i, fs, taus, backend=metrics_backend, data_type=allan_data_type
+    )
 
-    from qgrav.metrics.allan import identify_noise_type, allan_minimum
+    from qgrav.metrics.allan import allan_minimum, identify_noise_type
+
     _ni_b = identify_noise_type(np.asarray(adev_b["taus_s"]), np.asarray(adev_b["adev"]))
     _ni_i = identify_noise_type(np.asarray(adev_i["taus_s"]), np.asarray(adev_i["adev"]))
     _am_b = allan_minimum(np.asarray(adev_b["taus_s"]), np.asarray(adev_b["adev"]))
@@ -142,25 +180,43 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     }
 
     if have_truth:
-        adev_true = allan_deviation_overlapping(x_true, fs, taus, backend=metrics_backend, data_type=allan_data_type)
-        comp_base = curve_correlation(psd_b["f_hz"], np.log10(psd_b["psd"] + 1e-30), psd_true["f_hz"], np.log10(psd_true["psd"] + 1e-30))
-        comp_imp = curve_correlation(psd_i["f_hz"], np.log10(psd_i["psd"] + 1e-30), psd_true["f_hz"], np.log10(psd_true["psd"] + 1e-30))
+        adev_true = allan_deviation_overlapping(
+            x_true, fs, taus, backend=metrics_backend, data_type=allan_data_type
+        )
+        comp_base = curve_correlation(
+            psd_b["f_hz"],
+            np.log10(psd_b["psd"] + 1e-30),
+            psd_true["f_hz"],
+            np.log10(psd_true["psd"] + 1e-30),
+        )
+        comp_imp = curve_correlation(
+            psd_i["f_hz"],
+            np.log10(psd_i["psd"] + 1e-30),
+            psd_true["f_hz"],
+            np.log10(psd_true["psd"] + 1e-30),
+        )
         base_stats = compute_error_statistics(x_true, x_b)
         imp_stats = compute_error_statistics(x_true, x_i)
-        metrics.update({
-            "baseline": base_stats,
-            "improved": imp_stats,
-            "rmse_improvement_percent": improvement_percent(base_stats["rmse"], imp_stats["rmse"]),
-            "mae_improvement_percent": improvement_percent(base_stats["mae"], imp_stats["mae"]),
-            "psd_vs_truth_baseline": comp_base,
-            "psd_vs_truth_improved": comp_imp,
-        })
+        metrics.update(
+            {
+                "baseline": base_stats,
+                "improved": imp_stats,
+                "rmse_improvement_percent": improvement_percent(
+                    base_stats["rmse"], imp_stats["rmse"]
+                ),
+                "mae_improvement_percent": improvement_percent(base_stats["mae"], imp_stats["mae"]),
+                "psd_vs_truth_baseline": comp_base,
+                "psd_vs_truth_improved": comp_imp,
+            }
+        )
     else:
         adev_true = None
-        metrics.update({
-            "baseline": {"note": "No truth available: error statistics skipped."},
-            "improved": {"note": "No truth available: error statistics skipped."},
-        })
+        metrics.update(
+            {
+                "baseline": {"note": "No truth available: error statistics skipped."},
+                "improved": {"note": "No truth available: error statistics skipped."},
+            }
+        )
 
     if len(np.asarray(adev_b["adev"])) and len(np.asarray(adev_i["adev"])):
         common_tau = min(len(np.asarray(adev_b["adev"])), len(np.asarray(adev_i["adev"])))
@@ -174,7 +230,12 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
         if comparison_backend == primary_backend:
             comparison_backend = "custom" if primary_backend != "custom" else "allantools"
         metrics["allan_backend_comparison"] = _compare_allan_backends(
-            x_i, fs, taus, primary_backend=primary_backend, reference_backend=comparison_backend, data_type=allan_data_type
+            x_i,
+            fs,
+            taus,
+            primary_backend=primary_backend,
+            reference_backend=comparison_backend,
+            data_type=allan_data_type,
         )
 
     save_dict: dict[str, np.ndarray] = {
@@ -195,7 +256,10 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
 
     try:
         from qgrav.physics.systematics import systematics_summary
-        ifo_cfg = cfg.get("interferometer", {}) if isinstance(cfg.get("interferometer", {}), dict) else {}
+
+        ifo_cfg = (
+            cfg.get("interferometer", {}) if isinstance(cfg.get("interferometer", {}), dict) else {}
+        )
         metrics["systematics"] = systematics_summary(
             interferometer_time_s=float(ifo_cfg.get("interferometer_time_s", 0.260)),
         )
@@ -205,7 +269,26 @@ def _run_interferometer_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunP
     metrics_jsonable = _jsonable(metrics)
     paths.metrics_path.write_text(json.dumps(metrics_jsonable, indent=2), encoding="utf-8")
     np.savez_compressed(paths.data_path, **save_dict)
-    plot_paths = _make_ifo_plots(paths, metrics, t, I, Q, x_true if have_truth else None, x_b, x_i, fs, psd_method, nperseg, noverlap, adev_true, adev_b, adev_i, "simulation" in metrics)
+    plot_paths = _make_ifo_plots(
+        paths,
+        metrics,
+        t,
+        I,
+        Q,
+        x_true if have_truth else None,
+        x_b,
+        x_i,
+        fs,
+        psd_method,
+        nperseg,
+        noverlap,
+        adev_true,
+        adev_b,
+        adev_i,
+        "simulation" in metrics,
+    )
     _write_summary(paths.summary_path, metrics_jsonable)
     _write_run_metadata(paths.run_metadata_path, cfg, metrics_jsonable)
-    return build_html_report(run_dir=paths.run_dir, config_text=cfg_text, metrics=metrics_jsonable, plot_paths=plot_paths)
+    return build_html_report(
+        run_dir=paths.run_dir, config_text=cfg_text, metrics=metrics_jsonable, plot_paths=plot_paths
+    )

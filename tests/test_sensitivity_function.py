@@ -1,4 +1,5 @@
 """Tests for the Mach-Zehnder sensitivity function and vibration transfer function."""
+
 from __future__ import annotations
 
 import math
@@ -9,8 +10,6 @@ import pytest
 from qgrav.physics.constants import K_EFF_RB87_D2
 from qgrav.physics.phase_models import vibration_phase_rad
 from qgrav.physics.sensitivity_function import (
-    NHNM_PSD,
-    NLNM_PSD,
     integrate_vibration_noise,
     interpolate_psd,
     sensitivity_function_time_domain,
@@ -29,10 +28,14 @@ def test_gs_instantaneous_pulse_shape():
     assert val_first == -1.0
     # Inside the second window
     mid_second = 1.5 * T
-    val_second = sensitivity_function_time_domain(np.array([mid_second]), interferometer_time_s=T)[0]
+    val_second = sensitivity_function_time_domain(np.array([mid_second]), interferometer_time_s=T)[
+        0
+    ]
     assert val_second == +1.0
     # Outside is zero
-    val_outside = sensitivity_function_time_domain(np.array([-0.02, 2 * T + 0.02]), interferometer_time_s=T)
+    val_outside = sensitivity_function_time_domain(
+        np.array([-0.02, 2 * T + 0.02]), interferometer_time_s=T
+    )
     assert np.all(val_outside == 0.0)
     # The integral of |g_s| over the support equals 2T to high precision
     _trapezoid = getattr(np, "trapezoid", None) or np.trapz  # type: ignore[attr-defined]
@@ -71,8 +74,6 @@ def test_transfer_function_has_notches_at_n_over_T():
 def test_transfer_function_rolloff_above_1_over_T():
     """For f >> 1/T, |H|^2 ~ 1/f^2: slope on log-log -> -2."""
     T = 0.26
-    f_hi = np.array([50.0, 100.0, 200.0]) / T  # well above 1/T
-    H_sq = transfer_function_vibration(f_hi, interferometer_time_s=T)
     # Average over many points (since |H|^2 still oscillates with sin^4)
     # Use the upper envelope: average over a band
     f_band = np.linspace(20.0 / T, 200.0 / T, 5000)
@@ -99,23 +100,24 @@ def test_integrate_vibration_matches_analytical_rms_over_phase():
     f0 = 1.7
     A = 1e-9
     k_eff = K_EFF_RB87_D2.value
-    expected_sigma_phi_sq = 8.0 * (k_eff ** 2) * (A ** 2) * (math.sin(math.pi * f0 * T) ** 4)
+    expected_sigma_phi_sq = 8.0 * (k_eff**2) * (A**2) * (math.sin(math.pi * f0 * T) ** 4)
     expected_sigma_phi = math.sqrt(expected_sigma_phi_sq)
 
     # Single-tone PSD: total variance over the band equals 0.5 * a_peak^2.
     a_peak = A * (2 * math.pi * f0) ** 2
-    var_acc = 0.5 * a_peak ** 2
+    var_acc = 0.5 * a_peak**2
     df = 1e-4
     f_grid = np.array([f0 - df / 2, f0, f0 + df / 2])
     psd = np.array([var_acc / df] * 3)
     out = integrate_vibration_noise(
-        psd, f_grid,
+        psd,
+        f_grid,
         interferometer_time_s=T,
         k_eff_rad_per_m=k_eff,
     )
-    assert math.isclose(out["sigma_phi_rad"], expected_sigma_phi, rel_tol=2e-2), (
-        f"integrator={out['sigma_phi_rad']:.4e}, expected={expected_sigma_phi:.4e}"
-    )
+    assert math.isclose(
+        out["sigma_phi_rad"], expected_sigma_phi, rel_tol=2e-2
+    ), f"integrator={out['sigma_phi_rad']:.4e}, expected={expected_sigma_phi:.4e}"
 
 
 def test_single_tone_phase_scales_linearly_with_amplitude():
@@ -126,9 +128,14 @@ def test_single_tone_phase_scales_linearly_with_amplitude():
     f0 = 1.7  # between notches
     k_eff = K_EFF_RB87_D2.value
     phis = [
-        float(vibration_phase_rad(
-            A, frequency_hz=f0, interferometer_time_s=T, k_eff_rad_per_m=k_eff,
-        ))
+        float(
+            vibration_phase_rad(
+                A,
+                frequency_hz=f0,
+                interferometer_time_s=T,
+                k_eff_rad_per_m=k_eff,
+            )
+        )
         for A in [1e-10, 1e-9, 1e-8]
     ]
     # Linearity: each step is 10x the previous
@@ -160,12 +167,14 @@ def test_nhnm_louder_than_nlnm():
     """NHNM-induced gravity noise must exceed NLNM-induced at the same site."""
     f = np.logspace(-3, 2, 2000)
     sig_nlnm = integrate_vibration_noise(
-        interpolate_psd(f, "nlnm"), f,
+        interpolate_psd(f, "nlnm"),
+        f,
         interferometer_time_s=0.26,
         k_eff_rad_per_m=K_EFF_RB87_D2.value,
     )["sigma_g_m_s2"]
     sig_nhnm = integrate_vibration_noise(
-        interpolate_psd(f, "nhnm"), f,
+        interpolate_psd(f, "nhnm"),
+        f,
         interferometer_time_s=0.26,
         k_eff_rad_per_m=K_EFF_RB87_D2.value,
     )["sigma_g_m_s2"]
@@ -177,7 +186,8 @@ def test_integrate_returns_paired_units():
     f = np.logspace(-2, 1, 500)
     psd = np.full_like(f, 1e-16)  # arbitrary flat PSD
     out = integrate_vibration_noise(
-        psd, f,
+        psd,
+        f,
         interferometer_time_s=0.26,
         k_eff_rad_per_m=K_EFF_RB87_D2.value,
     )

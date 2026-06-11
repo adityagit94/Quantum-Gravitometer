@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 
+
 def _random_walk(rng: np.random.Generator, n: int, step_std: float) -> np.ndarray:
     steps = rng.normal(0.0, step_std, size=n)
     return np.cumsum(steps)
+
 
 def generate_virtual_ifo(
     *,

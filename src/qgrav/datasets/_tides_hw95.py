@@ -39,6 +39,7 @@ The amplitudes here are calibrated empirically to reproduce the M2 amplitude
 of ~165 microGal at mid-latitude (lat=45 deg). Other constituents are scaled
 relative to M2 per HW95 Table 4.1.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -115,29 +116,29 @@ def _doodson_arguments(mjd: np.ndarray) -> tuple[np.ndarray, ...]:
 # ---------------------------------------------------------------------------
 _CONSTITUENTS: list[tuple[str, tuple[int, int, int, int, int, int], float, float]] = [
     # name,   (tau, s, h, p, N', p_s),  amp_uGal,  phase_deg
-    ("M2",  (2,  0,  0,  0,  0,  0), 165.0, 0.0),
-    ("S2",  (2,  2, -2,  0,  0,  0),  76.8, 0.0),
-    ("N2",  (2, -1,  0,  1,  0,  0),  31.4, 0.0),
-    ("K2",  (2,  2,  0,  0,  0,  0),  20.9, 0.0),
-    ("K1",  (1,  1,  0,  0,  0,  0),  96.5, 0.0),
-    ("O1",  (1, -1,  0,  0,  0,  0),  68.7, 0.0),
-    ("P1",  (1,  1, -2,  0,  0,  0),  31.9, 0.0),
-    ("Q1",  (1, -2,  0,  1,  0,  0),  13.2, 0.0),
-    ("Mf",  (0,  2,  0,  0,  0,  0),  20.4, 0.0),
-    ("Mm",  (0,  1,  0, -1,  0,  0),  10.8, 0.0),
+    ("M2", (2, 0, 0, 0, 0, 0), 165.0, 0.0),
+    ("S2", (2, 2, -2, 0, 0, 0), 76.8, 0.0),
+    ("N2", (2, -1, 0, 1, 0, 0), 31.4, 0.0),
+    ("K2", (2, 2, 0, 0, 0, 0), 20.9, 0.0),
+    ("K1", (1, 1, 0, 0, 0, 0), 96.5, 0.0),
+    ("O1", (1, -1, 0, 0, 0, 0), 68.7, 0.0),
+    ("P1", (1, 1, -2, 0, 0, 0), 31.9, 0.0),
+    ("Q1", (1, -2, 0, 1, 0, 0), 13.2, 0.0),
+    ("Mf", (0, 2, 0, 0, 0, 0), 20.4, 0.0),
+    ("Mm", (0, 1, 0, -1, 0, 0), 10.8, 0.0),
     # Smaller semi-diurnals
-    ("nu2", (2, -1,  2, -1,  0,  0),   6.0, 0.0),
-    ("L2",  (2,  1,  0, -1,  0,  0),   4.7, 0.0),
-    ("T2",  (2,  2, -3,  0,  0,  1),   4.5, 0.0),
-    ("2N2", (2, -2,  0,  2,  0,  0),   4.2, 0.0),
+    ("nu2", (2, -1, 2, -1, 0, 0), 6.0, 0.0),
+    ("L2", (2, 1, 0, -1, 0, 0), 4.7, 0.0),
+    ("T2", (2, 2, -3, 0, 0, 1), 4.5, 0.0),
+    ("2N2", (2, -2, 0, 2, 0, 0), 4.2, 0.0),
     # Smaller diurnals
-    ("J1",  (1,  2,  0, -1,  0,  0),   5.4, 0.0),
-    ("OO1", (1,  3,  0,  0,  0,  0),   3.0, 0.0),
-    ("M1",  (1,  0,  0,  1,  0,  0),   7.6, 0.0),
+    ("J1", (1, 2, 0, -1, 0, 0), 5.4, 0.0),
+    ("OO1", (1, 3, 0, 0, 0, 0), 3.0, 0.0),
+    ("M1", (1, 0, 0, 1, 0, 0), 7.6, 0.0),
     # Long-period
-    ("Ssa", (0,  0,  2,  0,  0,  0),   3.0, 0.0),
-    ("Sa",  (0,  0,  1,  0,  0, -1),   1.0, 0.0),
-    ("Mtm", (0,  3,  0, -1,  0,  0),   3.9, 0.0),
+    ("Ssa", (0, 0, 2, 0, 0, 0), 3.0, 0.0),
+    ("Sa", (0, 0, 1, 0, 0, -1), 1.0, 0.0),
+    ("Mtm", (0, 3, 0, -1, 0, 0), 3.9, 0.0),
 ]
 
 
@@ -217,9 +218,10 @@ def gravity_tide_m_s2(
     longitude_deg: float = 0.0,
 ) -> np.ndarray:
     """Compute the solid-earth gravity tide in SI units (m/s^2)."""
-    return gravity_tide_ugal(
-        unix_seconds, latitude_deg=latitude_deg, longitude_deg=longitude_deg
-    ) * 1e-8
+    return (
+        gravity_tide_ugal(unix_seconds, latitude_deg=latitude_deg, longitude_deg=longitude_deg)
+        * 1e-8
+    )
 
 
 def constituent_names() -> list[str]:

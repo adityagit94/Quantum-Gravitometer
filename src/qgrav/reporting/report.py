@@ -245,7 +245,9 @@ _TEMPLATE = """<!doctype html>
 """
 
 
-def build_html_report(*, run_dir: Path, config_text: str, metrics: dict[str, Any], plot_paths: dict[str, Any]) -> Path:
+def build_html_report(
+    *, run_dir: Path, config_text: str, metrics: dict[str, Any], plot_paths: dict[str, Any]
+) -> Path:
     env = Environment(loader=FileSystemLoader(str(run_dir)), autoescape=True)
     template = env.from_string(_TEMPLATE)
     html = template.render(

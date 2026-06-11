@@ -53,7 +53,13 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
         if not isinstance(virtual_cfg, dict):
             issues.append("Virtual mode requires a `bench_virtual_ifo` section.")
         else:
-            for key in ["wavelength_m", "sample_rate_hz", "duration_s", "displacement_sines", "measurement_noise_std"]:
+            for key in [
+                "wavelength_m",
+                "sample_rate_hz",
+                "duration_s",
+                "displacement_sines",
+                "measurement_noise_std",
+            ]:
                 if key not in virtual_cfg:
                     issues.append(f"Missing `bench_virtual_ifo.{key}`.")
     elif bench_type == "real":
@@ -72,9 +78,7 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
                 issues.append("Missing `bench_real_gravity.source_path`.")
             level = str(grav_cfg.get("igets_level", "auto")).strip().lower()
             if level not in {"auto", "1", "2", "3"}:
-                issues.append(
-                    "`bench_real_gravity.igets_level` must be one of: auto, 1, 2, 3."
-                )
+                issues.append("`bench_real_gravity.igets_level` must be one of: auto, 1, 2, 3.")
             tide_backend = str(grav_cfg.get("tide_backend", "auto")).strip().lower()
             if tide_backend not in {"auto", "pygtide", "internal_hw95"}:
                 issues.append(
@@ -86,7 +90,9 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
     if stats is not None and not isinstance(stats, dict):
         issues.append("`stats` must be a mapping/dictionary when present.")
     elif isinstance(stats, dict):
-        backend = str(stats.get("metrics_backend", stats.get("allan_backend", "auto"))).strip().lower()
+        backend = (
+            str(stats.get("metrics_backend", stats.get("allan_backend", "auto"))).strip().lower()
+        )
         if backend not in {"auto", "custom", "allantools"}:
             issues.append("`stats.metrics_backend` must be one of: auto, custom, allantools.")
         data_type = str(stats.get("allan_data_type", "freq")).strip().lower()
@@ -108,9 +114,16 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
         if backend != "aisim":
             issues.append("`simulation.backend` currently supports only `aisim`.")
         model = str(simulation.get("model", "rabi_scan")).strip().lower()
-        allowed_models = {"rabi_scan", "mach_zehnder_phase_scan", "gravity_sweep", "vibration_sensitivity_sweep"}
+        allowed_models = {
+            "rabi_scan",
+            "mach_zehnder_phase_scan",
+            "gravity_sweep",
+            "vibration_sensitivity_sweep",
+        }
         if model not in allowed_models:
-            issues.append("`simulation.model` must be one of: rabi_scan, mach_zehnder_phase_scan, gravity_sweep, vibration_sensitivity_sweep.")
+            issues.append(
+                "`simulation.model` must be one of: rabi_scan, mach_zehnder_phase_scan, gravity_sweep, vibration_sensitivity_sweep."
+            )
         if "n_atoms" not in simulation:
             issues.append("Missing `simulation.n_atoms` for enabled AISim simulation.")
         if model == "rabi_scan":
@@ -122,11 +135,24 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
                 if key not in simulation:
                     issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")
         elif model == "gravity_sweep":
-            for key in ["tau_pi_half_s", "interferometer_time_s", "gravity_center_m_s2", "gravity_span_m_s2", "n_gravity_points"]:
+            for key in [
+                "tau_pi_half_s",
+                "interferometer_time_s",
+                "gravity_center_m_s2",
+                "gravity_span_m_s2",
+                "n_gravity_points",
+            ]:
                 if key not in simulation:
                     issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")
         elif model == "vibration_sensitivity_sweep":
-            for key in ["tau_pi_half_s", "interferometer_time_s", "gravity_ref_m_s2", "vibration_frequency_hz", "amplitude_max_m", "n_amplitude_points"]:
+            for key in [
+                "tau_pi_half_s",
+                "interferometer_time_s",
+                "gravity_ref_m_s2",
+                "vibration_frequency_hz",
+                "amplitude_max_m",
+                "n_amplitude_points",
+            ]:
                 if key not in simulation:
                     issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")
     return issues

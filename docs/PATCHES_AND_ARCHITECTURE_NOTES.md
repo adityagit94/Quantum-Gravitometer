@@ -69,3 +69,37 @@ A deeper refactor should introduce a dedicated stage layout, for example:
 - shared helpers in a support module
 
 This is an architectural improvement rather than an urgent correctness bug, so it should be done in a dedicated refactor milestone with regression tests.
+
+---
+
+## 2026-06-11 - Lint/type enforcement decisions (CI hardening)
+
+Context: adding an enforced ruff/black/mypy gate to CI revealed the
+pre-commit hooks had only ever touched changed files, so most of the tree
+had never been formatted. Decisions taken:
+
+- **One-time mechanical reformat** of all non-vendor `src` + `tests` with
+  black 24.10 (the pre-commit pin). Full suite identical before/after
+  (379 passed, 2 skipped).
+- **CI pins ruff==0.6.9 / black==24.10.0** to match
+  `.pre-commit-config.yaml`, so local hooks and CI can never disagree;
+  mypy pinned for stable stubs.
+- **E741 globally ignored**: `I` (intensity), `l` are standard physics
+  notation here; renaming numerics code is churn, not clarity.
+- **`__init__.py` files ignore F401**: they re-export the public API that
+  tests and the GUI import from package roots.
+- **`gui/app.py`, `pipeline/_common.py`, `visuals.py` ignore E402**: they
+  must set `MPLCONFIGDIR` / the matplotlib backend before importing
+  `matplotlib.pyplot`.
+- **`_tides_hw95.py` gets a B007 per-file-ignore** instead of an edit: the
+  tide catalogue is regression-locked, so lint config bends rather than
+  the file changing.
+- **Scoped mypy overrides** (with `TODO(typing)`) for
+  `qgrav.sim_ai.aisim_adapter` (`arg-type`: the YAML dispatcher builds
+  `**kwargs` dicts mypy widens to `float | None`) and `qgrav.pipeline.*`
+  (`arg-type`, `index`): fixing properly needs TypedDicts per study model.
+  Everything else is mypy-clean (62 files).
+- The ruff F401 autofix initially **removed the `qgrav info` aisim
+  availability probe** (`import qgrav.vendor.aisim` inside `try`); restored
+  with an explicit `# noqa: F401` and a comment. Watch for this pattern
+  when running autofixes.

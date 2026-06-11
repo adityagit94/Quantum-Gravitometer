@@ -17,11 +17,11 @@ def port_differential_summary(port2: np.ndarray, port3: np.ndarray) -> dict[str,
     diff = p3 - p2
     norm_diff = diff / total
     return {
-        'output_port_2': p2,
-        'output_port_3': p3,
-        'differential_signal': diff,
-        'normalized_differential_signal': norm_diff,
-        'closed_total': total,
+        "output_port_2": p2,
+        "output_port_3": p3,
+        "differential_signal": diff,
+        "normalized_differential_signal": norm_diff,
+        "closed_total": total,
     }
 
 

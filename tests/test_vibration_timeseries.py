@@ -1,4 +1,5 @@
 """Tests for time-domain vibration noise generator (Phase 4)."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -39,9 +40,7 @@ class TestVibrationPSDMatchesInput:
         # PSD should match input within a factor of 3 (statistical fluctuation)
         ratio = psd_measured[mask] / psd_input[mask]
         median_ratio = float(np.median(ratio))
-        assert 0.3 < median_ratio < 3.0, (
-            f"PSD ratio out of range: median = {median_ratio}"
-        )
+        assert 0.3 < median_ratio < 3.0, f"PSD ratio out of range: median = {median_ratio}"
 
 
 class TestVibrationIsolationAttenuates:
@@ -90,8 +89,13 @@ class TestVibrationDeterministicWithSeed:
     """Same seed should produce identical output."""
 
     def test_vibration_deterministic_with_seed(self):
-        kwargs = dict(duration_s=10.0, sample_rate_hz=50.0,
-                      seismic_model="nlnm", isolation_cutoff_hz=1.0, seed=123)
+        kwargs = dict(
+            duration_s=10.0,
+            sample_rate_hz=50.0,
+            seismic_model="nlnm",
+            isolation_cutoff_hz=1.0,
+            seed=123,
+        )
         r1 = generate_vibration_timeseries(**kwargs)
         r2 = generate_vibration_timeseries(**kwargs)
         np.testing.assert_array_equal(r1["accel_m_s2"], r2["accel_m_s2"])
@@ -99,10 +103,14 @@ class TestVibrationDeterministicWithSeed:
 
     def test_vibration_different_seeds_differ(self):
         r1 = generate_vibration_timeseries(
-            duration_s=10.0, sample_rate_hz=50.0, seed=1,
+            duration_s=10.0,
+            sample_rate_hz=50.0,
+            seed=1,
         )
         r2 = generate_vibration_timeseries(
-            duration_s=10.0, sample_rate_hz=50.0, seed=2,
+            duration_s=10.0,
+            sample_rate_hz=50.0,
+            seed=2,
         )
         # They should differ in at least 50% of samples
         diff = np.abs(r1["accel_m_s2"] - r2["accel_m_s2"])
@@ -114,7 +122,9 @@ class TestTimeDomainOutputShape:
 
     def test_output_shape(self):
         result = generate_vibration_timeseries(
-            duration_s=2.0, sample_rate_hz=10.0, seed=0,
+            duration_s=2.0,
+            sample_rate_hz=10.0,
+            seed=0,
         )
         # n_samples = duration * fs = 20
         assert len(result["t_s"]) == 20
@@ -132,8 +142,11 @@ class TestDisplacementDoubleIntegralOfAcceleration:
     def test_displacement_relates_to_accel(self):
         """For a band-limited signal, freq-domain double-integration should be self-consistent."""
         result = generate_vibration_timeseries(
-            duration_s=200.0, sample_rate_hz=20.0,
-            seismic_model="nlnm", isolation_cutoff_hz=0.5, seed=42,
+            duration_s=200.0,
+            sample_rate_hz=20.0,
+            seismic_model="nlnm",
+            isolation_cutoff_hz=0.5,
+            seed=42,
         )
         accel = result["accel_m_s2"]
         disp = result["displacement_m"]
@@ -141,14 +154,14 @@ class TestDisplacementDoubleIntegralOfAcceleration:
         # Take the FFTs and verify A(f) = -ω² X(f) for f > 0.
         fs = 20.0
         n = len(accel)
-        freqs = np.fft.rfftfreq(n, d=1.0/fs)
+        freqs = np.fft.rfftfreq(n, d=1.0 / fs)
         A = np.fft.rfft(accel)
         X = np.fft.rfft(disp)
         omega = 2.0 * np.pi * freqs
         # For nonzero freqs:
         nonzero = freqs > 0.5  # well above DC, where it's defined
         if np.any(nonzero):
-            ratio = A[nonzero] / (-omega[nonzero] ** 2 * X[nonzero] + 1e-30)
+            ratio = A[nonzero] / (-(omega[nonzero] ** 2) * X[nonzero] + 1e-30)
             # Most of the ratios should be very close to 1
             # (we don't check NaN; expect them where X is tiny)
             valid = np.isfinite(ratio) & (np.abs(X[nonzero]) > 1e-15)

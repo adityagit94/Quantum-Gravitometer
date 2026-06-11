@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
+
 def _ewma(x: np.ndarray, alpha: float) -> np.ndarray:
     y = np.empty_like(x, dtype=np.float64)
     y[0] = float(x[0])
@@ -9,6 +10,7 @@ def _ewma(x: np.ndarray, alpha: float) -> np.ndarray:
     for i in range(1, len(x)):
         y[i] = a * float(x[i]) + (1.0 - a) * y[i - 1]
     return y
+
 
 def _moving_average(x: np.ndarray, window: int) -> np.ndarray:
     w = int(window)
@@ -18,6 +20,7 @@ def _moving_average(x: np.ndarray, window: int) -> np.ndarray:
     kernel = np.ones(w, dtype=np.float64) / float(w)
     xpad = np.pad(x.astype(np.float64), (pad, pad), mode="reflect")
     return np.convolve(xpad, kernel, mode="valid")
+
 
 def estimate_displacement_improved(
     I: np.ndarray,

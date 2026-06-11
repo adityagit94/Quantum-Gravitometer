@@ -1,4 +1,5 @@
 """Tests for issues found in the v0.9.2 codebase audit."""
+
 from __future__ import annotations
 
 import json
@@ -31,9 +32,7 @@ def test_equivalent_gravity_error_rejects_negative_T():
 def test_equivalent_gravity_error_valid_inputs():
     from qgrav.physics.phase_models import equivalent_gravity_error_m_s2
 
-    result = equivalent_gravity_error_m_s2(
-        np.pi, k_eff_rad_per_m=1e7, interferometer_time_s=0.1
-    )
+    result = equivalent_gravity_error_m_s2(np.pi, k_eff_rad_per_m=1e7, interferometer_time_s=0.1)
     assert np.isfinite(result)
     assert float(result) > 0
 
@@ -90,8 +89,10 @@ def test_cli_run_bad_config_exits_cleanly(tmp_path):
     bad_cfg.write_text("bench:\n  type: nonexistent_type\n", encoding="utf-8")
 
     buf = StringIO()
-    with mock.patch.object(sys, "argv", ["qgrav", "run", "--config", str(bad_cfg)]), \
-         mock.patch("sys.stderr", buf):
+    with (
+        mock.patch.object(sys, "argv", ["qgrav", "run", "--config", str(bad_cfg)]),
+        mock.patch("sys.stderr", buf),
+    ):
         with pytest.raises(SystemExit) as exc_info:
             main()
     assert exc_info.value.code == 1
@@ -107,8 +108,10 @@ def test_cli_verbose_shows_traceback(tmp_path):
     bad_cfg.write_text("bench:\n  type: nonexistent_type\n", encoding="utf-8")
 
     buf = StringIO()
-    with mock.patch.object(sys, "argv", ["qgrav", "--verbose", "run", "--config", str(bad_cfg)]), \
-         mock.patch("sys.stderr", buf):
+    with (
+        mock.patch.object(sys, "argv", ["qgrav", "--verbose", "run", "--config", str(bad_cfg)]),
+        mock.patch("sys.stderr", buf),
+    ):
         with pytest.raises(SystemExit):
             main()
     stderr_output = buf.getvalue()
@@ -172,8 +175,9 @@ def test_jsonable_full_dict_serializes():
 
 def test_plot_psd_short_data_no_crash():
     """_plot_psd should not crash when PSD has only 1 frequency bin."""
-    from qgrav.visuals import _plot_psd
     from matplotlib.figure import Figure
+
+    from qgrav.visuals import _plot_psd
 
     fig = Figure()
     ax = fig.add_subplot(111)
@@ -187,14 +191,17 @@ def test_plot_psd_short_data_no_crash():
 
 
 def test_gravity_pipeline_rejects_missing_config_section():
-    from qgrav.pipeline._gravity import _run_real_gravity_pipeline
     from qgrav.pipeline._common import RunPaths
+    from qgrav.pipeline._gravity import _run_real_gravity_pipeline
 
     cfg = {"bench": {"type": "real_gravity"}}  # missing bench_real_gravity
     paths = RunPaths(
-        run_dir=Path("/tmp/fake"), plots_dir=Path("/tmp/fake/plots"),
-        data_path=Path("/tmp/fake/data.npz"), config_copy=Path("/tmp/fake/cfg.yaml"),
-        metrics_path=Path("/tmp/fake/m.json"), summary_path=Path("/tmp/fake/s.md"),
+        run_dir=Path("/tmp/fake"),
+        plots_dir=Path("/tmp/fake/plots"),
+        data_path=Path("/tmp/fake/data.npz"),
+        config_copy=Path("/tmp/fake/cfg.yaml"),
+        metrics_path=Path("/tmp/fake/m.json"),
+        summary_path=Path("/tmp/fake/s.md"),
         run_metadata_path=Path("/tmp/fake/rm.json"),
     )
     with pytest.raises(ValueError, match="bench_real_gravity"):

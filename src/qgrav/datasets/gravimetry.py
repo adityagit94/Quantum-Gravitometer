@@ -4,10 +4,11 @@ import csv
 import io
 import logging
 import zipfile
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 
@@ -39,7 +40,8 @@ def parse_station_metadata(text: str) -> dict[str, StationInfo]:
             continue
         code = parts[0].strip()
         try:
-            lon = float(parts[1]); lat = float(parts[2])
+            lon = float(parts[1])
+            lat = float(parts[2])
         except ValueError:
             continue
         stations[code] = StationInfo(code=code, longitude_deg=lon, latitude_deg=lat)
@@ -48,53 +50,55 @@ def parse_station_metadata(text: str) -> dict[str, StationInfo]:
 
 def _read_text_from_source(source_path: str | Path, member_name: str | None = None) -> str:
     path = Path(source_path)
-    if path.suffix.lower() == '.zip':
+    if path.suffix.lower() == ".zip":
         if member_name is None:
-            raise ValueError('member_name is required when reading from a zip archive.')
-        with zipfile.ZipFile(path, 'r') as zf:
-            return zf.read(member_name).decode('utf-8', errors='ignore')
-    return path.read_text(encoding='utf-8', errors='ignore')
+            raise ValueError("member_name is required when reading from a zip archive.")
+        with zipfile.ZipFile(path, "r") as zf:
+            return zf.read(member_name).decode("utf-8", errors="ignore")
+    return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def _find_metadata_text(source_path: str | Path) -> tuple[str | None, str | None]:
     path = Path(source_path)
     if path.is_dir():
-        for cand in [path / 'SG station.txt', path / 'sg station.txt']:
+        for cand in [path / "SG station.txt", path / "sg station.txt"]:
             if cand.exists():
-                return cand.read_text(encoding='utf-8', errors='ignore'), str(cand)
+                return cand.read_text(encoding="utf-8", errors="ignore"), str(cand)
         return None, None
-    if path.suffix.lower() == '.zip':
-        with zipfile.ZipFile(path, 'r') as zf:
+    if path.suffix.lower() == ".zip":
+        with zipfile.ZipFile(path, "r") as zf:
             for name in zf.namelist():
-                if Path(name).name.lower() == 'sg station.txt':
-                    return zf.read(name).decode('utf-8', errors='ignore'), name
+                if Path(name).name.lower() == "sg station.txt":
+                    return zf.read(name).decode("utf-8", errors="ignore"), name
         return None, None
     parent = path.parent
-    for cand in [parent / 'SG station.txt', parent / 'sg station.txt']:
+    for cand in [parent / "SG station.txt", parent / "sg station.txt"]:
         if cand.exists():
-            return cand.read_text(encoding='utf-8', errors='ignore'), str(cand)
+            return cand.read_text(encoding="utf-8", errors="ignore"), str(cand)
     return None, None
 
 
 def list_stations_in_source(source_path: str | Path) -> list[dict[str, Any]]:
     path = Path(source_path)
     text, _ = _find_metadata_text(path)
-    metadata = parse_station_metadata(text or '')
+    metadata = parse_station_metadata(text or "")
     station_codes: list[str] = []
     if path.is_dir():
-        station_codes = sorted(p.stem for p in path.glob('*.ggp'))
-    elif path.suffix.lower() == '.zip':
-        with zipfile.ZipFile(path, 'r') as zf:
-            station_codes = sorted(Path(name).stem for name in zf.namelist() if name.lower().endswith('.ggp'))
-    elif path.suffix.lower() in {'.ggp', '.csv'}:
+        station_codes = sorted(p.stem for p in path.glob("*.ggp"))
+    elif path.suffix.lower() == ".zip":
+        with zipfile.ZipFile(path, "r") as zf:
+            station_codes = sorted(
+                Path(name).stem for name in zf.namelist() if name.lower().endswith(".ggp")
+            )
+    elif path.suffix.lower() in {".ggp", ".csv"}:
         station_codes = [path.stem]
     else:
-        raise ValueError(f'Unsupported source type: {path}')
+        raise ValueError(f"Unsupported source type: {path}")
     return [
         {
-            'station_code': code,
-            'longitude_deg': metadata.get(code, StationInfo(code=code)).longitude_deg,
-            'latitude_deg': metadata.get(code, StationInfo(code=code)).latitude_deg,
+            "station_code": code,
+            "longitude_deg": metadata.get(code, StationInfo(code=code)).longitude_deg,
+            "latitude_deg": metadata.get(code, StationInfo(code=code)).latitude_deg,
         }
         for code in station_codes
     ]
@@ -114,38 +118,42 @@ def parse_ggp_lines(lines: Iterable[str]) -> tuple[np.ndarray, np.ndarray]:
         if len(date_s) != 8 or len(time_s) != 6 or not date_s.isdigit() or not time_s.isdigit():
             continue
         try:
-            ts = datetime.strptime(date_s + time_s, '%Y%m%d%H%M%S')
+            ts = datetime.strptime(date_s + time_s, "%Y%m%d%H%M%S")
             val = float(value_s)
         except ValueError:
             continue
         if not np.isfinite(val):
             continue
-        timestamps.append(np.datetime64(ts, 's'))
+        timestamps.append(np.datetime64(ts, "s"))
         values.append(val)
     if not timestamps:
-        raise ValueError('No valid data rows found in .ggp content.')
-    return np.asarray(timestamps, dtype='datetime64[s]'), np.asarray(values, dtype=np.float64)
+        raise ValueError("No valid data rows found in .ggp content.")
+    return np.asarray(timestamps, dtype="datetime64[s]"), np.asarray(values, dtype=np.float64)
 
 
-def _gap_report(raw_timestamps: np.ndarray, *, gap_tolerance_fraction: float = 0.1) -> dict[str, Any]:
+def _gap_report(
+    raw_timestamps: np.ndarray, *, gap_tolerance_fraction: float = 0.1
+) -> dict[str, Any]:
     timestamps = np.asarray(raw_timestamps)
     finite_mask = _finite_time_mask(timestamps)
-    times_clean = timestamps[finite_mask].astype('datetime64[s]')
+    times_clean = timestamps[finite_mask].astype("datetime64[s]")
     if len(times_clean) < 2:
         return {
-            'n_samples_total': int(len(times_clean)),
-            'median_dt_s': None,
-            'gap_count': 0,
-            'duplicate_count': 0,
-            'reverse_count': 0,
-            'missing_samples_estimate': 0,
-            'segment_count': 1 if len(times_clean) else 0,
-            'largest_contiguous_segment_samples': int(len(times_clean)),
+            "n_samples_total": int(len(times_clean)),
+            "median_dt_s": None,
+            "gap_count": 0,
+            "duplicate_count": 0,
+            "reverse_count": 0,
+            "missing_samples_estimate": 0,
+            "segment_count": 1 if len(times_clean) else 0,
+            "largest_contiguous_segment_samples": int(len(times_clean)),
         }
 
-    reverse_count = int(np.sum(np.diff(times_clean) < np.timedelta64(0, 's'))) if len(times_clean) > 1 else 0
+    reverse_count = (
+        int(np.sum(np.diff(times_clean) < np.timedelta64(0, "s"))) if len(times_clean) > 1 else 0
+    )
     timestamps_sorted = np.sort(times_clean)
-    dt = np.diff(timestamps_sorted).astype('timedelta64[s]').astype(np.int64)
+    dt = np.diff(timestamps_sorted).astype("timedelta64[s]").astype(np.int64)
     positive = dt[dt > 0]
     median_dt = int(np.median(positive)) if len(positive) else None
     duplicate_count = int(np.sum(dt == 0))
@@ -166,29 +174,39 @@ def _gap_report(raw_timestamps: np.ndarray, *, gap_tolerance_fraction: float = 0
         lengths = np.diff(boundaries)
         largest = int(np.max(lengths)) if len(lengths) else 0
     return {
-        'n_samples_total': int(len(times_clean)),
-        'median_dt_s': median_dt,
-        'gap_count': gap_count,
-        'duplicate_count': duplicate_count,
-        'reverse_count': reverse_count,
-        'missing_samples_estimate': missing_samples,
-        'segment_count': segment_count,
-        'largest_contiguous_segment_samples': largest,
+        "n_samples_total": int(len(times_clean)),
+        "median_dt_s": median_dt,
+        "gap_count": gap_count,
+        "duplicate_count": duplicate_count,
+        "reverse_count": reverse_count,
+        "missing_samples_estimate": missing_samples,
+        "segment_count": segment_count,
+        "largest_contiguous_segment_samples": largest,
     }
 
 
-def _select_longest_contiguous_segment(timestamps: np.ndarray, values: np.ndarray, expected_dt_s: int | None, *, gap_tolerance_fraction: float = 0.1) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+def _select_longest_contiguous_segment(
+    timestamps: np.ndarray,
+    values: np.ndarray,
+    expected_dt_s: int | None,
+    *,
+    gap_tolerance_fraction: float = 0.1,
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
     if len(timestamps) == 0:
-        raise ValueError('Empty time series.')
+        raise ValueError("Empty time series.")
     if expected_dt_s is None or len(timestamps) < 2:
-        return timestamps, values, {
-            'strategy': 'entire_series',
-            'segment_index': 0,
-            'segment_start': str(timestamps[0]),
-            'segment_end': str(timestamps[-1]),
-            'segment_samples': int(len(timestamps)),
-        }
-    dt = np.diff(timestamps).astype('timedelta64[s]').astype(np.int64)
+        return (
+            timestamps,
+            values,
+            {
+                "strategy": "entire_series",
+                "segment_index": 0,
+                "segment_start": str(timestamps[0]),
+                "segment_end": str(timestamps[-1]),
+                "segment_samples": int(len(timestamps)),
+            },
+        )
+    dt = np.diff(timestamps).astype("timedelta64[s]").astype(np.int64)
     tolerance = max(1, int(round(expected_dt_s * gap_tolerance_fraction)))
     breaks = np.where((np.abs(dt - expected_dt_s) > tolerance) | (dt <= 0))[0]
     boundaries = np.concatenate(([0], breaks + 1, [len(timestamps)]))
@@ -196,60 +214,69 @@ def _select_longest_contiguous_segment(timestamps: np.ndarray, values: np.ndarra
     best_len = -1
     segments = []
     for i in range(len(boundaries) - 1):
-        s = int(boundaries[i]); e = int(boundaries[i + 1]); seg_len = e - s
+        s = int(boundaries[i])
+        e = int(boundaries[i + 1])
+        seg_len = e - s
         segments.append((s, e, seg_len))
         if seg_len > best_len:
-            best_len = seg_len; best_i = i
+            best_len = seg_len
+            best_i = i
     s, e, seg_len = segments[best_i]
-    return timestamps[s:e], values[s:e], {
-        'strategy': 'longest_contiguous_segment',
-        'segment_index': int(best_i),
-        'segment_start': str(timestamps[s]),
-        'segment_end': str(timestamps[e - 1]),
-        'segment_samples': int(seg_len),
-    }
+    return (
+        timestamps[s:e],
+        values[s:e],
+        {
+            "strategy": "longest_contiguous_segment",
+            "segment_index": int(best_i),
+            "segment_start": str(timestamps[s]),
+            "segment_end": str(timestamps[e - 1]),
+            "segment_samples": int(seg_len),
+        },
+    )
 
 
 def _parse_csv_series(text: str) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
     reader = csv.DictReader(io.StringIO(text))
     timestamps: list[np.datetime64] = []
     values: list[float] = []
-    meta: dict[str, Any] = {'dropped_rows': 0}
+    meta: dict[str, Any] = {"dropped_rows": 0}
     for row in reader:
-        ts_raw = (row.get('timestamp') or row.get('time') or '').strip()
-        val_raw = (row.get('gravity_residual') or row.get('value') or row.get('gravity') or '').strip()
+        ts_raw = (row.get("timestamp") or row.get("time") or "").strip()
+        val_raw = (
+            row.get("gravity_residual") or row.get("value") or row.get("gravity") or ""
+        ).strip()
         if not ts_raw or not val_raw:
-            meta['dropped_rows'] += 1
+            meta["dropped_rows"] += 1
             continue
         try:
             ts = np.datetime64(ts_raw)
             val = float(val_raw)
         except Exception:
-            logger.exception('CSV row parsing failed')
-            meta['dropped_rows'] += 1
+            logger.exception("CSV row parsing failed")
+            meta["dropped_rows"] += 1
             continue
         if not np.isfinite(val):
-            meta['dropped_rows'] += 1
+            meta["dropped_rows"] += 1
             continue
-        timestamps.append(ts.astype('datetime64[s]'))
+        timestamps.append(ts.astype("datetime64[s]"))
         values.append(val)
-        if row.get('station_code') and 'station_code' not in meta:
-            meta['station_code'] = row['station_code']
-        if row.get('longitude') and 'longitude_deg' not in meta:
+        if row.get("station_code") and "station_code" not in meta:
+            meta["station_code"] = row["station_code"]
+        if row.get("longitude") and "longitude_deg" not in meta:
             try:
-                meta['longitude_deg'] = float(row['longitude'])
+                meta["longitude_deg"] = float(row["longitude"])
             except ValueError:
-                logger.exception('Longitude metadata parsing failed')
-        if row.get('latitude') and 'latitude_deg' not in meta:
+                logger.exception("Longitude metadata parsing failed")
+        if row.get("latitude") and "latitude_deg" not in meta:
             try:
-                meta['latitude_deg'] = float(row['latitude'])
+                meta["latitude_deg"] = float(row["latitude"])
             except ValueError:
-                logger.exception('Latitude metadata parsing failed')
-        if row.get('units') and 'units' not in meta:
-            meta['units'] = row['units']
+                logger.exception("Latitude metadata parsing failed")
+        if row.get("units") and "units" not in meta:
+            meta["units"] = row["units"]
     if not timestamps:
-        raise ValueError('No valid timestamp/value rows found in CSV.')
-    t_arr = np.asarray(timestamps, dtype='datetime64[s]')
+        raise ValueError("No valid timestamp/value rows found in CSV.")
+    t_arr = np.asarray(timestamps, dtype="datetime64[s]")
     v_arr = np.asarray(values, dtype=np.float64)
     finite_mask = _finite_time_mask(t_arr) & np.isfinite(v_arr)
     t_arr = t_arr[finite_mask]
@@ -268,8 +295,15 @@ def _normalize_unit(raw: str) -> str:
     if s in {"ugal", "µgal", "microgal", "micro-gal", "ug"}:
         return "ugal"
     # nm/s^2 variants
-    if s in {"nm/s^2", "nm/s**2", "nm s-2", "nm/s2", "nanometers/second**2",
-             "nanometers/second^2", "nm s^-2"}:
+    if s in {
+        "nm/s^2",
+        "nm/s**2",
+        "nm s-2",
+        "nm/s2",
+        "nanometers/second**2",
+        "nanometers/second^2",
+        "nm s^-2",
+    }:
         return "nm/s^2"
     # m/s^2 variants
     if s in {"m/s^2", "m/s**2", "ms^-2", "ms-2", "m s-2", "m s^-2"}:
@@ -281,7 +315,10 @@ def _normalize_unit(raw: str) -> str:
 
 
 _KNOWN_CANONICAL_UNITS = {
-    "ugal", "nm/s^2", "m/s^2", "gravity residual (dataset units)",
+    "ugal",
+    "nm/s^2",
+    "m/s^2",
+    "gravity residual (dataset units)",
 }
 
 
@@ -290,15 +327,17 @@ def _unit_validation(values: np.ndarray, declared_units: str | None = None) -> l
     if declared_units:
         canonical = _normalize_unit(declared_units)
         if canonical not in _KNOWN_CANONICAL_UNITS:
-            warnings.append(f'Unrecognized declared units: {declared_units}')
+            warnings.append(f"Unrecognized declared units: {declared_units}")
     finite = np.asarray(values, dtype=np.float64)
     finite = finite[np.isfinite(finite)]
     if len(finite) == 0:
-        warnings.append('No finite values available for unit sanity checks.')
+        warnings.append("No finite values available for unit sanity checks.")
         return warnings
     vmax = float(np.max(np.abs(finite)))
     if vmax > 1e6:
-        warnings.append('Gravity values are extremely large; check unit normalization or malformed parsing.')
+        warnings.append(
+            "Gravity values are extremely large; check unit normalization or malformed parsing."
+        )
     return warnings
 
 
@@ -307,61 +346,67 @@ def load_real_gravity_dataset(
     source_path: str | Path,
     station_code: str | None = None,
     metadata_path: str | Path | None = None,
-    segment_strategy: str = 'longest_contiguous',
+    segment_strategy: str = "longest_contiguous",
     gap_tolerance_fraction: float = 0.1,
 ) -> dict[str, Any]:
     path = Path(source_path)
-    source_kind = path.suffix.lower().lstrip('.') if path.is_file() else 'directory'
+    source_kind = path.suffix.lower().lstrip(".") if path.is_file() else "directory"
 
+    metadata_text: str | None
     if metadata_path is not None:
-        metadata_text = Path(metadata_path).read_text(encoding='utf-8', errors='ignore')
+        metadata_text = Path(metadata_path).read_text(encoding="utf-8", errors="ignore")
     else:
         metadata_text, _ = _find_metadata_text(path)
-    station_meta = parse_station_metadata(metadata_text or '')
+    station_meta = parse_station_metadata(metadata_text or "")
 
     csv_meta: dict[str, Any] = {}
-    if path.suffix.lower() == '.csv':
-        timestamps_raw, values_raw, csv_meta = _parse_csv_series(path.read_text(encoding='utf-8', errors='ignore'))
-        code = station_code or csv_meta.get('station_code') or path.stem
+    if path.suffix.lower() == ".csv":
+        timestamps_raw, values_raw, csv_meta = _parse_csv_series(
+            path.read_text(encoding="utf-8", errors="ignore")
+        )
+        code = station_code or csv_meta.get("station_code") or path.stem
     else:
-        if path.suffix.lower() == '.ggp':
+        if path.suffix.lower() == ".ggp":
             code = station_code or path.stem
-            text = path.read_text(encoding='utf-8', errors='ignore')
-        elif path.suffix.lower() == '.zip':
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        elif path.suffix.lower() == ".zip":
             if not station_code:
                 stations = list_stations_in_source(path)
                 if not stations:
-                    raise ValueError('No .ggp stations found in zip archive.')
-                code = str(stations[0]['station_code'])
+                    raise ValueError("No .ggp stations found in zip archive.")
+                code = str(stations[0]["station_code"])
             else:
                 code = station_code
             member_name = None
-            with zipfile.ZipFile(path, 'r') as zf:
+            with zipfile.ZipFile(path, "r") as zf:
                 for name in zf.namelist():
-                    if name.lower().endswith(f'/{code.lower()}.ggp') or Path(name).name.lower() == f'{code.lower()}.ggp':
+                    if (
+                        name.lower().endswith(f"/{code.lower()}.ggp")
+                        or Path(name).name.lower() == f"{code.lower()}.ggp"
+                    ):
                         member_name = name
                         break
             if member_name is None:
-                raise FileNotFoundError(f'Station {code} not found in archive {path.name}.')
+                raise FileNotFoundError(f"Station {code} not found in archive {path.name}.")
             text = _read_text_from_source(path, member_name=member_name)
         elif path.is_dir():
             if not station_code:
                 stations = list_stations_in_source(path)
                 if not stations:
-                    raise ValueError('No .ggp stations found in directory.')
-                code = str(stations[0]['station_code'])
+                    raise ValueError("No .ggp stations found in directory.")
+                code = str(stations[0]["station_code"])
             else:
                 code = station_code
-            ggp_path = path / f'{code}.ggp'
+            ggp_path = path / f"{code}.ggp"
             if not ggp_path.exists():
-                raise FileNotFoundError(f'Station file not found: {ggp_path}')
-            text = ggp_path.read_text(encoding='utf-8', errors='ignore')
+                raise FileNotFoundError(f"Station file not found: {ggp_path}")
+            text = ggp_path.read_text(encoding="utf-8", errors="ignore")
         else:
-            raise ValueError(f'Unsupported gravimetry source: {path}')
+            raise ValueError(f"Unsupported gravimetry source: {path}")
         timestamps_raw, values_raw = parse_ggp_lines(text.splitlines())
 
     if len(timestamps_raw) != len(values_raw):
-        raise ValueError('Timestamp/value arrays have inconsistent lengths.')
+        raise ValueError("Timestamp/value arrays have inconsistent lengths.")
 
     timestamps_raw = np.asarray(timestamps_raw)
     values_raw = np.asarray(values_raw, dtype=np.float64)
@@ -377,56 +422,58 @@ def load_real_gravity_dataset(
     timestamps = timestamps[finite_mask]
     values = values[finite_mask]
 
-    expected_dt_s = gap_report.get('median_dt_s')
-    if segment_strategy == 'longest_contiguous':
-        seg_t, seg_v, segment_report = _select_longest_contiguous_segment(timestamps, values, expected_dt_s, gap_tolerance_fraction=gap_tolerance_fraction)
+    expected_dt_s = gap_report.get("median_dt_s")
+    if segment_strategy == "longest_contiguous":
+        seg_t, seg_v, segment_report = _select_longest_contiguous_segment(
+            timestamps, values, expected_dt_s, gap_tolerance_fraction=gap_tolerance_fraction
+        )
     else:
         seg_t, seg_v = timestamps, values
         segment_report = {
-            'strategy': 'entire_series',
-            'segment_index': 0,
-            'segment_start': str(timestamps[0]),
-            'segment_end': str(timestamps[-1]),
-            'segment_samples': int(len(timestamps)),
+            "strategy": "entire_series",
+            "segment_index": 0,
+            "segment_start": str(timestamps[0]),
+            "segment_end": str(timestamps[-1]),
+            "segment_samples": int(len(timestamps)),
         }
 
-    diffs = np.diff(seg_t).astype('timedelta64[s]').astype(np.int64)
+    diffs = np.diff(seg_t).astype("timedelta64[s]").astype(np.int64)
     diffs = diffs[diffs > 0]
     if len(diffs) == 0:
-        raise ValueError('Cannot infer sampling rate')
+        raise ValueError("Cannot infer sampling rate")
     dt = float(np.median(diffs))
     if dt <= 0:
-        raise ValueError('Unable to infer positive sampling interval from selected segment.')
+        raise ValueError("Unable to infer positive sampling interval from selected segment.")
     sample_rate_hz = float(1.0 / dt)
-    t = (seg_t - seg_t[0]).astype('timedelta64[s]').astype(np.float64)
-    t_full = (timestamps - timestamps[0]).astype('timedelta64[s]').astype(np.float64)
+    t = (seg_t - seg_t[0]).astype("timedelta64[s]").astype(np.float64)
+    t_full = (timestamps - timestamps[0]).astype("timedelta64[s]").astype(np.float64)
 
     info = station_meta.get(code, StationInfo(code=code))
-    longitude = csv_meta.get('longitude_deg', info.longitude_deg)
-    latitude = csv_meta.get('latitude_deg', info.latitude_deg)
-    declared_units = csv_meta.get('units')
+    longitude = csv_meta.get("longitude_deg", info.longitude_deg)
+    latitude = csv_meta.get("latitude_deg", info.latitude_deg)
+    declared_units = csv_meta.get("units")
     unit_warnings = _unit_validation(values, declared_units)
 
     return {
-        't': t,
-        'gravity_residual': seg_v.astype(np.float64),
-        'timestamps': seg_t,
-        'timestamps_full': timestamps,
-        't_full': t_full,
-        'gravity_residual_full': values.astype(np.float64),
-        'sample_rate_hz': sample_rate_hz,
-        'station_code': code,
-        'longitude_deg': longitude,
-        'latitude_deg': latitude,
-        'units': declared_units or 'gravity residual (dataset units)',
-        'source_path': str(path),
-        'source_kind': source_kind,
-        'gap_report': gap_report,
-        'analysis_segment': segment_report,
-        'record_start': str(timestamps[0]),
-        'record_end': str(timestamps[-1]),
-        'unit_warnings': unit_warnings,
-        'dropped_rows': int(csv_meta.get('dropped_rows', 0)),
+        "t": t,
+        "gravity_residual": seg_v.astype(np.float64),
+        "timestamps": seg_t,
+        "timestamps_full": timestamps,
+        "t_full": t_full,
+        "gravity_residual_full": values.astype(np.float64),
+        "sample_rate_hz": sample_rate_hz,
+        "station_code": code,
+        "longitude_deg": longitude,
+        "latitude_deg": latitude,
+        "units": declared_units or "gravity residual (dataset units)",
+        "source_path": str(path),
+        "source_kind": source_kind,
+        "gap_report": gap_report,
+        "analysis_segment": segment_report,
+        "record_start": str(timestamps[0]),
+        "record_end": str(timestamps[-1]),
+        "unit_warnings": unit_warnings,
+        "dropped_rows": int(csv_meta.get("dropped_rows", 0)),
     }
 
 
@@ -441,16 +488,27 @@ def convert_ggp_to_csv(
         source_path=source_path,
         station_code=station_code,
         metadata_path=metadata_path,
-        segment_strategy='entire_series',
+        segment_strategy="entire_series",
     )
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open('w', encoding='utf-8', newline='') as f:
+    with out.open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(['timestamp', 'gravity_residual', 'station_code', 'longitude', 'latitude', 'units'])
-        lon = '' if data.get('longitude_deg') is None else data.get('longitude_deg')
-        lat = '' if data.get('latitude_deg') is None else data.get('latitude_deg')
-        units = data.get('units', 'gravity residual (dataset units)')
-        for ts, val in zip(data['timestamps_full'], data['gravity_residual_full']):
-            writer.writerow([str(ts).replace('T', ' '), f'{float(val):.12g}', data['station_code'], lon, lat, units])
+        writer.writerow(
+            ["timestamp", "gravity_residual", "station_code", "longitude", "latitude", "units"]
+        )
+        lon = "" if data.get("longitude_deg") is None else data.get("longitude_deg")
+        lat = "" if data.get("latitude_deg") is None else data.get("latitude_deg")
+        units = data.get("units", "gravity residual (dataset units)")
+        for ts, val in zip(data["timestamps_full"], data["gravity_residual_full"], strict=False):
+            writer.writerow(
+                [
+                    str(ts).replace("T", " "),
+                    f"{float(val):.12g}",
+                    data["station_code"],
+                    lon,
+                    lat,
+                    units,
+                ]
+            )
     return out

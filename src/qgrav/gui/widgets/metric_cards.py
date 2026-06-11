@@ -41,6 +41,7 @@ class MetricCards(ttk.Frame):
         self.vars["rmse"].set("—" if rmse is None else f"{rmse:.2f}%")
         allan = metrics.get("allan_improvement_percent_mean")
         self.vars["allan"].set("—" if allan is None else f"{allan:.2f}%")
-        sim = metrics.get("simulation") if isinstance(metrics.get("simulation"), dict) else {}
+        sim_raw = metrics.get("simulation")
+        sim = sim_raw if isinstance(sim_raw, dict) else {}
         peak = sim.get("peak_excited_fraction")
         self.vars["aisim_peak"].set("—" if peak is None else f"{peak:.3f}")

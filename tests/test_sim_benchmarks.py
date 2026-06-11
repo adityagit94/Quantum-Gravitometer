@@ -1,5 +1,6 @@
 from qgrav.sim_ai import phase_mach_zehnder
 
+
 def test_phase_mach_zehnder_simple():
     k_eff = 1.0e7
     a = 9.81

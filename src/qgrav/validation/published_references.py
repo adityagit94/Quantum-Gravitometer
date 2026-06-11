@@ -31,6 +31,7 @@ References
 - Hinderer, J., Crossley, D., Warburton, R., *Gravimetric methods,
   superconducting gravity meters*, in *Treatise on Geophysics* vol. 3 (2007)
 """
+
 from __future__ import annotations
 
 import warnings
@@ -319,34 +320,39 @@ _V1_0_0_VALUE_BUGS: dict[str, tuple[float, float, str]] = {
 #   key: (v1.0.1 value, v1.0.2 value, unit change, reason)
 _V1_0_1_VALUE_BUGS: dict[str, tuple[float, float, str, str]] = {
     "kasevich_chu_1991_first_demo": (
-        3e-6, 3e-6,
+        3e-6,
+        3e-6,
         "m/s^2/sqrt(Hz) -> dimensionless (delta_g/g at 1000 s)",
         "Value unchanged but RE-TYPED: 3e-6 is a dimensionless fractional "
         "resolution after 1000 s integration (sodium atoms), not an ASD. "
         "As an ASD it would be ~9e-4 m/s^2/sqrt(Hz).",
     ),
     "bidel_2018_marine": (
-        1.7e-6, 8e-6,
+        1.7e-6,
+        8e-6,
         "m/s^2/sqrt(Hz) (unchanged dimension, corrected value)",
         "v1.0.1 stored the 0.17 mGal STATIC UNCERTAINTY as a sensitivity. "
         "The true static sensitivity is 0.8 mGal/sqrt(Hz) = 8e-6. The "
         "0.17 mGal figure is now a separate key bidel_2018_marine_static_uncertainty.",
     ),
     "sg_noise_floor": (
-        1e-11, 1.8e-9,
+        1e-11,
+        1.8e-9,
         "m/s^2/sqrt(Hz) (corrected value)",
         "v1.0.1 stored the 1 nGal frequency-domain DETECTABILITY as an ASD. "
         "True SG ASD floor is ~1-3e-9 m/s^2/sqrt(Hz) (LSBB best site 1.8e-9 "
         "at 1 mHz). The 1 nGal figure is now key sg_detectability_nGal.",
     ),
     "nlnm_low_freq": (
-        7e-10, 4e-10,
+        7e-10,
+        4e-10,
         "m/s^2/sqrt(Hz) (corrected value)",
         "v1.0.1 value was ~4 dB high (-183 dB). True NLNM acceleration-ASD "
         "minimum is ~4e-10 m/s^2/sqrt(Hz) (-187.5 dB) at ~30-100 s period.",
     ),
     "mz_visibility": (
-        0.5, 0.5,
+        0.5,
+        0.5,
         "dimensionless (unchanged value, re-sourced)",
         "Value unchanged but the 0.5 could NOT be verified in Peters 2001 "
         "(paywalled figure). Re-labelled as the idealised MZ maximum, not "

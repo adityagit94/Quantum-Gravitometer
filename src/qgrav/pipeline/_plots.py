@@ -1,10 +1,11 @@
 """Plot generation for pipeline runs (thread-safe, OO matplotlib API)."""
+
 from __future__ import annotations
 
 from typing import Any
 
-from matplotlib.figure import Figure
 import numpy as np
+from matplotlib.figure import Figure
 
 from qgrav.metrics import compute_psd
 from qgrav.pipeline._common import RunPaths
@@ -79,11 +80,23 @@ def _make_ifo_plots(
     fig = Figure()
     ax = fig.add_subplot(111)
     if adev_true is not None and len(np.asarray(adev_true["adev"])):
-        ax.loglog(np.asarray(adev_true["taus_s"]), np.asarray(adev_true["adev"]), label="ADEV truth")
+        ax.loglog(
+            np.asarray(adev_true["taus_s"]), np.asarray(adev_true["adev"]), label="ADEV truth"
+        )
     if len(np.asarray(adev_b["adev"])):
-        ax.loglog(np.asarray(adev_b["taus_s"]), np.asarray(adev_b["adev"]), label="ADEV baseline", alpha=0.85)
+        ax.loglog(
+            np.asarray(adev_b["taus_s"]),
+            np.asarray(adev_b["adev"]),
+            label="ADEV baseline",
+            alpha=0.85,
+        )
     if len(np.asarray(adev_i["adev"])):
-        ax.loglog(np.asarray(adev_i["taus_s"]), np.asarray(adev_i["adev"]), label="ADEV improved", alpha=0.85)
+        ax.loglog(
+            np.asarray(adev_i["taus_s"]),
+            np.asarray(adev_i["adev"]),
+            label="ADEV improved",
+            alpha=0.85,
+        )
     ax.set_xlabel("tau (s)")
     ax.set_ylabel("Allan deviation")
     ax.legend()
@@ -105,7 +118,11 @@ def _make_ifo_plots(
         fig.tight_layout()
         fig.savefig(err_path, dpi=160)
 
-    sim_plots = _make_simulation_plots(paths, {"simulation": metrics.get("simulation")}) if have_simulation else []
+    sim_plots = (
+        _make_simulation_plots(paths, {"simulation": metrics.get("simulation")})
+        if have_simulation
+        else []
+    )
     return {
         "raw": str(raw_path.relative_to(paths.run_dir)),
         "displacement": str(disp_path.relative_to(paths.run_dir)),
@@ -176,7 +193,11 @@ def _make_real_gravity_plots(
     fig.tight_layout()
     fig.savefig(allan_path, dpi=160)
 
-    sim_plots = _make_simulation_plots(paths, {"simulation": metrics.get("simulation")}) if have_simulation else []
+    sim_plots = (
+        _make_simulation_plots(paths, {"simulation": metrics.get("simulation")})
+        if have_simulation
+        else []
+    )
     return {
         "raw": str(raw_path.relative_to(paths.run_dir)),
         "displacement": str(hist_path.relative_to(paths.run_dir)),

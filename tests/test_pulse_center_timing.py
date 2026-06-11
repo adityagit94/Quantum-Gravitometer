@@ -14,26 +14,30 @@ Two investigations from v1.2.0, captured as regression tests:
    needed wide tolerances at N=300, and why v1.2 raised them to N=4000 (floor
    below the injected budget).
 """
-from __future__ import annotations
 
-import math
+from __future__ import annotations
 
 import numpy as np
 import pytest
 
+from qgrav.physics.constants import WAVELENGTH_RB87_D2
+from qgrav.sim_ai import aisim_adapter as A
 from qgrav.sim_ai._aisim_overrides import (
     ChirpedWavevectors,
     IntegratedPhaseSpatialSuperpositionTransitionPropagator,
 )
-from qgrav.sim_ai import aisim_adapter as A
-from qgrav.physics.constants import WAVELENGTH_RB87_D2
 
 
 def _ensemble(n_atoms=300, seed=1):
     _, atoms, _, _, _ = A._create_detected_ensemble(
-        n_atoms=n_atoms, seed=seed, cloud_radius_m=3e-3,
-        temp_xy_K=2.5e-6, temp_z_K=100e-9,
-        detector_time_s=778e-3, detector_radius_m=5e-3, multiport=True,
+        n_atoms=n_atoms,
+        seed=seed,
+        cloud_radius_m=3e-3,
+        temp_xy_K=2.5e-6,
+        temp_z_K=100e-9,
+        detector_time_s=778e-3,
+        detector_radius_m=5e-3,
+        multiport=True,
     )
     return atoms
 
@@ -43,17 +47,20 @@ class TestPulseCenterFlag:
 
     def test_default_is_pulse_start(self):
         prop = IntegratedPhaseSpatialSuperpositionTransitionPropagator(
-            23e-6, intensity_profile=A._gaussian_beam(beam_radius_m=0.015,
-                                                      center_rabi_freq_hz=12.5e3),
-            n_pulses=3, n_pulse=1,
+            23e-6,
+            intensity_profile=A._gaussian_beam(beam_radius_m=0.015, center_rabi_freq_hz=12.5e3),
+            n_pulses=3,
+            n_pulse=1,
         )
         assert prop.pulse_center_timing is False
 
     def test_flag_can_be_enabled(self):
         prop = IntegratedPhaseSpatialSuperpositionTransitionPropagator(
-            23e-6, intensity_profile=A._gaussian_beam(beam_radius_m=0.015,
-                                                      center_rabi_freq_hz=12.5e3),
-            n_pulses=3, n_pulse=1, pulse_center_timing=True,
+            23e-6,
+            intensity_profile=A._gaussian_beam(beam_radius_m=0.015, center_rabi_freq_hz=12.5e3),
+            n_pulses=3,
+            n_pulse=1,
+            pulse_center_timing=True,
         )
         assert prop.pulse_center_timing is True
 
@@ -76,8 +83,13 @@ class TestPulseCenterFlag:
 
         def bs2_matrix(pulse_center):
             prop = IntegratedPhaseSpatialSuperpositionTransitionPropagator(
-                tau, intensity_profile=beam, n_pulses=3, n_pulse=3,
-                wave_vectors=wv, phase_scan=0.0, pulse_center_timing=pulse_center,
+                tau,
+                intensity_profile=beam,
+                n_pulses=3,
+                n_pulse=3,
+                wave_vectors=wv,
+                phase_scan=0.0,
+                pulse_center_timing=pulse_center,
             )
             # Advance atoms to the bs2 time so atoms.time reflects a late pulse.
             a = A.GravityFreePropagator(2 * T, g_m_s2=gc).propagate(atoms)
@@ -103,10 +115,15 @@ class TestFiniteEnsembleFloor:
 
         def floor(n_atoms):
             r = run_aisim_multi_drop_cycle(
-                n_drops=60, seed=2016, n_atoms=n_atoms,
-                interferometer_time_s=0.26, cycle_time_s=1.5,
-                gravity_propagation=True, detection_noise_enabled=False,
-                raman_phase_noise_rad=0.0, fit_visibility=True,
+                n_drops=60,
+                seed=2016,
+                n_atoms=n_atoms,
+                interferometer_time_s=0.26,
+                cycle_time_s=1.5,
+                gravity_propagation=True,
+                detection_noise_enabled=False,
+                raman_phase_noise_rad=0.0,
+                fit_visibility=True,
             )
             return float(r["std_g_m_s2"])
 

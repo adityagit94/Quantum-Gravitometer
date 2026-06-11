@@ -25,15 +25,16 @@ Rabi result
 
 Both qgrav's matrix and QuTiP's integrator must reproduce this.
 """
+
 from __future__ import annotations
 
 import numpy as np
 
-from qgrav.vendor.aisim import AtomicEnsemble, IntensityProfile
 from qgrav.sim_ai._aisim_overrides import (
     ChirpedWavevectors,
     IntegratedPhaseTwoLevelTransitionPropagator,
 )
+from qgrav.vendor.aisim import AtomicEnsemble, IntensityProfile
 
 
 def analytic_rabi_population(omega_eff: float, delta: float, tau: float) -> float:
@@ -61,7 +62,9 @@ def aisim_rabi_population(omega_eff: float, delta: float, tau: float) -> float:
     beam = IntensityProfile(r_profile=1e6, center_rabi_freq=float(omega_eff))
     wv = ChirpedWavevectors(k1=k_eff / 2.0, k2=-k_eff / 2.0)  # k1 - k2 = k_eff
     prop = IntegratedPhaseTwoLevelTransitionPropagator(
-        float(tau), intensity_profile=beam, wave_vectors=wv,
+        float(tau),
+        intensity_profile=beam,
+        wave_vectors=wv,
     )
     out = prop.propagate(atoms)
     return float(out.state_occupation(1)[0])
@@ -81,7 +84,9 @@ def qutip_rabi_population(omega_eff: float, delta: float, tau: float) -> float:
 
 
 def compare_rabi_grid(
-    omega_effs=None, deltas=None, taus=None,
+    omega_effs=None,
+    deltas=None,
+    taus=None,
 ) -> dict[str, float]:
     """Compare qgrav vs QuTiP vs the closed form over a grid of (Omega, delta, tau).
 
@@ -113,8 +118,11 @@ def compare_rabi_grid(
 
 
 def qutip_spontaneous_emission_loss(
-    *, omega_eff: float, single_photon_detuning_hz: float,
-    tau: float, excited_state_lifetime_s: float = 26.24e-9,
+    *,
+    omega_eff: float,
+    single_photon_detuning_hz: float,
+    tau: float,
+    excited_state_lifetime_s: float = 26.24e-9,
 ) -> float:
     """Spontaneous-emission loss over a pulse, via a 3-level Lindblad mesolve.
 
@@ -141,6 +149,5 @@ def qutip_spontaneous_emission_loss(
     c_ops = [np.sqrt(gamma_eff) * lost * e.dag()]
     psi0 = e  # start in the (admixed) excited state — worst case for SE loss
     p_lost = lost * lost.dag()
-    res = qt.mesolve(H, psi0, np.linspace(0.0, float(tau), 50), c_ops=c_ops,
-                     e_ops=[p_lost])
+    res = qt.mesolve(H, psi0, np.linspace(0.0, float(tau), 50), c_ops=c_ops, e_ops=[p_lost])
     return float(res.expect[0][-1])

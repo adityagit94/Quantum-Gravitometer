@@ -1,7 +1,7 @@
 """Tests for qgrav CLI commands (info, validate-data, run --dry-run)."""
+
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 from unittest import mock
@@ -14,11 +14,11 @@ from qgrav.config import find_project_root
 def _run_cli(*argv: str) -> str:
     """Run the CLI with the given args and capture stdout."""
     import io
+
     from qgrav.cli import main
 
     buf = io.StringIO()
-    with mock.patch.object(sys, "argv", ["qgrav", *argv]), \
-         mock.patch("sys.stdout", buf):
+    with mock.patch.object(sys, "argv", ["qgrav", *argv]), mock.patch("sys.stdout", buf):
         main()
     return buf.getvalue()
 

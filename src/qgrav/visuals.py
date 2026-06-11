@@ -4,15 +4,15 @@ import json
 import logging
 import os
 from pathlib import Path
+from pathlib import Path as _PathForMPL
 from typing import Any
 
-from pathlib import Path as _PathForMPL
 _MPLDIR = _PathForMPL.home() / ".qgrav_mpl"
 _MPLDIR.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("MPLCONFIGDIR", str(_MPLDIR))
 
-from matplotlib.figure import Figure
 import numpy as np
+from matplotlib.figure import Figure
 
 from qgrav.metrics import compute_psd
 from qgrav.metrics.allan import identify_noise_type
@@ -42,7 +42,11 @@ def _annotate_noise_type(ax: Any, taus: np.ndarray, adev: np.ndarray) -> None:
 def load_run_bundle(run_dir: Path) -> dict[str, Any]:
     run_dir = Path(run_dir)
     metrics = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
-    summary = (run_dir / "SUMMARY.md").read_text(encoding="utf-8") if (run_dir / "SUMMARY.md").exists() else ""
+    summary = (
+        (run_dir / "SUMMARY.md").read_text(encoding="utf-8")
+        if (run_dir / "SUMMARY.md").exists()
+        else ""
+    )
     data = np.load(run_dir / "data.npz", allow_pickle=False)
     arrays = {key: data[key] for key in data.files}
     return {"run_dir": run_dir, "metrics": metrics, "summary": summary, "arrays": arrays}
@@ -76,7 +80,9 @@ def _new_fig(width: float = 9.2, height: float = 6.2, *, constrained: bool = Fal
     return Figure(figsize=(width, height), dpi=110, constrained_layout=constrained)
 
 
-def _plot_psd(ax, x: np.ndarray, fs: float, label: str, psd_method: str, nperseg: int, noverlap: int) -> None:
+def _plot_psd(
+    ax, x: np.ndarray, fs: float, label: str, psd_method: str, nperseg: int, noverlap: int
+) -> None:
     psd = compute_psd(x, fs, method=psd_method, nperseg=nperseg, noverlap=noverlap)
     if len(psd["f_hz"]) > 1:
         ax.loglog(psd["f_hz"][1:], psd["psd"][1:], label=label)
@@ -184,8 +190,14 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
             ax.set_ylabel("gravity residual")
             ax.set_title("Raw vs corrected gravity residual")
             ax.legend()
-        elif isinstance(sim_specs, list) and any(isinstance(spec, dict) and str(spec.get("name")) == kind for spec in sim_specs):
-            spec = next(spec for spec in sim_specs if isinstance(spec, dict) and str(spec.get("name")) == kind)
+        elif isinstance(sim_specs, list) and any(
+            isinstance(spec, dict) and str(spec.get("name")) == kind for spec in sim_specs
+        ):
+            spec = next(
+                spec
+                for spec in sim_specs
+                if isinstance(spec, dict) and str(spec.get("name")) == kind
+            )
             _plot_sim_from_spec(ax, arrays, spec)
         else:
             raise ValueError(f"Unsupported plot kind: {kind}")
@@ -284,8 +296,12 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
         ax.set_ylabel("count")
         ax.set_title("Estimator error histogram")
         ax.legend()
-    elif isinstance(sim_specs, list) and any(isinstance(spec, dict) and str(spec.get("name")) == kind for spec in sim_specs):
-        spec = next(spec for spec in sim_specs if isinstance(spec, dict) and str(spec.get("name")) == kind)
+    elif isinstance(sim_specs, list) and any(
+        isinstance(spec, dict) and str(spec.get("name")) == kind for spec in sim_specs
+    ):
+        spec = next(
+            spec for spec in sim_specs if isinstance(spec, dict) and str(spec.get("name")) == kind
+        )
         _plot_sim_from_spec(ax, arrays, spec)
     else:
         raise ValueError(f"Unsupported plot kind: {kind}")

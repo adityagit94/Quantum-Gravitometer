@@ -1,11 +1,11 @@
 """Tests for GravityFreePropagator — Phase 1 of v1.0 upgrade."""
+
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
-from qgrav.vendor.aisim import AtomicEnsemble
 from qgrav.sim_ai import GravityFreePropagator  # v1.1: moved to overrides (Phase 12)
+from qgrav.vendor.aisim import AtomicEnsemble
 
 
 def _single_atom(x=0.0, y=0.0, z=0.0, vx=0.0, vy=0.0, vz=0.0, state=None):
@@ -17,6 +17,7 @@ def _single_atom(x=0.0, y=0.0, z=0.0, vx=0.0, vy=0.0, vz=0.0, state=None):
 
 # --- Phase 1.3 tests ---
 
+
 class TestGravityPositionUpdate:
     """Test exact ballistic kinematics under uniform gravity."""
 
@@ -26,7 +27,7 @@ class TestGravityPositionUpdate:
         prop = GravityFreePropagator(time_delta=0.1, g_m_s2=9.81)
         result = prop.propagate(atoms)
         expected_z = -0.5 * 9.81 * 0.1**2  # -0.04905
-        expected_vz = -9.81 * 0.1           # -0.981
+        expected_vz = -9.81 * 0.1  # -0.981
         np.testing.assert_allclose(result.position[0, 2], expected_z, atol=1e-12)
         np.testing.assert_allclose(result.velocity[0, 2], expected_vz, atol=1e-12)
 

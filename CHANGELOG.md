@@ -2,6 +2,17 @@
 
 ## Unreleased - GUI integration
 
+### CI
+- The test matrix now includes Python 3.13 on both ubuntu and windows,
+  backing the `Programming Language :: Python :: 3.13` classifier.
+- New `lint` job enforces ruff, black, and mypy on every push/PR (ruff/black
+  pinned to the pre-commit versions; vendored code excluded from all three).
+  The whole non-vendor tree was reformatted once with black 24.10 and the
+  ruff findings fixed (dead locals, `raise ... from`, isinstance unions,
+  import sorting); `[tool.mypy]` config added and the source tree is
+  mypy-clean (62 files), with scoped TODO(typing) overrides for the
+  config-dispatcher and pipeline modules.
+
 Brings the full v1.0-v1.3 simulation/validation engine into the desktop
 workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 regressions.**
 

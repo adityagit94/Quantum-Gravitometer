@@ -15,15 +15,17 @@ History:
     entries (nlnm_low_freq, mz_visibility).  See ``_V1_0_1_VALUE_BUGS`` and
     ``docs/research/RESEARCH_REFERENCE_AUDIT.md``.
 """
+
 from __future__ import annotations
 
 import math
+
 import pytest
 
 from qgrav.validation.published_references import (
-    REFERENCES,
     _V1_0_0_VALUE_BUGS,
     _V1_0_1_VALUE_BUGS,
+    REFERENCES,
     get_reference,
 )
 
@@ -121,31 +123,34 @@ class TestUnitConversionSanityChecks:
     """Cross-check that each reference value matches its description in
     obvious units. Catches accidental key/value mix-ups in future edits."""
 
-    @pytest.mark.parametrize("key,expected_value,human_unit", [
-        # micro-Gal -> m/s^2/sqrt(Hz)
-        ("hu_2013_short_term_noise",        4.2e-8, "4.2 microGal/sqrt(Hz)"),
-        ("freier_2016_short_term_noise",    9.6e-8, "96 nm/s^2/sqrt(Hz)"),
-        ("menoret_2018_short_term_noise",   7.5e-7, "750 nm/s^2/sqrt(Hz)"),
-        # nm/s^2 long-term
-        ("freier_2016_long_term_stability", 5e-10, "0.5 nm/s^2"),
-        ("menoret_2018_long_term_stability", 1e-8, "1 microGal = 10 nm/s^2"),
-        # Misc
-        ("freier_2016_accuracy",            3.9e-8, "39 nm/s^2"),
-        ("peters_2001_accuracy",            3e-8,   "3 microGal"),
-        # v1.0.2 audit corrections (docs/research/RESEARCH_REFERENCE_AUDIT.md):
-        ("bidel_2018_marine",               8e-6,   "0.8 mGal/sqrt(Hz) static sensitivity"),
-        ("bidel_2018_marine_static_uncertainty", 1.7e-6, "0.17 mGal static uncertainty"),
-        ("kasevich_chu_1991_first_demo",    3e-6,   "dimensionless delta_g/g at 1000 s"),
-        ("nlnm_low_freq",                   4e-10,  "NLNM ASD minimum -187.5 dB"),
-        ("sg_noise_floor",                  1.8e-9, "LSBB SG ASD floor at 1 mHz"),
-        ("sg_detectability_nGal",           1e-11,  "1 nGal freq-domain detectability"),
-        ("mz_visibility",                   0.5,    "idealised MZ maximum"),
-    ])
+    @pytest.mark.parametrize(
+        "key,expected_value,human_unit",
+        [
+            # micro-Gal -> m/s^2/sqrt(Hz)
+            ("hu_2013_short_term_noise", 4.2e-8, "4.2 microGal/sqrt(Hz)"),
+            ("freier_2016_short_term_noise", 9.6e-8, "96 nm/s^2/sqrt(Hz)"),
+            ("menoret_2018_short_term_noise", 7.5e-7, "750 nm/s^2/sqrt(Hz)"),
+            # nm/s^2 long-term
+            ("freier_2016_long_term_stability", 5e-10, "0.5 nm/s^2"),
+            ("menoret_2018_long_term_stability", 1e-8, "1 microGal = 10 nm/s^2"),
+            # Misc
+            ("freier_2016_accuracy", 3.9e-8, "39 nm/s^2"),
+            ("peters_2001_accuracy", 3e-8, "3 microGal"),
+            # v1.0.2 audit corrections (docs/research/RESEARCH_REFERENCE_AUDIT.md):
+            ("bidel_2018_marine", 8e-6, "0.8 mGal/sqrt(Hz) static sensitivity"),
+            ("bidel_2018_marine_static_uncertainty", 1.7e-6, "0.17 mGal static uncertainty"),
+            ("kasevich_chu_1991_first_demo", 3e-6, "dimensionless delta_g/g at 1000 s"),
+            ("nlnm_low_freq", 4e-10, "NLNM ASD minimum -187.5 dB"),
+            ("sg_noise_floor", 1.8e-9, "LSBB SG ASD floor at 1 mHz"),
+            ("sg_detectability_nGal", 1e-11, "1 nGal freq-domain detectability"),
+            ("mz_visibility", 0.5, "idealised MZ maximum"),
+        ],
+    )
     def test_value_matches_human_description(self, key, expected_value, human_unit):
         ref = REFERENCES[key]
-        assert math.isclose(ref.value, expected_value, rel_tol=1e-12), (
-            f"{key}: expected {expected_value!r} ({human_unit}); got {ref.value!r}"
-        )
+        assert math.isclose(
+            ref.value, expected_value, rel_tol=1e-12
+        ), f"{key}: expected {expected_value!r} ({human_unit}); got {ref.value!r}"
 
 
 class TestRegistryStructure:
@@ -224,8 +229,13 @@ class TestV102AuditCorrections:
 
     def test_all_v102_bugs_documented(self):
         """Every audited key must remain documented in _V1_0_1_VALUE_BUGS."""
-        for key in ("kasevich_chu_1991_first_demo", "bidel_2018_marine",
-                    "sg_noise_floor", "nlnm_low_freq", "mz_visibility"):
+        for key in (
+            "kasevich_chu_1991_first_demo",
+            "bidel_2018_marine",
+            "sg_noise_floor",
+            "nlnm_low_freq",
+            "mz_visibility",
+        ):
             assert key in _V1_0_1_VALUE_BUGS, f"{key} missing from audit log"
             old, new, unit_change, reason = _V1_0_1_VALUE_BUGS[key]
             assert reason, f"{key}: empty reason"

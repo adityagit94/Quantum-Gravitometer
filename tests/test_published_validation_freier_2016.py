@@ -14,11 +14,11 @@ Validates that qgrav reproduces the Freier 2016 short-term sensitivity
 See ``docs/research/RESEARCH_FREIER_2016.md`` for parameter provenance and
 ``src/qgrav/validation/freier_2016_setup.py`` for the curated values.
 """
+
 from __future__ import annotations
 
 import math
 
-import numpy as np
 import pytest
 
 from qgrav.sim_ai.aisim_adapter import run_aisim_multi_drop_cycle
@@ -38,8 +38,8 @@ class TestFreier2016Parameters:
         p = FREIER_2016_PARAMS
         assert p["interferometer_time_s"] == 0.260
         assert p["cycle_time_s"] == 1.5
-        assert p["tau_pi_half_s"] == 17e-6           # NOT 23e-6 (research F3)
-        assert p["single_photon_detuning_hz"] == -700e6   # NOT "few GHz"
+        assert p["tau_pi_half_s"] == 17e-6  # NOT 23e-6 (research F3)
+        assert p["single_photon_detuning_hz"] == -700e6  # NOT "few GHz"
         assert p["beam_radius_m"] == 0.015
         assert p["n_detected_per_drop"] == 5e5
 
@@ -92,7 +92,10 @@ class TestFreier2016Simulation:
         matrix ops are vectorised over atoms.)
         """
         kwargs = multi_drop_kwargs(
-            n_drops=100, seed=2016, n_atoms=4000, gravity_propagation=True,
+            n_drops=100,
+            seed=2016,
+            n_atoms=4000,
+            gravity_propagation=True,
         )
         result = run_aisim_multi_drop_cycle(**kwargs)
 
@@ -113,7 +116,10 @@ class TestFreier2016Simulation:
         # noise (~100 nm/s^2), 6 drops gives a mean uncertainty ~40 nm/s^2; we
         # need a multi-microGal absolute tolerance just for the smoke-test mean.
         kwargs = multi_drop_kwargs(
-            n_drops=20, seed=2016, n_atoms=200, gravity_propagation=True,
+            n_drops=20,
+            seed=2016,
+            n_atoms=200,
+            gravity_propagation=True,
         )
         result = run_aisim_multi_drop_cycle(**kwargs)
         assert result["gravity_propagation"] is True

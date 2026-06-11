@@ -11,7 +11,7 @@ def load_real_gravity(
     source_path: str | Path,
     station_code: str | None = None,
     metadata_path: str | Path | None = None,
-    segment_strategy: str = 'longest_contiguous',
+    segment_strategy: str = "longest_contiguous",
     gap_tolerance_fraction: float = 0.1,
 ) -> dict[str, Any]:
     return load_real_gravity_dataset(

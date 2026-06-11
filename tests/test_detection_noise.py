@@ -1,8 +1,8 @@
 """Tests for detection noise & spontaneous emission models (Phase 5)."""
+
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from qgrav.physics.noise_models import (
     add_detection_noise,
@@ -78,10 +78,12 @@ class TestSpontaneousEmissionOrderOfMagnitude:
             excited_state_lifetime_s=26.24e-9,
         )
         p1 = spontaneous_emission_loss_probability(
-            single_photon_detuning_hz=1e9, **common,
+            single_photon_detuning_hz=1e9,
+            **common,
         )
         p2 = spontaneous_emission_loss_probability(
-            single_photon_detuning_hz=2e9, **common,
+            single_photon_detuning_hz=2e9,
+            **common,
         )
         np.testing.assert_allclose(p1 / p2, 4.0, rtol=1e-10)
 
@@ -93,9 +95,11 @@ class TestSpontaneousEmissionOrderOfMagnitude:
             excited_state_lifetime_s=26.24e-9,
         )
         p1 = spontaneous_emission_loss_probability(
-            pulse_duration_s=25e-6, **common,
+            pulse_duration_s=25e-6,
+            **common,
         )
         p2 = spontaneous_emission_loss_probability(
-            pulse_duration_s=50e-6, **common,
+            pulse_duration_s=50e-6,
+            **common,
         )
         np.testing.assert_allclose(p2 / p1, 2.0, rtol=1e-10)

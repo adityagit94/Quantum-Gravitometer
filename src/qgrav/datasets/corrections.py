@@ -16,10 +16,10 @@ References
 - Wenzel, H.-G., *The nanogal software: Earth tide data processing package
   ETERNA 3.30*, Bull. Inf. Marees Terrestres 124, 9425 (1996).
 """
+
 from __future__ import annotations
 
 import logging
-import warnings
 from typing import Any
 
 import numpy as np
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 def _try_import_pygtide():
     """Best-effort import of PyGTide. Returns the module or ``None``."""
     try:
-        import pygtide  # type: ignore
+        import pygtide
 
         return pygtide
     except Exception:
@@ -132,13 +132,15 @@ def apply_tide_correction(
             used_backend = "internal_hw95"
         else:
             tide = _compute_tide_pygtide(
-                pygtide, t,
-                latitude_deg=latitude_deg, longitude_deg=longitude_deg,
+                pygtide,
+                t,
+                latitude_deg=latitude_deg,
+                longitude_deg=longitude_deg,
                 height_m=height_m,
             )
             used_backend = "pygtide"
             corrected = v - tide
-            rms_ugal = float(np.sqrt(np.mean(tide ** 2)) * 1e8)
+            rms_ugal = float(np.sqrt(np.mean(tide**2)) * 1e8)
             return {
                 "corrected": corrected,
                 "tide_subtracted": tide,
@@ -147,12 +149,10 @@ def apply_tide_correction(
             }
 
     # internal_hw95 path
-    tide = gravity_tide_m_s2(
-        t, latitude_deg=latitude_deg, longitude_deg=longitude_deg
-    )
+    tide = gravity_tide_m_s2(t, latitude_deg=latitude_deg, longitude_deg=longitude_deg)
     corrected = v - tide
     if tide.size > 0:
-        rms_ugal = float(np.sqrt(np.mean(tide ** 2)) * 1e8)
+        rms_ugal = float(np.sqrt(np.mean(tide**2)) * 1e8)
     else:
         rms_ugal = float("nan")
     return {
@@ -188,7 +188,6 @@ def _compute_tide_pygtide(
     t1 = float(t[-1])
     duration_s = max(t1 - t0, 60.0)
     samples_per = 60.0  # seconds per sample
-    n = int(np.ceil(duration_s / samples_per)) + 2
     start_dt = _dt.datetime.utcfromtimestamp(t0)
     pt.predict(
         latitude=latitude_deg,
@@ -256,7 +255,9 @@ def apply_pressure_correction(
     p = np.asarray(pressure, dtype=np.float64)
     if g.shape != p.shape or g.shape != t.shape:
         raise ValueError("timestamps, gravity, and pressure must share shape")
-    p_ref = float(reference_pressure_hpa) if reference_pressure_hpa is not None else float(np.mean(p))
+    p_ref = (
+        float(reference_pressure_hpa) if reference_pressure_hpa is not None else float(np.mean(p))
+    )
     admittance_m_s2_per_hpa = admittance_nm_s2_per_hpa * 1e-9
     correction = admittance_m_s2_per_hpa * (p - p_ref)
     return g - correction

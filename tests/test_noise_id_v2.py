@@ -1,4 +1,5 @@
 """Tests for the lag-1 autocorrelation noise-type identification."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -59,10 +60,12 @@ def test_pipeline_stores_acf_with_legacy_slope():
     """Sanity check: the pipeline structure stores ACF method and legacy slope
     side by side. (Run a tiny virtual-bench pipeline to verify the output
     schema.)"""
-    import tempfile
     import json
-    import yaml
+    import tempfile
     from pathlib import Path
+
+    import yaml
+
     from qgrav.pipeline import run_pipeline
 
     cfg = {
@@ -73,6 +76,7 @@ def test_pipeline_stores_acf_with_legacy_slope():
     # This path is set up by other tests if data is bundled. We use it via
     # the find_project_root helper.
     from qgrav.config import find_project_root
+
     data_dir = find_project_root(Path(__file__)) / "data" / "raw" / "sg_sample"
     if not data_dir.exists():
         pytest.skip("sample data not present")

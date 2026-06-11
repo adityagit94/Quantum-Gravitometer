@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from functools import partial
 import logging
+from functools import partial
 from typing import Any
 
 import numpy as np
@@ -13,7 +13,6 @@ from qgrav.physics import (
     equivalent_gravity_error_m_s2,
     gravity_phase_rad,
     gravity_sweep_axis,
-    normalized_differential_signal,
     phase_scan_axis,
     port_differential_summary,
     source_summary_rows,
@@ -42,12 +41,14 @@ def is_aisim_available() -> bool:
 
 def _import_aisim():
     try:
-        from qgrav.vendor import aisim as ais  # type: ignore
+        from qgrav.vendor import aisim as ais
+
         return ais
     except Exception:
         logger.exception("Vendored AISim import failed; trying external package")
         try:
-            import aisim as ais  # type: ignore
+            import aisim as ais
+
             return ais
         except Exception as exc:
             raise RuntimeError(
@@ -215,7 +216,9 @@ def _run_mach_zehnder_sequence(
 
     port2 = float(np.mean(atoms.state_occupation(2)))
     port3 = float(np.mean(atoms.state_occupation(3)))
-    summary = port_differential_summary(np.array([port2], dtype=np.float64), np.array([port3], dtype=np.float64))
+    summary = port_differential_summary(
+        np.array([port2], dtype=np.float64), np.array([port3], dtype=np.float64)
+    )
     return {
         "port_2": port2,
         "port_3": port3,
@@ -265,7 +268,7 @@ def _run_mach_zehnder_sequence_with_gravity(
     standard atom-interferometry result ``k_eff*(g-g_chirp)*T**2`` for the
     gravity phase, matching the analytical formula used in the hybrid mode.
     """
-    ais = _import_aisim()
+    _import_aisim()  # fail fast if the vendored AISim cannot be imported
     T = float(interferometer_time_s)
 
     # Adjust phase_scan by the calibration offset so the simulated and
@@ -326,7 +329,9 @@ def _run_mach_zehnder_sequence_with_gravity(
 
     port2 = float(np.mean(atoms.state_occupation(2)))
     port3 = float(np.mean(atoms.state_occupation(3)))
-    summary = port_differential_summary(np.array([port2], dtype=np.float64), np.array([port3], dtype=np.float64))
+    summary = port_differential_summary(
+        np.array([port2], dtype=np.float64), np.array([port3], dtype=np.float64)
+    )
     return {
         "port_2": port2,
         "port_3": port3,
@@ -496,8 +501,15 @@ def _fit_sinusoid(x_rad: np.ndarray, y: np.ndarray) -> dict[str, float]:
     }
 
 
-def _hybrid_gravity_phase_rad(*, g_m_s2: np.ndarray, k_eff_rad_per_m: float, T_s: float, phase_bias_rad: float) -> np.ndarray:
-    return gravity_phase_rad(g_m_s2, k_eff_rad_per_m=k_eff_rad_per_m, interferometer_time_s=T_s, phase_bias_rad=phase_bias_rad)
+def _hybrid_gravity_phase_rad(
+    *, g_m_s2: np.ndarray, k_eff_rad_per_m: float, T_s: float, phase_bias_rad: float
+) -> np.ndarray:
+    return gravity_phase_rad(
+        g_m_s2,
+        k_eff_rad_per_m=k_eff_rad_per_m,
+        interferometer_time_s=T_s,
+        phase_bias_rad=phase_bias_rad,
+    )
 
 
 def _vibration_phase_sinusoid(
@@ -580,7 +592,7 @@ def _pack_result(
     if isinstance(summary_rows, dict):
         summary_rows.update(source_summary_rows(source_cfg, detected_count))
         summary_rows["Truth checks passed"] = f"{truth['passed_count']}/{truth['total_count']}"
-        summary_rows["All truth checks passed"] = bool(truth['all_passed'])
+        summary_rows["All truth checks passed"] = bool(truth["all_passed"])
         summary_rows["Study scope"] = study_scope
         summary_rows["Study scope category"] = category
     return result
@@ -623,8 +635,12 @@ def run_aisim_rabi_scan(
     )
 
     atoms_ready = ais.FreePropagator(float(pre_pulse_delay_s)).propagate(detected_atoms)
-    intensity_profile = _gaussian_beam(beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz)
-    wave_vectors = _wave_vectors(wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m)
+    intensity_profile = _gaussian_beam(
+        beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz
+    )
+    wave_vectors = _wave_vectors(
+        wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m
+    )
     propagator = ais.TwoLevelTransitionPropagator(
         float(tau_step_s), intensity_profile=intensity_profile, wave_vectors=wave_vectors
     )
@@ -749,8 +765,12 @@ def run_aisim_mach_zehnder_phase_scan(
         detector_radius_m=detector_radius_m,
         multiport=True,
     )
-    intensity_profile = _gaussian_beam(beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz)
-    wave_vectors = _wave_vectors(wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m)
+    intensity_profile = _gaussian_beam(
+        beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz
+    )
+    wave_vectors = _wave_vectors(
+        wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m
+    )
     k_eff = float(wave_vectors.k1 - wave_vectors.k2)
 
     sequence = MachZehnderPulseSequence(
@@ -783,6 +803,7 @@ def run_aisim_mach_zehnder_phase_scan(
     peak_idx = int(np.argmax(port3))
 
     from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+
     _visibility = float(fit.get("visibility", 1.0))
     _contrast = max(min(_visibility, 1.0), 0.01)
     _sens = shot_noise_sensitivity_m_s2_per_sqrt_hz(
@@ -853,7 +874,11 @@ def run_aisim_mach_zehnder_phase_scan(
                 "y_label": "signal",
                 "series": [
                     {"key": "differential_signal", "label": "port3 - port2", "kind": "line"},
-                    {"key": "normalized_differential_signal", "label": "normalized diff", "kind": "line"},
+                    {
+                        "key": "normalized_differential_signal",
+                        "label": "normalized diff",
+                        "kind": "line",
+                    },
                 ],
             },
         ],
@@ -927,9 +952,13 @@ def run_aisim_gravity_sweep(
         detector_radius_m=detector_radius_m,
         multiport=True,
     )
-    intensity_profile = _gaussian_beam(beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz)
+    intensity_profile = _gaussian_beam(
+        beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz
+    )
     # Compute k_eff from default or custom wave vectors
-    wv_tmp = _wave_vectors(wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m)
+    wv_tmp = _wave_vectors(
+        wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m
+    )
     k_eff = float(wv_tmp.k1 - wv_tmp.k2)
 
     if gravity_propagation:
@@ -954,13 +983,18 @@ def run_aisim_gravity_sweep(
         if phase_bias_rad is None:
             phase_bias_rad = 0.0
         if lock_to_midfringe:
-            phase_bias_rad = float(np.pi / 2.0 - k_eff * float(gravity_center_m_s2) * (float(interferometer_time_s) ** 2))
+            phase_bias_rad = float(
+                np.pi / 2.0
+                - k_eff * float(gravity_center_m_s2) * (float(interferometer_time_s) ** 2)
+            )
 
     sequence = MachZehnderPulseSequence(
         tau_pi_half_s=float(tau_pi_half_s),
         interferometer_time_s=float(interferometer_time_s),
     )
-    g_values = gravity_sweep_axis(float(gravity_center_m_s2), float(gravity_span_m_s2), int(n_gravity_points))
+    g_values = gravity_sweep_axis(
+        float(gravity_center_m_s2), float(gravity_span_m_s2), int(n_gravity_points)
+    )
 
     if not gravity_propagation:
         total_phase = _hybrid_gravity_phase_rad(
@@ -1029,11 +1063,15 @@ def run_aisim_gravity_sweep(
         norm_diff[i] = out["normalized_differential_signal"]
     center_idx = len(g_values) // 2
     if 0 < center_idx < len(g_values) - 1:
-        slope = float((norm_diff[center_idx + 1] - norm_diff[center_idx - 1]) / (g_values[center_idx + 1] - g_values[center_idx - 1]))
+        slope = float(
+            (norm_diff[center_idx + 1] - norm_diff[center_idx - 1])
+            / (g_values[center_idx + 1] - g_values[center_idx - 1])
+        )
     else:
         slope = float("nan")
 
     from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+
     _sens_gs = shot_noise_sensitivity_m_s2_per_sqrt_hz(
         k_eff_rad_per_m=k_eff,
         interferometer_time_s=float(interferometer_time_s),
@@ -1043,7 +1081,8 @@ def run_aisim_gravity_sweep(
     )
 
     _study_type = (
-        "fully_simulated_gravity_propagation" if gravity_propagation
+        "fully_simulated_gravity_propagation"
+        if gravity_propagation
         else "hybrid_aisim_plus_analytic_gravity_phase"
     )
     result = {
@@ -1072,10 +1111,12 @@ def run_aisim_gravity_sweep(
         # analytical cross-check (the calibration removes the residual
         # numerically; this number predicts what the residual *should* be from
         # finite-pulse-duration physics).
-        "bertoldi_finite_tau_scale_factor": float(bertoldi_finite_tau_scale_factor(
-            tau_pi_half_s=float(tau_pi_half_s),
-            interferometer_time_s=float(interferometer_time_s),
-        )),
+        "bertoldi_finite_tau_scale_factor": float(
+            bertoldi_finite_tau_scale_factor(
+                tau_pi_half_s=float(tau_pi_half_s),
+                interferometer_time_s=float(interferometer_time_s),
+            )
+        ),
         "empirical_phase_offset_rad": float(sim_phase_offset),
         "shot_noise_sensitivity_m_s2_per_sqrt_hz": _sens_gs,
         "shot_noise_sensitivity_ugal_per_sqrt_hz": _sens_gs * 1e8,
@@ -1105,7 +1146,11 @@ def run_aisim_gravity_sweep(
                 "series": [
                     {"key": "output_port_2", "label": "port 2", "kind": "line"},
                     {"key": "output_port_3", "label": "port 3", "kind": "line"},
-                    {"key": "normalized_differential_signal", "label": "normalized diff", "kind": "line"},
+                    {
+                        "key": "normalized_differential_signal",
+                        "label": "normalized diff",
+                        "kind": "line",
+                    },
                 ],
             },
             {
@@ -1206,8 +1251,12 @@ def run_aisim_vibration_sensitivity_sweep(
         detector_radius_m=detector_radius_m,
         multiport=True,
     )
-    intensity_profile = _gaussian_beam(beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz)
-    wv_tmp = _wave_vectors(wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m)
+    intensity_profile = _gaussian_beam(
+        beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz
+    )
+    wv_tmp = _wave_vectors(
+        wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m
+    )
     k_eff = float(wv_tmp.k1 - wv_tmp.k2)
 
     if gravity_propagation:
@@ -1227,7 +1276,9 @@ def run_aisim_vibration_sensitivity_sweep(
         if phase_bias_rad is None:
             phase_bias_rad = 0.0
         if lock_to_midfringe:
-            phase_bias_rad = float(np.pi / 2.0 - k_eff * float(gravity_ref_m_s2) * (float(interferometer_time_s) ** 2))
+            phase_bias_rad = float(
+                np.pi / 2.0 - k_eff * float(gravity_ref_m_s2) * (float(interferometer_time_s) ** 2)
+            )
 
     if not gravity_propagation:
         base_phase = _hybrid_gravity_phase_rad(
@@ -1243,7 +1294,9 @@ def run_aisim_vibration_sensitivity_sweep(
         tau_pi_half_s=float(tau_pi_half_s),
         interferometer_time_s=float(interferometer_time_s),
     )
-    amplitudes = vibration_amplitude_axis(float(amplitude_min_m), float(amplitude_max_m), int(n_amplitude_points))
+    amplitudes = vibration_amplitude_axis(
+        float(amplitude_min_m), float(amplitude_max_m), int(n_amplitude_points)
+    )
     vib_phase = _vibration_phase_sinusoid(
         amplitudes_m=amplitudes,
         frequency_hz=vibration_frequency_hz,
@@ -1303,11 +1356,14 @@ def run_aisim_vibration_sensitivity_sweep(
         interferometer_time_s=float(interferometer_time_s),
     )
     if len(amplitudes) >= 2:
-        slope = float((equiv_g_error[-1] - equiv_g_error[0]) / max(amplitudes[-1] - amplitudes[0], 1e-30))
+        slope = float(
+            (equiv_g_error[-1] - equiv_g_error[0]) / max(amplitudes[-1] - amplitudes[0], 1e-30)
+        )
     else:
         slope = float("nan")
 
     from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
+
     _sens_vs = shot_noise_sensitivity_m_s2_per_sqrt_hz(
         k_eff_rad_per_m=k_eff,
         interferometer_time_s=float(interferometer_time_s),
@@ -1365,8 +1421,16 @@ def run_aisim_vibration_sensitivity_sweep(
                 "x_label": "vibration amplitude (nm)",
                 "y_label": "equivalent gravity error / signal",
                 "series": [
-                    {"key": "equivalent_gravity_error_m_s2", "label": "equiv gravity error (m/s²)", "kind": "line"},
-                    {"key": "normalized_differential_signal", "label": "normalized diff", "kind": "line"},
+                    {
+                        "key": "equivalent_gravity_error_m_s2",
+                        "label": "equiv gravity error (m/s²)",
+                        "kind": "line",
+                    },
+                    {
+                        "key": "normalized_differential_signal",
+                        "label": "normalized diff",
+                        "kind": "line",
+                    },
                 ],
             },
             {
@@ -1377,7 +1441,11 @@ def run_aisim_vibration_sensitivity_sweep(
                 "x_label": "vibration amplitude (nm)",
                 "y_label": "phase / population",
                 "series": [
-                    {"key": "vibration_phase_rad", "label": "vibration phase (rad)", "kind": "line"},
+                    {
+                        "key": "vibration_phase_rad",
+                        "label": "vibration phase (rad)",
+                        "kind": "line",
+                    },
                     {"key": "output_port_2", "label": "port 2", "kind": "line"},
                     {"key": "output_port_3", "label": "port 3", "kind": "line"},
                 ],
@@ -1457,8 +1525,8 @@ def _allan_deviation(
     n = len(x)
     if n < 4:
         return np.array([cycle_time_s]), np.array([float(np.std(x))])
-    taus = []
-    adevs = []
+    taus: list[float] = []
+    adevs: list[float] = []
     m = 1
     while m <= n // 2 and len(taus) < max_levels:
         # Group into blocks of size m, average each block
@@ -1592,8 +1660,12 @@ def run_aisim_multi_drop_cycle(
         n_detected_effective = int(n_detected_per_drop)
 
     # Precompute beam, wavevectors, etc. (shared across drops)
-    intensity_profile = _gaussian_beam(beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz)
-    wv_tmp = _wave_vectors(wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m)
+    intensity_profile = _gaussian_beam(
+        beam_radius_m=beam_radius_m, center_rabi_freq_hz=center_rabi_freq_hz
+    )
+    wv_tmp = _wave_vectors(
+        wavelength_m=wavelength_m, k1_rad_per_m=k1_rad_per_m, k2_rad_per_m=k2_rad_per_m
+    )
     k_eff = float(wv_tmp.k1 - wv_tmp.k2)
     T = float(interferometer_time_s)
 
@@ -1618,9 +1690,13 @@ def run_aisim_multi_drop_cycle(
     visibility_estimate = 1.0  # default; refined below if fit_visibility
     if gravity_propagation:
         _, cal_atoms, _, _, _ = _create_detected_ensemble(
-            n_atoms=int(n_atoms), seed=int(seed),
-            cloud_radius_m=cloud_radius_m, temp_xy_K=temp_xy_K, temp_z_K=temp_z_K,
-            detector_time_s=detector_time_s, detector_radius_m=detector_radius_m,
+            n_atoms=int(n_atoms),
+            seed=int(seed),
+            cloud_radius_m=cloud_radius_m,
+            temp_xy_K=temp_xy_K,
+            temp_z_K=temp_z_K,
+            detector_time_s=detector_time_s,
+            detector_radius_m=detector_radius_m,
             multiport=True,
         )
         sim_phase_offset, fitted_visibility = _calibrate_gravity_phase_and_visibility(
@@ -1658,7 +1734,6 @@ def run_aisim_multi_drop_cycle(
             seed=(int(vibration_seed) if vibration_seed is not None else int(seed) + 99_000),
         )
         z_disp = vib_ts["displacement_m"]
-        t_grid = vib_ts["t_s"]
 
         def _z_at(t):
             idx = int(round(float(t) * vib_sample_rate_hz))
@@ -1693,9 +1768,13 @@ def run_aisim_multi_drop_cycle(
     for i in range(n):
         # Fresh ensemble per drop (true independence)
         _, drop_atoms, _, _, _ = _create_detected_ensemble(
-            n_atoms=int(n_atoms), seed=int(seed) + i + 1,
-            cloud_radius_m=cloud_radius_m, temp_xy_K=temp_xy_K, temp_z_K=temp_z_K,
-            detector_time_s=detector_time_s, detector_radius_m=detector_radius_m,
+            n_atoms=int(n_atoms),
+            seed=int(seed) + i + 1,
+            cloud_radius_m=cloud_radius_m,
+            temp_xy_K=temp_xy_K,
+            temp_z_K=temp_z_K,
+            detector_time_s=detector_time_s,
+            detector_radius_m=detector_radius_m,
             multiport=True,
         )
         # Total phase bias = operating point + servo correction + physical
@@ -1817,12 +1896,13 @@ def run_aisim_multi_drop_cycle(
             "ensemble": f"fresh ensemble per drop (seed={seed}+i)",
             "atom_optics": "AISim SpatialSuperpositionTransitionPropagator three-pulse MZ",
             "noise": _multi_drop_noise_description(
-                detection_noise_enabled, detection_sigma_p,
-                raman_phase_noise_rad, correlated_vibration, seismic_model,
+                detection_noise_enabled,
+                detection_sigma_p,
+                raman_phase_noise_rad,
+                correlated_vibration,
+                seismic_model,
             ),
-            "feedback": (
-                f"{servo_type} servo on phase bias" if servo_enabled else "open loop"
-            ),
+            "feedback": (f"{servo_type} servo on phase bias" if servo_enabled else "open loop"),
         },
         "limitations": [
             (
@@ -1862,8 +1942,12 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
         beam_radius_m=float(sim_cfg.get("beam_radius_m", 29.5e-3 / 2.0)),
         center_rabi_freq_hz=float(sim_cfg.get("center_rabi_freq_hz", 12.5e3)),
         wavelength_m=float(sim_cfg.get("wavelength_m", WAVELENGTH_RB87_D2.value)),
-        k1_rad_per_m=None if sim_cfg.get("k1_rad_per_m") is None else float(sim_cfg.get("k1_rad_per_m")),
-        k2_rad_per_m=None if sim_cfg.get("k2_rad_per_m") is None else float(sim_cfg.get("k2_rad_per_m")),
+        k1_rad_per_m=(
+            None if sim_cfg.get("k1_rad_per_m") is None else float(sim_cfg.get("k1_rad_per_m"))
+        ),
+        k2_rad_per_m=(
+            None if sim_cfg.get("k2_rad_per_m") is None else float(sim_cfg.get("k2_rad_per_m"))
+        ),
     )
 
     if model == "rabi_scan":
@@ -1895,7 +1979,11 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             gravity_center_m_s2=float(sim_cfg.get("gravity_center_m_s2", NOMINAL_GRAVITY.value)),
             gravity_span_m_s2=float(sim_cfg.get("gravity_span_m_s2", 6.0e-6)),
             n_gravity_points=int(sim_cfg.get("n_gravity_points", 61)),
-            phase_bias_rad=None if sim_cfg.get("phase_bias_rad") is None else float(sim_cfg.get("phase_bias_rad")),
+            phase_bias_rad=(
+                None
+                if sim_cfg.get("phase_bias_rad") is None
+                else float(sim_cfg.get("phase_bias_rad"))
+            ),
             lock_to_midfringe=bool(sim_cfg.get("lock_to_midfringe", True)),
             gravity_propagation=bool(sim_cfg.get("gravity_propagation", False)),
             gravity_gradient_per_m=float(sim_cfg.get("gravity_gradient_per_m", 0.0)),
@@ -1917,22 +2005,23 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             cycle_time_s=float(sim_cfg.get("cycle_time_s", 1.0)),
             detection_noise_enabled=bool(sim_cfg.get("detection_noise_enabled", True)),
             n_detected_per_drop=(
-                None if sim_cfg.get("n_detected_per_drop") is None
+                None
+                if sim_cfg.get("n_detected_per_drop") is None
                 else int(sim_cfg.get("n_detected_per_drop"))
             ),
             # Phase 15 noise machinery (all default to off).
             detection_sigma_p=(
-                None if sim_cfg.get("detection_sigma_p") is None
+                None
+                if sim_cfg.get("detection_sigma_p") is None
                 else float(sim_cfg.get("detection_sigma_p"))
             ),
             raman_phase_noise_rad=float(sim_cfg.get("raman_phase_noise_rad", 0.0)),
             correlated_vibration=bool(sim_cfg.get("correlated_vibration", False)),
             seismic_model=str(sim_cfg.get("seismic_model", "nlnm")),
-            vibration_isolation_cutoff_hz=float(
-                sim_cfg.get("vibration_isolation_cutoff_hz", 0.0)
-            ),
+            vibration_isolation_cutoff_hz=float(sim_cfg.get("vibration_isolation_cutoff_hz", 0.0)),
             vibration_seed=(
-                None if sim_cfg.get("vibration_seed") is None
+                None
+                if sim_cfg.get("vibration_seed") is None
                 else int(sim_cfg.get("vibration_seed"))
             ),
             fit_visibility=bool(sim_cfg.get("fit_visibility", False)),
@@ -1954,7 +2043,11 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             amplitude_min_m=float(sim_cfg.get("amplitude_min_m", 0.0)),
             amplitude_max_m=float(sim_cfg.get("amplitude_max_m", 5.0e-8)),
             n_amplitude_points=int(sim_cfg.get("n_amplitude_points", 41)),
-            phase_bias_rad=None if sim_cfg.get("phase_bias_rad") is None else float(sim_cfg.get("phase_bias_rad")),
+            phase_bias_rad=(
+                None
+                if sim_cfg.get("phase_bias_rad") is None
+                else float(sim_cfg.get("phase_bias_rad"))
+            ),
             lock_to_midfringe=bool(sim_cfg.get("lock_to_midfringe", True)),
             gravity_propagation=bool(sim_cfg.get("gravity_propagation", False)),
             gravity_gradient_per_m=float(sim_cfg.get("gravity_gradient_per_m", 0.0)),

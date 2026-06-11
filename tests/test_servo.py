@@ -1,8 +1,8 @@
 """Tests for fringe-locking servo (Phase 7)."""
+
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from qgrav.physics.readout_models import servo_integrator_step
 from qgrav.sim_ai.aisim_adapter import run_aisim_multi_drop_cycle
@@ -14,16 +14,20 @@ class TestServoIntegratorBasic:
     def test_servo_zero_error_no_change(self):
         """When P = setpoint, no phase correction."""
         out = servo_integrator_step(
-            population=0.5, phase_estimate=1.234,
-            setpoint=0.5, gain=1.0,
+            population=0.5,
+            phase_estimate=1.234,
+            setpoint=0.5,
+            gain=1.0,
         )
         np.testing.assert_allclose(out, 1.234)
 
     def test_servo_positive_error_decreases_phase(self):
         """P > setpoint -> phase decreases."""
         out = servo_integrator_step(
-            population=0.7, phase_estimate=1.0,
-            setpoint=0.5, gain=2.0,
+            population=0.7,
+            phase_estimate=1.0,
+            setpoint=0.5,
+            gain=2.0,
         )
         # error = 0.7 - 0.5 = 0.2
         # phase_new = 1.0 - 2.0 * 0.2 = 0.6
@@ -31,8 +35,10 @@ class TestServoIntegratorBasic:
 
     def test_servo_negative_error_increases_phase(self):
         out = servo_integrator_step(
-            population=0.3, phase_estimate=1.0,
-            setpoint=0.5, gain=2.0,
+            population=0.3,
+            phase_estimate=1.0,
+            setpoint=0.5,
+            gain=2.0,
         )
         # error = 0.3 - 0.5 = -0.2
         # phase_new = 1.0 - 2.0 * (-0.2) = 1.4
@@ -63,9 +69,9 @@ class TestServoLocksToMidfringe:
         # Skip first few drops (transient), check mean of remaining
         p3 = result["port_3_noisy"]
         steady_mean = float(np.mean(p3[5:]))
-        assert abs(steady_mean - 0.5) < 0.05, (
-            f"Servo did not lock to midfringe: mean P3 = {steady_mean}"
-        )
+        assert (
+            abs(steady_mean - 0.5) < 0.05
+        ), f"Servo did not lock to midfringe: mean P3 = {steady_mean}"
 
     def test_servo_g_estimate_converges(self):
         """g_estimates from servo should converge to gravity_true."""
@@ -91,7 +97,9 @@ class TestServoDisabled:
 
     def test_servo_disabled_no_correction(self):
         r_no_servo = run_aisim_multi_drop_cycle(
-            n_atoms=500, seed=42, n_drops=5,
+            n_atoms=500,
+            seed=42,
+            n_drops=5,
             gravity_propagation=False,
             detection_noise_enabled=False,
             servo_enabled=False,

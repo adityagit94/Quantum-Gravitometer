@@ -3,6 +3,7 @@
 Verifies that when a config file lives in a temp directory (as the GUI does),
 passing an explicit project_root resolves relative paths correctly.
 """
+
 from __future__ import annotations
 
 import tempfile
@@ -31,7 +32,9 @@ def test_resolve_with_explicit_project_root(tmp_path: Path):
     result_with_root = resolve_project_relative_path(
         temp_config, "src/qgrav/__init__.py", project_root=root
     )
-    assert Path(result_with_root).exists(), f"Should find src/qgrav/__init__.py via project root, got {result_with_root}"
+    assert Path(
+        result_with_root
+    ).exists(), f"Should find src/qgrav/__init__.py via project root, got {result_with_root}"
 
 
 def test_resolve_absolute_path_ignores_project_root(tmp_path: Path):

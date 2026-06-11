@@ -13,11 +13,11 @@ regression with a factor-2.5 tolerance (wider than Freier's factor-3 because
 these are smaller-N setups; per the noise-budget physics the simulated ASD
 overshoots by ~1.5x at V~0.6 vs the published V).
 """
+
 from __future__ import annotations
 
 import math
 
-import numpy as np
 import pytest
 
 from qgrav.sim_ai.aisim_adapter import run_aisim_multi_drop_cycle
@@ -27,7 +27,6 @@ from qgrav.validation import (
     wu_2019_setup,
     xu_2022_setup,
 )
-
 
 _SETUPS = {
     "hu_2013": hu_2013_setup,
@@ -52,7 +51,9 @@ class TestParameterIntegrity:
         assert menoret_2018_setup.MENORET_2018_PARAMS["interferometer_time_s"] == 0.060
         assert menoret_2018_setup.MENORET_2018_PARAMS["cycle_time_s"] == 0.500
         assert menoret_2018_setup.MENORET_2018_PARAMS["contrast"] == 0.40
-        assert menoret_2018_setup.MENORET_2018_TARGETS["short_term_noise_m_s2_per_sqrt_hz"] == 7.5e-7
+        assert (
+            menoret_2018_setup.MENORET_2018_TARGETS["short_term_noise_m_s2_per_sqrt_hz"] == 7.5e-7
+        )
 
     def test_xu_2022_systematic_budget_target(self):
         # Xu 2022 is the FIRST HUST instrument with a published per-effect
@@ -95,20 +96,23 @@ class TestNoiseBudgets:
 
 _SIM_SEEDS = {
     # Fixed seeds (deterministic, order-independent).
-    "hu_2013":      2013,
+    "hu_2013": 2013,
     "menoret_2018": 2018,
-    "xu_2022":      2022,
-    "wu_2019":      2019,
+    "xu_2022": 2022,
+    "wu_2019": 2019,
 }
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("setup_name,gravity_true_key", [
-    ("hu_2013",      ("HU_2013_PARAMS",      "HU_2013_TARGETS")),
-    ("menoret_2018", ("MENORET_2018_PARAMS", "MENORET_2018_TARGETS")),
-    ("xu_2022",      ("XU_2022_PARAMS",      "XU_2022_TARGETS")),
-    ("wu_2019",      ("WU_2019_PARAMS",      "WU_2019_TARGETS")),
-])
+@pytest.mark.parametrize(
+    "setup_name,gravity_true_key",
+    [
+        ("hu_2013", ("HU_2013_PARAMS", "HU_2013_TARGETS")),
+        ("menoret_2018", ("MENORET_2018_PARAMS", "MENORET_2018_TARGETS")),
+        ("xu_2022", ("XU_2022_PARAMS", "XU_2022_TARGETS")),
+        ("wu_2019", ("WU_2019_PARAMS", "WU_2019_TARGETS")),
+    ],
+)
 class TestSimulationASD:
     """End-to-end simulation reproduces each published short-term ASD."""
 
@@ -117,8 +121,10 @@ class TestSimulationASD:
         params = getattr(setup, gravity_true_key[0])
         targets = getattr(setup, gravity_true_key[1])
         kwargs = setup.multi_drop_kwargs(
-            n_drops=80, seed=_SIM_SEEDS[setup_name],
-            n_atoms=4000, gravity_propagation=True,
+            n_drops=80,
+            seed=_SIM_SEEDS[setup_name],
+            n_atoms=4000,
+            gravity_propagation=True,
         )
         result = run_aisim_multi_drop_cycle(**kwargs)
 

@@ -27,6 +27,7 @@ The physics is documented in ``docs/PHYSICS_REVIEW_PACKET.md`` and validated
 against the literature in ``docs/research/RESEARCH_AISIM_PHYSICS.md`` and
 ``docs/research/RESEARCH_FINITE_TAU_FORMULAS.md``.
 """
+
 from __future__ import annotations
 
 import copy
@@ -209,7 +210,6 @@ class IntegratedPhaseTwoLevelTransitionPropagator(TwoLevelTransitionPropagator):
             delta = delta + Omega_eff**2 / (4.0 * Delta_rad_s)
 
         Omega_R = np.sqrt(Omega_eff**2 + delta**2)
-        t0 = atoms.time
         tau = self.time_delta
 
         sin_theta = Omega_eff / Omega_R
@@ -218,20 +218,10 @@ class IntegratedPhaseTwoLevelTransitionPropagator(TwoLevelTransitionPropagator):
         u_ee = np.cos(Omega_R * tau / 2) - 1j * cos_theta * np.sin(Omega_R * tau / 2)
         u_ee *= np.exp(-1j * delta * tau / 2)
 
-        u_eg = (
-            np.exp(-1j * (imprint_phase + phase))
-            * -1j
-            * sin_theta
-            * np.sin(Omega_R * tau / 2)
-        )
+        u_eg = np.exp(-1j * (imprint_phase + phase)) * -1j * sin_theta * np.sin(Omega_R * tau / 2)
         u_eg *= np.exp(-1j * delta * tau / 2)
 
-        u_ge = (
-            np.exp(+1j * (imprint_phase + phase))
-            * -1j
-            * sin_theta
-            * np.sin(Omega_R * tau / 2)
-        )
+        u_ge = np.exp(+1j * (imprint_phase + phase)) * -1j * sin_theta * np.sin(Omega_R * tau / 2)
         u_ge *= np.exp(1j * delta * tau / 2)
 
         u_gg = np.cos(Omega_R * tau / 2) + 1j * cos_theta * np.sin(Omega_R * tau / 2)

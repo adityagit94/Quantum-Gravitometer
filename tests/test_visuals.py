@@ -43,6 +43,7 @@ simulation:
   n_steps: 8
 """
 
+
 def test_visual_builder_handles_dashboard_and_simulation(tmp_path: Path):
     cfg = tmp_path / "config.yaml"
     cfg.write_text(CFG, encoding="utf-8")

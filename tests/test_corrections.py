@@ -1,4 +1,5 @@
 """Tests for the v0.8 real-data corrections module."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -52,7 +53,7 @@ def test_hw95_tide_magnitude_order_of_magnitude():
     t0 = 1_700_000_000.0
     t = t0 + np.arange(0, 7 * 86400.0, 3600.0)  # 7-day hourly sampling
     tide = gravity_tide_ugal(t, latitude_deg=45.0, longitude_deg=0.0)
-    rms = float(np.sqrt(np.mean(tide ** 2)))
+    rms = float(np.sqrt(np.mean(tide**2)))
     # Real body-tide RMS is around 70-120 microGal at mid-latitude
     assert 30.0 < rms < 250.0, f"tide RMS {rms:.1f} uGal out of expected range"
 
@@ -61,7 +62,8 @@ def test_apply_tide_correction_zero_size_returns_empty():
     out = apply_tide_correction(
         np.array([], dtype=np.float64),
         np.array([], dtype=np.float64),
-        latitude_deg=45.0, longitude_deg=0.0,
+        latitude_deg=45.0,
+        longitude_deg=0.0,
         backend="internal_hw95",
     )
     assert out["corrected"].size == 0
@@ -80,8 +82,10 @@ def test_apply_tide_correction_internal_hw95_reduces_variance():
     raw = tide_m_s2 + noise
 
     result = apply_tide_correction(
-        t, raw,
-        latitude_deg=45.0, longitude_deg=0.0,
+        t,
+        raw,
+        latitude_deg=45.0,
+        longitude_deg=0.0,
         backend="internal_hw95",
     )
     rms_before = float(np.std(raw))
@@ -98,8 +102,10 @@ def test_apply_tide_correction_auto_falls_back_when_pygtide_missing():
     t = np.array([1_700_000_000.0, 1_700_000_060.0])
     v = np.array([0.0, 0.0])
     result = apply_tide_correction(
-        t, v,
-        latitude_deg=0.0, longitude_deg=0.0,
+        t,
+        v,
+        latitude_deg=0.0,
+        longitude_deg=0.0,
         backend="auto",
     )
     # The backend used must be one of the supported values.
@@ -109,8 +115,10 @@ def test_apply_tide_correction_auto_falls_back_when_pygtide_missing():
 def test_apply_tide_correction_unknown_backend_raises():
     with pytest.raises(ValueError):
         apply_tide_correction(
-            np.array([1.0]), np.array([0.0]),
-            latitude_deg=0.0, longitude_deg=0.0,
+            np.array([1.0]),
+            np.array([0.0]),
+            latitude_deg=0.0,
+            longitude_deg=0.0,
             backend="nonsense",
         )
 
@@ -150,9 +158,11 @@ def test_pipeline_integration_runs_when_apply_corrections_true():
     if not data_dir.exists():
         pytest.skip(f"sample data not found at {data_dir}")
 
-    import tempfile
-    import yaml
     import json
+    import tempfile
+
+    import yaml
+
     from qgrav.pipeline import run_pipeline
 
     cfg = {
@@ -185,8 +195,7 @@ def test_pipeline_integration_runs_when_apply_corrections_true():
         assert "corrections_applied" in metrics
         # With forced level=1 we expect tide correction to fire.
         assert any("tide" in c for c in metrics["corrections_applied"]), (
-            f"expected tide in corrections_applied but got: "
-            f"{metrics['corrections_applied']}"
+            f"expected tide in corrections_applied but got: " f"{metrics['corrections_applied']}"
         )
         assert metrics["correction_metrics"]["tide_rms_subtracted_ugal"] > 0
 
@@ -199,9 +208,11 @@ def test_pipeline_integration_default_apply_corrections_false():
     if not data_dir.exists():
         pytest.skip(f"sample data not found at {data_dir}")
 
-    import tempfile
-    import yaml
     import json
+    import tempfile
+
+    import yaml
+
     from qgrav.pipeline import run_pipeline
 
     cfg = {
@@ -234,18 +245,18 @@ def test_pressure_correction_warns_on_partial_overlap(tmp_path):
     if not data_dir.exists():
         pytest.skip(f"sample data not found at {data_dir}")
 
-    import tempfile
-    import yaml
     import json
+    import tempfile
+
+    import yaml
+
     from qgrav.pipeline import run_pipeline
 
     # Create a pressure CSV that only covers a tiny slice of the gravity time range.
     # The gravity data for ap046 typically spans several days.
     pressure_csv = tmp_path / "pressure.csv"
     pressure_csv.write_text(
-        "unix_seconds,pressure_hpa\n"
-        "0,1013.0\n"
-        "100,1013.5\n",
+        "unix_seconds,pressure_hpa\n" "0,1013.0\n" "100,1013.5\n",
         encoding="utf-8",
     )
 
@@ -273,9 +284,9 @@ def test_pressure_correction_warns_on_partial_overlap(tmp_path):
         report_path = run_pipeline(cfg_path, project_root=project_root)
         metrics = json.loads((report_path.parent / "metrics.json").read_text(encoding="utf-8"))
         # With near-zero overlap, pressure should have been skipped.
-        assert "atmospheric_pressure" not in metrics["corrections_applied"], (
-            "Pressure correction should be skipped with <50% coverage"
-        )
+        assert (
+            "atmospheric_pressure" not in metrics["corrections_applied"]
+        ), "Pressure correction should be skipped with <50% coverage"
         # There should be a warning about coverage.
         assert any("Pressure" in w for w in metrics.get("corrections_warnings", []))
 
@@ -288,9 +299,11 @@ def test_corrections_skipped_warning_when_no_coordinates():
     if not data_dir.exists():
         pytest.skip(f"sample data not found at {data_dir}")
 
-    import tempfile
-    import yaml
     import json
+    import tempfile
+
+    import yaml
+
     from qgrav.pipeline import run_pipeline
 
     cfg = {
@@ -335,7 +348,9 @@ def test_corrected_run_preserves_raw_data():
         pytest.skip(f"sample data not found at {data_dir}")
 
     import tempfile
+
     import yaml
+
     from qgrav.pipeline import run_pipeline
 
     cfg = {
@@ -366,9 +381,9 @@ def test_corrected_run_preserves_raw_data():
         assert "gravity_residual_full_raw" in data, "missing gravity_residual_full_raw in data.npz"
         assert "tide_subtracted" in data, "missing tide_subtracted in data.npz"
         # Corrected and raw should differ (tide was applied)
-        assert not np.array_equal(data["gravity_residual"], data["gravity_residual_raw"]), (
-            "raw and corrected arrays should differ after corrections"
-        )
+        assert not np.array_equal(
+            data["gravity_residual"], data["gravity_residual_raw"]
+        ), "raw and corrected arrays should differ after corrections"
 
 
 def test_synthetic_tide_correction_improves_allan_deviation():
@@ -387,6 +402,7 @@ def test_synthetic_tide_correction_improves_allan_deviation():
 
     # Tide signal at mid-latitude (dominant M2 ~ 12.42 hr period)
     from qgrav.datasets._tides_hw95 import gravity_tide_ugal
+
     tide_ugal = gravity_tide_ugal(t, latitude_deg=45.0, longitude_deg=0.0)
     tide_m_s2 = tide_ugal * 1e-8
 
@@ -400,8 +416,10 @@ def test_synthetic_tide_correction_improves_allan_deviation():
 
     # Apply tide correction
     corrected = apply_tide_correction(
-        t, raw_signal,
-        latitude_deg=45.0, longitude_deg=0.0,
+        t,
+        raw_signal,
+        latitude_deg=45.0,
+        longitude_deg=0.0,
         backend="internal_hw95",
     )
     adev_after = allan_deviation_overlapping(corrected["corrected"], fs, taus, backend="custom")
@@ -420,9 +438,9 @@ def test_synthetic_tide_correction_improves_allan_deviation():
 def test_html_report_escapes_special_characters():
     """The HTML report must escape < > & characters in config text and metrics
     to prevent XSS or rendering breakage."""
-    import json
-    from qgrav.reporting.report import build_html_report
     import tempfile
+
+    from qgrav.reporting.report import build_html_report
 
     with tempfile.TemporaryDirectory() as tdir:
         run_dir = Path(tdir)
@@ -479,4 +497,4 @@ def test_html_report_escapes_special_characters():
         assert "<script>" not in html, "Config text was not escaped in HTML"
         assert "&lt;script&gt;" in html, "Expected escaped script tag in HTML"
         # The XSS payload in corrections_warnings should be escaped
-        assert '<img src=x' not in html, "corrections_warnings was not escaped"
+        assert "<img src=x" not in html, "corrections_warnings was not escaped"

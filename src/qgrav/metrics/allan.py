@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from functools import lru_cache
 import logging
+from functools import lru_cache
 from typing import Literal
 
 import numpy as np
@@ -21,11 +21,13 @@ def _import_allantools_module():
     standalone.
     """
     try:
-        from qgrav.vendor.allantools import allantools as at  # type: ignore
+        from qgrav.vendor.allantools import allantools as at
+
         return at
     except Exception:
         try:
-            import allantools as at  # type: ignore
+            import allantools as at
+
             return at
         except Exception:
             logger.exception("Failed to import AllanTools")
@@ -39,7 +41,9 @@ def available_allan_backends() -> list[str]:
     return backends
 
 
-def _validate_inputs(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -> tuple[np.ndarray, float, np.ndarray]:
+def _validate_inputs(
+    x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray
+) -> tuple[np.ndarray, float, np.ndarray]:
     x = np.asarray(x, dtype=np.float64)
     if x.ndim != 1:
         raise ValueError("Allan deviation input must be 1D.")
@@ -57,7 +61,9 @@ def _validate_inputs(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -
     return x, float(sample_rate_hz), taus_s
 
 
-def _custom_oadev_freq(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -> dict[str, np.ndarray]:
+def _custom_oadev_freq(
+    x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray
+) -> dict[str, np.ndarray]:
     """Custom overlapping Allan deviation for directly sampled measurement values.
 
     This matches AllanTools ``oadev(..., data_type='freq')``. In AllanTools terminology,
@@ -82,10 +88,15 @@ def _custom_oadev_freq(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray)
         taus_actual.append(m * tau0)
         adev.append(float(np.sqrt(0.5 * np.mean(diffs**2))))
 
-    return {"taus_s": np.asarray(taus_actual, dtype=np.float64), "adev": np.asarray(adev, dtype=np.float64)}
+    return {
+        "taus_s": np.asarray(taus_actual, dtype=np.float64),
+        "adev": np.asarray(adev, dtype=np.float64),
+    }
 
 
-def _custom_oadev_phase(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray) -> dict[str, np.ndarray]:
+def _custom_oadev_phase(
+    x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray
+) -> dict[str, np.ndarray]:
     """Custom overlapping Allan deviation for phase-like time-series data.
 
     This matches AllanTools ``oadev(..., data_type='phase')``.
@@ -99,13 +110,16 @@ def _custom_oadev_phase(x: np.ndarray, sample_rate_hz: float, taus_s: np.ndarray
     for m in ms:
         if 2 * m >= n:
             continue
-        d2 = x[2 * m:] - 2.0 * x[m:-m] + x[:-2 * m]
+        d2 = x[2 * m :] - 2.0 * x[m:-m] + x[: -2 * m]
         if len(d2) == 0:
             continue
         taus_actual.append(m * tau0)
         adev.append(float(np.sqrt(np.mean(d2**2) / (2.0 * (m * tau0) ** 2))))
 
-    return {"taus_s": np.asarray(taus_actual, dtype=np.float64), "adev": np.asarray(adev, dtype=np.float64)}
+    return {
+        "taus_s": np.asarray(taus_actual, dtype=np.float64),
+        "adev": np.asarray(adev, dtype=np.float64),
+    }
 
 
 def _resolve_backend(backend: AllanBackend) -> str:
@@ -303,11 +317,14 @@ def identify_noise_type_acf(
             "description": "Time series too short for ACF noise-type ID.",
         }
     try:
-        from qgrav.vendor.allantools.ci import autocorr_noise_id  # type: ignore
+        from qgrav.vendor.allantools.ci import autocorr_noise_id
 
         alpha_int, alpha, d, rho = autocorr_noise_id(
-            arr, af=int(averaging_factor), data_type=data_type,
-            dmin=int(dmin), dmax=int(dmax),
+            arr,
+            af=int(averaging_factor),
+            data_type=data_type,
+            dmin=int(dmin),
+            dmax=int(dmax),
         )
         noise_type = _ACF_ALPHA_INT_TO_NAME.get(int(alpha_int), f"alpha_int={alpha_int}")
         return {

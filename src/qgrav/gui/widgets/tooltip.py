@@ -6,6 +6,7 @@ help text after a short delay.  It is deliberately defensive: every Tk call is
 guarded so a tooltip can never crash the application (e.g. if the parent widget
 is destroyed while the pointer is still over it).
 """
+
 from __future__ import annotations
 
 import tkinter as tk

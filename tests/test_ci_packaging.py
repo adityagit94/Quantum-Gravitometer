@@ -3,6 +3,7 @@
 These don't *run* CI — they just verify the workflow / Dockerfile files exist
 and parse, so a typo doesn't ship in a release.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -46,7 +47,7 @@ class TestPackaging:
         assert path.is_file()
         text = path.read_text(encoding="utf-8")
         assert "FROM python:3.11" in text
-        assert "ENTRYPOINT [\"qgrav\"]" in text
+        assert 'ENTRYPOINT ["qgrav"]' in text
         assert "MPLBACKEND=Agg" in text
 
     def test_dockerignore_excludes_runs_and_research(self):

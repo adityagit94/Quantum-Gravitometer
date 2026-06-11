@@ -1,4 +1,5 @@
 """Pipeline package — split from the original monolithic pipeline.py."""
+
 from __future__ import annotations
 
 import logging
@@ -35,5 +36,9 @@ def run_pipeline(config_path: Path, *, project_root: Path | None = None) -> Path
     bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
     bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
     if bench_type == "real_gravity":
-        return _run_real_gravity_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
-    return _run_interferometer_pipeline(cfg, cfg_text, paths, config_path, project_root=project_root)
+        return _run_real_gravity_pipeline(
+            cfg, cfg_text, paths, config_path, project_root=project_root
+        )
+    return _run_interferometer_pipeline(
+        cfg, cfg_text, paths, config_path, project_root=project_root
+    )

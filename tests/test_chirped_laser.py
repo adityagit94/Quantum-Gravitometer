@@ -1,14 +1,14 @@
 """Tests for chirped laser detuning in Wavevectors — Phase 2 of v1.0 upgrade."""
+
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
-from qgrav.vendor.aisim import AtomicEnsemble
-from qgrav.vendor.aisim import Wavevectors as UpstreamWavevectors
 # v1.1 (Phase 12): the chirp extension lives in qgrav.sim_ai as a subclass;
 # the vendored Wavevectors is upstream-clean (no chirp parameter).
 from qgrav.sim_ai import ChirpedWavevectors as Wavevectors
+from qgrav.vendor.aisim import AtomicEnsemble
+from qgrav.vendor.aisim import Wavevectors as UpstreamWavevectors
 
 
 def _single_atom(vz=0.0, time=0.0):
@@ -66,8 +66,7 @@ class TestChirpCancelsGravityDoppler:
             vz_t = v_thermal - g * t
             atoms = _single_atom(vz=vz_t, time=t)
             shift = wv.doppler_shift(atoms)
-            np.testing.assert_allclose(shift[0], expected, rtol=1e-10,
-                                       err_msg=f"Failed at t={t}")
+            np.testing.assert_allclose(shift[0], expected, rtol=1e-10, err_msg=f"Failed at t={t}")
 
 
 class TestChirpUnitsConsistency:

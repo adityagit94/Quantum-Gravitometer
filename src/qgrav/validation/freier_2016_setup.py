@@ -26,6 +26,7 @@ noise of 96 nm/s^2/sqrt(Hz)."
    noise, NOT by sqrt(N) atomic projection noise.  Do not model the noise
    from the detected atom number alone; use ``FREIER_2016_NOISE_BUDGET``.
 """
+
 from __future__ import annotations
 
 import math
@@ -33,19 +34,19 @@ import math
 # --- Instrument parameters (SI, qgrav-ready) ---------------------------------
 # Every value is sourced in docs/research/RESEARCH_FREIER_2016.md.
 FREIER_2016_PARAMS: dict[str, float] = {
-    "interferometer_time_s": 0.260,        # thesis ch.2.3 ("T = 0.26 s")
-    "cycle_time_s": 1.5,                    # Freier 2016 §2 (verbatim)
-    "tau_pi_half_s": 17e-6,                 # thesis ch.4.3 (Onsala; pi = 34 us)
-    "n_atoms_mot": 1e9,                     # thesis ch.3.1.2
-    "n_atoms_selected": 2e7,               # thesis ch.4.2
-    "n_detected_per_drop": 5e5,            # thesis ch.4.4
-    "temp_cloud_K": 2e-6,                   # thesis Fig.4.1; Hu et al.
-    "sigma_v_selected_m_s": 5.2e-3,        # thesis ch.4.2 (post velocity selection)
-    "beam_radius_m": 0.015,                 # 30 mm 1/e^2 diameter; thesis ch.3.1.4
-    "single_photon_detuning_hz": -700e6,    # red of F'=1; thesis ch.3.3.1
-    "chirp_rate_hz_per_s": 25.14e6,         # = k_eff*g/(2*pi); thesis ch.4.3
-    "k_eff_rad_per_m": 1.610e7,             # 2*(2*pi/780.241 nm), counter-prop
-    "raman_intensity_ratio_q": 1.72,        # light-shift null; Hu et al.
+    "interferometer_time_s": 0.260,  # thesis ch.2.3 ("T = 0.26 s")
+    "cycle_time_s": 1.5,  # Freier 2016 §2 (verbatim)
+    "tau_pi_half_s": 17e-6,  # thesis ch.4.3 (Onsala; pi = 34 us)
+    "n_atoms_mot": 1e9,  # thesis ch.3.1.2
+    "n_atoms_selected": 2e7,  # thesis ch.4.2
+    "n_detected_per_drop": 5e5,  # thesis ch.4.4
+    "temp_cloud_K": 2e-6,  # thesis Fig.4.1; Hu et al.
+    "sigma_v_selected_m_s": 5.2e-3,  # thesis ch.4.2 (post velocity selection)
+    "beam_radius_m": 0.015,  # 30 mm 1/e^2 diameter; thesis ch.3.1.4
+    "single_photon_detuning_hz": -700e6,  # red of F'=1; thesis ch.3.3.1
+    "chirp_rate_hz_per_s": 25.14e6,  # = k_eff*g/(2*pi); thesis ch.4.3
+    "k_eff_rad_per_m": 1.610e7,  # 2*(2*pi/780.241 nm), counter-prop
+    "raman_intensity_ratio_q": 1.72,  # light-shift null; Hu et al.
     "gravity_true_m_s2": 9.81,
 }
 
@@ -68,11 +69,11 @@ FREIER_2016_NOISE_BUDGET: dict[str, float] = {
 
 # --- Target benchmarks (Freier 2016 abstract, verbatim) ----------------------
 FREIER_2016_TARGETS: dict[str, float] = {
-    "short_term_noise_m_s2_per_sqrt_hz": 9.6e-8,   # 96 nm/s^2/sqrt(Hz)
-    "long_term_stability_m_s2": 5e-10,             # 0.5 nm/s^2 (~1 day)
-    "accuracy_m_s2": 3.9e-8,                        # 39 nm/s^2
-    "tolerance_factor": 2.0,                        # accept within x2 either way
-    "long_term_tolerance_factor": 5.0,             # long-term is harder
+    "short_term_noise_m_s2_per_sqrt_hz": 9.6e-8,  # 96 nm/s^2/sqrt(Hz)
+    "long_term_stability_m_s2": 5e-10,  # 0.5 nm/s^2 (~1 day)
+    "accuracy_m_s2": 3.9e-8,  # 39 nm/s^2
+    "tolerance_factor": 2.0,  # accept within x2 either way
+    "long_term_tolerance_factor": 5.0,  # long-term is harder
 }
 
 
@@ -105,9 +106,7 @@ def phase_noise_per_shot_rad() -> float:
     b = FREIER_2016_NOISE_BUDGET
     k_eff = FREIER_2016_PARAMS["k_eff_rad_per_m"]
     T = FREIER_2016_PARAMS["interferometer_time_s"]
-    g_noise = math.sqrt(
-        b["raman_phase_g_noise_m_s2"] ** 2 + b["vibration_g_noise_m_s2"] ** 2
-    )
+    g_noise = math.sqrt(b["raman_phase_g_noise_m_s2"] ** 2 + b["vibration_g_noise_m_s2"] ** 2)
     return k_eff * T**2 * g_noise
 
 

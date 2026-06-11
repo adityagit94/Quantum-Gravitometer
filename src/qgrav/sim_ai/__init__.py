@@ -1,4 +1,3 @@
-from .simple_ai import phase_mach_zehnder, simulate_phase_timeseries
 from ._aisim_overrides import (
     ChirpedWavevectors,
     GravityFreePropagator,
@@ -15,6 +14,7 @@ from .aisim_adapter import (
     run_aisim_vibration_sensitivity_sweep,
     run_simulation_from_config,
 )
+from .simple_ai import phase_mach_zehnder, simulate_phase_timeseries
 
 __all__ = [
     "phase_mach_zehnder",

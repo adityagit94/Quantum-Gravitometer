@@ -11,6 +11,7 @@ Determinism notes
   generous tolerances and fixed seeds. If a test is inherently flaky, mark
   it with ``@pytest.mark.flaky`` so CI can retry it.
 """
+
 from __future__ import annotations
 
 import os
@@ -18,10 +19,12 @@ import os
 # Pin matplotlib backend before anything imports pyplot.
 os.environ.setdefault("MPLBACKEND", "Agg")
 import matplotlib
+
 matplotlib.use("Agg")  # Non-interactive backend for CI / headless runs
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from qgrav.config import find_project_root
 

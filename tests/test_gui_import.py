@@ -10,4 +10,3 @@ def test_gui_module_entrypoint_importable():
     """`python -m qgrav.gui` must resolve (a __main__.py exposing main)."""
     mod = importlib.import_module("qgrav.gui.__main__")
     assert hasattr(mod, "main")
-

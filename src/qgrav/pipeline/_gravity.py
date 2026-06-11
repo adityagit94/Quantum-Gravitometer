@@ -1,4 +1,5 @@
 """Real-gravity pipeline stage."""
+
 from __future__ import annotations
 
 import json
@@ -12,8 +13,6 @@ from qgrav import __version__
 from qgrav.bench_ifo import load_real_gravity
 from qgrav.config import resolve_project_relative_path
 from qgrav.metrics import allan_deviation_overlapping
-from qgrav.reporting import build_html_report
-
 from qgrav.pipeline._common import (
     RunPaths,
     _compare_allan_backends,
@@ -25,18 +24,31 @@ from qgrav.pipeline._common import (
 )
 from qgrav.pipeline._plots import _make_real_gravity_plots
 from qgrav.pipeline._simulation import _add_simulation
+from qgrav.reporting import build_html_report
 
 logger = logging.getLogger(__name__)
 
 
-def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPaths, config_path: Path, *, project_root: Path | None = None) -> Path:
+def _run_real_gravity_pipeline(
+    cfg: dict[str, Any],
+    cfg_text: str,
+    paths: RunPaths,
+    config_path: Path,
+    *,
+    project_root: Path | None = None,
+) -> Path:
     grav_cfg = cfg.get("bench_real_gravity")
     if not isinstance(grav_cfg, dict):
         raise ValueError("Config missing required section 'bench_real_gravity'")
     data = load_real_gravity(
-        source_path=resolve_project_relative_path(config_path, grav_cfg["source_path"], project_root=project_root) or grav_cfg["source_path"],
+        source_path=resolve_project_relative_path(
+            config_path, grav_cfg["source_path"], project_root=project_root
+        )
+        or grav_cfg["source_path"],
         station_code=grav_cfg.get("station_code"),
-        metadata_path=resolve_project_relative_path(config_path, grav_cfg.get("metadata_path"), project_root=project_root),
+        metadata_path=resolve_project_relative_path(
+            config_path, grav_cfg.get("metadata_path"), project_root=project_root
+        ),
         segment_strategy=str(grav_cfg.get("segment_strategy", "longest_contiguous")),
         gap_tolerance_fraction=float(grav_cfg.get("gap_tolerance_fraction", 0.1)),
     )
@@ -45,7 +57,7 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
     t_full = np.asarray(data["t_full"], dtype=np.float64)
     x = np.asarray(data["gravity_residual"], dtype=np.float64)
     if x.size < 3:
-        raise ValueError('Dataset too small. Need at least 3 samples.')
+        raise ValueError("Dataset too small. Need at least 3 samples.")
     t = np.asarray(data["t"], dtype=np.float64)
     fs = float(data["sample_rate_hz"])
 
@@ -88,21 +100,23 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
                 tide_backend = str(grav_cfg.get("tide_backend", "auto"))
                 try:
                     tide_full = apply_tide_correction(
-                        unix_full, x_full,
-                        latitude_deg=float(lat), longitude_deg=float(lon),
+                        unix_full,
+                        x_full,
+                        latitude_deg=float(lat),
+                        longitude_deg=float(lon),
                         backend=tide_backend,
                     )
                     tide_seg = apply_tide_correction(
-                        unix_seg, x,
-                        latitude_deg=float(lat), longitude_deg=float(lon),
+                        unix_seg,
+                        x,
+                        latitude_deg=float(lat),
+                        longitude_deg=float(lon),
                         backend=tide_backend,
                     )
                     x_full = tide_full["corrected"]
                     x = tide_seg["corrected"]
                     tide_subtracted = tide_seg.get("tide_subtracted", np.array([]))
-                    corrections_applied.append(
-                        f"solid_earth_tide ({tide_seg['backend_used']})"
-                    )
+                    corrections_applied.append(f"solid_earth_tide ({tide_seg['backend_used']})")
                     correction_metrics["tide_rms_subtracted_ugal"] = float(
                         tide_seg["rms_subtracted_ugal"]
                     )
@@ -113,7 +127,9 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
         else:
             logger.warning("Tide correction requested but no station coordinates available")
             corrections_applied.append("SKIPPED:tide (no station coordinates)")
-            corrections_warnings.append("Tide correction skipped: no station coordinates in metadata")
+            corrections_warnings.append(
+                "Tide correction skipped: no station coordinates in metadata"
+            )
         # Optional pressure correction
         pressure_path = grav_cfg.get("pressure_csv_path")
         if pressure_path:
@@ -137,19 +153,27 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
                     else:
                         coverage = 1.0
                     if coverage < 0.5:
-                        logger.warning("Pressure coverage %.0f%% — skipping correction", coverage * 100)
-                        corrections_warnings.append(f"Pressure correction skipped: only {coverage*100:.0f}% temporal overlap")
+                        logger.warning(
+                            "Pressure coverage %.0f%% — skipping correction", coverage * 100
+                        )
+                        corrections_warnings.append(
+                            f"Pressure correction skipped: only {coverage*100:.0f}% temporal overlap"
+                        )
                     else:
                         if coverage < 0.95:
-                            logger.warning("Pressure coverage %.0f%% — applying with caution", coverage * 100)
-                            corrections_warnings.append(f"Pressure coverage low: {coverage*100:.0f}% temporal overlap")
+                            logger.warning(
+                                "Pressure coverage %.0f%% — applying with caution", coverage * 100
+                            )
+                            corrections_warnings.append(
+                                f"Pressure coverage low: {coverage*100:.0f}% temporal overlap"
+                            )
                         pressure_interp = np.interp(unix_seg, p_t, p_v)
-                        admittance = float(
-                            grav_cfg.get("pressure_admittance_nm_s2_per_hpa", -3.0)
-                        )
+                        admittance = float(grav_cfg.get("pressure_admittance_nm_s2_per_hpa", -3.0))
                         rms_pressure_before = float(np.std(x))
                         x = apply_pressure_correction(
-                            unix_seg, x, pressure_interp,
+                            unix_seg,
+                            x,
+                            pressure_interp,
                             admittance_nm_s2_per_hpa=admittance,
                         )
                         rms_pressure_after = float(np.std(x))
@@ -162,14 +186,25 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
             except Exception as exc:
                 logger.warning("Pressure correction skipped: %s", exc)
     # ----- end v0.8 corrections -----
-    psd_method, nperseg, noverlap, metrics_backend, allan_data_type, compare_allan_backends, comparison_backend = _stats_cfg(cfg)
+    (
+        psd_method,
+        nperseg,
+        noverlap,
+        metrics_backend,
+        allan_data_type,
+        compare_allan_backends,
+        comparison_backend,
+    ) = _stats_cfg(cfg)
     nperseg = min(max(8, nperseg), len(x))
     noverlap = min(max(1, noverlap), max(1, nperseg - 1))
     taus = _logspace_taus(duration_s=float(t[-1] - t[0]) if len(t) > 1 else 1.0, sample_rate_hz=fs)
 
-    adev = allan_deviation_overlapping(x, fs, taus, backend=metrics_backend, data_type=allan_data_type)
+    adev = allan_deviation_overlapping(
+        x, fs, taus, backend=metrics_backend, data_type=allan_data_type
+    )
 
-    from qgrav.metrics.allan import identify_noise_type, identify_noise_type_acf, allan_minimum
+    from qgrav.metrics.allan import allan_minimum, identify_noise_type, identify_noise_type_acf
+
     _adev_arr = np.asarray(adev["adev"])
     _taus_arr = np.asarray(adev["taus_s"])
     # v0.8: primary noise-ID is the lag-1 autocorrelation method (Riley 2004);
@@ -226,7 +261,12 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
         if comparison_backend == primary_backend:
             comparison_backend = "custom" if primary_backend != "custom" else "allantools"
         metrics["allan_backend_comparison"] = _compare_allan_backends(
-            x, fs, taus, primary_backend=primary_backend, reference_backend=comparison_backend, data_type=allan_data_type
+            x,
+            fs,
+            taus,
+            primary_backend=primary_backend,
+            reference_backend=comparison_backend,
+            data_type=allan_data_type,
         )
 
     save_dict: dict[str, np.ndarray] = {
@@ -245,6 +285,7 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
 
     try:
         from qgrav.physics.systematics import systematics_summary
+
         lat = data.get("latitude_deg")
         metrics["systematics"] = systematics_summary(
             latitude_deg=float(lat) if lat is not None else 45.0,
@@ -255,7 +296,22 @@ def _run_real_gravity_pipeline(cfg: dict[str, Any], cfg_text: str, paths: RunPat
     metrics_jsonable = _jsonable(metrics)
     paths.metrics_path.write_text(json.dumps(metrics_jsonable, indent=2), encoding="utf-8")
     np.savez_compressed(paths.data_path, **save_dict)
-    plot_paths = _make_real_gravity_plots(paths, metrics, t_full, x_full, t, x, fs, psd_method, nperseg, noverlap, adev, "simulation" in metrics)
+    plot_paths = _make_real_gravity_plots(
+        paths,
+        metrics,
+        t_full,
+        x_full,
+        t,
+        x,
+        fs,
+        psd_method,
+        nperseg,
+        noverlap,
+        adev,
+        "simulation" in metrics,
+    )
     _write_summary(paths.summary_path, metrics_jsonable)
     _write_run_metadata(paths.run_metadata_path, cfg, metrics_jsonable)
-    return build_html_report(run_dir=paths.run_dir, config_text=cfg_text, metrics=metrics_jsonable, plot_paths=plot_paths)
+    return build_html_report(
+        run_dir=paths.run_dir, config_text=cfg_text, metrics=metrics_jsonable, plot_paths=plot_paths
+    )

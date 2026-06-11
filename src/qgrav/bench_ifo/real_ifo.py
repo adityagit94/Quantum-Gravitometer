@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -52,7 +53,9 @@ def load_real_ifo_csv(
         raise FileNotFoundError(f"CSV not found: {path}")
 
     if has_header:
-        data = np.genfromtxt(
+        # Structured array (field access by name); typed Any because the numpy
+        # stubs cannot express str-keyed __getitem__ on structured dtypes.
+        data: Any = np.genfromtxt(
             path,
             delimiter=delimiter,
             names=True,
@@ -82,7 +85,9 @@ def load_real_ifo_csv(
         elif raw.ndim == 1:
             raw = raw.reshape(1, -1)
         if raw.shape[1] < 2:
-            raise ValueError("CSV without header must have at least 2 columns: I_meas,Q_meas or t,I_meas,Q_meas")
+            raise ValueError(
+                "CSV without header must have at least 2 columns: I_meas,Q_meas or t,I_meas,Q_meas"
+            )
         if raw.shape[1] == 2:
             if sample_rate_hz is None:
                 raise ValueError("Provide `sample_rate_hz` when CSV has no time column.")

@@ -7,9 +7,8 @@ import tempfile
 import threading
 import webbrowser
 from pathlib import Path
-from typing import Any
-
 from pathlib import Path as _PathForMPL
+from typing import Any
 
 _MPLDIR = _PathForMPL.home() / ".qgrav_mpl"
 _MPLDIR.mkdir(parents=True, exist_ok=True)
@@ -24,22 +23,22 @@ except Exception:
     logger.exception("Failed to enable TkAgg; falling back to Agg")
     matplotlib.use("Agg")
 
+import tkinter as tk
+from tkinter import BOTH, END, LEFT, VERTICAL, X, filedialog, messagebox, ttk
+
 import matplotlib.pyplot as plt
 import numpy as np
-import tkinter as tk
 import yaml
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-from tkinter import BOTH, END, LEFT, VERTICAL, X, filedialog, messagebox, ttk
 
 from qgrav.bench_ifo import load_real_gravity
 from qgrav.config import find_project_root, load_config, validate_config_structure
 from qgrav.datasets import list_stations_in_source
+from qgrav.gui.widgets import CollapsibleSection, MetricCards, ScrollableFrame, attach_tooltip
 from qgrav.metrics import allan_deviation_overlapping, available_allan_backends, compute_psd
 from qgrav.pipeline import run_pipeline
 from qgrav.visuals import available_plot_kinds, build_run_figure, load_run_bundle
-
-from qgrav.gui.widgets import CollapsibleSection, MetricCards, ScrollableFrame, attach_tooltip
 
 
 class QGravApp:
@@ -160,11 +159,28 @@ class QGravApp:
             logger.warning("Unable to switch ttk theme to clam: %s", exc)
         style.configure("App.TFrame", background="#eef3fb")
         style.configure("Hero.TFrame", background="#16324f")
-        style.configure("HeroTitle.TLabel", background="#16324f", foreground="#ffffff", font=("Segoe UI", 16, "bold"))
-        style.configure("HeroSub.TLabel", background="#16324f", foreground="#d5e4ff", font=("Segoe UI", 10))
+        style.configure(
+            "HeroTitle.TLabel",
+            background="#16324f",
+            foreground="#ffffff",
+            font=("Segoe UI", 16, "bold"),
+        )
+        style.configure(
+            "HeroSub.TLabel", background="#16324f", foreground="#d5e4ff", font=("Segoe UI", 10)
+        )
         style.configure("Card.TFrame", background="#ffffff", relief="flat")
-        style.configure("CardTitle.TLabel", background="#ffffff", foreground="#5b6880", font=("Segoe UI", 10, "bold"))
-        style.configure("CardValue.TLabel", background="#ffffff", foreground="#17355f", font=("Segoe UI", 14, "bold"))
+        style.configure(
+            "CardTitle.TLabel",
+            background="#ffffff",
+            foreground="#5b6880",
+            font=("Segoe UI", 10, "bold"),
+        )
+        style.configure(
+            "CardValue.TLabel",
+            background="#ffffff",
+            foreground="#17355f",
+            font=("Segoe UI", 14, "bold"),
+        )
         style.configure("Section.TLabelframe", padding=8)
         style.configure("Accent.TButton", font=("Segoe UI", 10, "bold"))
 
@@ -177,21 +193,37 @@ class QGravApp:
         hero = ttk.Frame(outer, style="Hero.TFrame", padding=16)
         hero.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         hero.columnconfigure(0, weight=1)
-        ttk.Label(hero, text="qgrav Research Workbench", style="HeroTitle.TLabel").grid(row=0, column=0, sticky="w")
-        ttk.Label(hero, text="simulation → validation → statistics → report", style="HeroSub.TLabel").grid(row=0, column=1, sticky="w", padx=16)
-        ttk.Label(hero, textvariable=self.status_var, style="HeroSub.TLabel").grid(row=0, column=2, sticky="e", padx=16)
+        ttk.Label(hero, text="qgrav Research Workbench", style="HeroTitle.TLabel").grid(
+            row=0, column=0, sticky="w"
+        )
+        ttk.Label(
+            hero, text="simulation → validation → statistics → report", style="HeroSub.TLabel"
+        ).grid(row=0, column=1, sticky="w", padx=16)
+        ttk.Label(hero, textvariable=self.status_var, style="HeroSub.TLabel").grid(
+            row=0, column=2, sticky="e", padx=16
+        )
 
         toolbar = ttk.Frame(outer, style="App.TFrame")
         toolbar.grid(row=1, column=0, sticky="ew", pady=(0, 8))
         toolbar.columnconfigure(1, weight=1)
         ttk.Label(toolbar, text="Config:").grid(row=0, column=0, sticky="w")
-        ttk.Entry(toolbar, textvariable=self.config_path_var).grid(row=0, column=1, sticky="ew", padx=8)
+        ttk.Entry(toolbar, textvariable=self.config_path_var).grid(
+            row=0, column=1, sticky="ew", padx=8
+        )
         ttk.Button(toolbar, text="Browse", command=self.pick_config).grid(row=0, column=2, padx=4)
-        ttk.Button(toolbar, text="Load", command=self.load_current_path).grid(row=0, column=3, padx=4)
-        ttk.Button(toolbar, text="Validate", command=self.validate_editor_config).grid(row=0, column=4, padx=4)
-        ttk.Button(toolbar, text="Save As", command=self.save_editor_as).grid(row=0, column=5, padx=4)
+        ttk.Button(toolbar, text="Load", command=self.load_current_path).grid(
+            row=0, column=3, padx=4
+        )
+        ttk.Button(toolbar, text="Validate", command=self.validate_editor_config).grid(
+            row=0, column=4, padx=4
+        )
+        ttk.Button(toolbar, text="Save As", command=self.save_editor_as).grid(
+            row=0, column=5, padx=4
+        )
         self._build_examples_menu(toolbar).grid(row=0, column=6, padx=4)
-        self.run_button = ttk.Button(toolbar, text="Run Pipeline", style="Accent.TButton", command=self.run_async)
+        self.run_button = ttk.Button(
+            toolbar, text="Run Pipeline", style="Accent.TButton", command=self.run_async
+        )
         self.run_button.grid(row=0, column=7, padx=(8, 0))
 
         self.progress = ttk.Progressbar(outer, variable=self.progress_var, mode="indeterminate")
@@ -202,9 +234,16 @@ class QGravApp:
         notebook = ttk.Notebook(outer)
         notebook.grid(row=4, column=0, sticky="nsew")
         self.notebook = notebook
-        tab_names = ["Setup & Run", "Data Browser", "Config Editor", "Results & Visuals", "Validation", "Guides"]
+        tab_names = [
+            "Setup & Run",
+            "Data Browser",
+            "Config Editor",
+            "Results & Visuals",
+            "Validation",
+            "Guides",
+        ]
         tabs = [ttk.Frame(notebook, padding=10) for _ in tab_names]
-        for tab, name in zip(tabs, tab_names):
+        for tab, name in zip(tabs, tab_names, strict=False):
             notebook.add(tab, text=name)
         self._build_experiment_tab(tabs[0])
         self._build_data_browser_tab(tabs[1])
@@ -221,10 +260,17 @@ class QGravApp:
         menu.add_command(label="AISim Rabi", command=self._load_bundled_aisim_example)
         menu.add_command(label="AISim Phase", command=self._load_bundled_aisim_phase_example)
         menu.add_command(label="AISim Gravity", command=self._load_bundled_aisim_gravity_example)
-        menu.add_command(label="AISim Multi-drop (realistic ASD)", command=self._load_bundled_aisim_multi_drop_example)
-        menu.add_command(label="AISim Vibration", command=self._load_bundled_aisim_vibration_example)
+        menu.add_command(
+            label="AISim Multi-drop (realistic ASD)",
+            command=self._load_bundled_aisim_multi_drop_example,
+        )
+        menu.add_command(
+            label="AISim Vibration", command=self._load_bundled_aisim_vibration_example
+        )
         menu.add_separator()
-        menu.add_command(label="Real gravity example", command=self._load_bundled_real_gravity_example)
+        menu.add_command(
+            label="Real gravity example", command=self._load_bundled_real_gravity_example
+        )
         menu_btn["menu"] = menu
         return menu_btn
 
@@ -251,7 +297,9 @@ class QGravApp:
         controls_parent = scroller.inner
         controls_parent.columnconfigure(0, weight=1)
 
-        self.workflow_frame = ttk.Labelframe(controls_parent, text="Start Here", style="Section.TLabelframe")
+        self.workflow_frame = ttk.Labelframe(
+            controls_parent, text="Start Here", style="Section.TLabelframe"
+        )
         self.workflow_frame.pack(fill=X, expand=False, pady=(0, 10))
         ttk.Label(
             self.workflow_frame,
@@ -268,10 +316,22 @@ class QGravApp:
             state="readonly",
             width=18,
         ).pack(side=LEFT, padx=8)
-        ttk.Label(self.workflow_frame, textvariable=self.workflow_summary_var, wraplength=430, foreground="#334e68").pack(anchor="w", padx=6, pady=(8, 2))
-        ttk.Label(self.workflow_frame, textvariable=self.next_steps_var, wraplength=430, foreground="#5b6880").pack(anchor="w", padx=6, pady=(0, 2))
+        ttk.Label(
+            self.workflow_frame,
+            textvariable=self.workflow_summary_var,
+            wraplength=430,
+            foreground="#334e68",
+        ).pack(anchor="w", padx=6, pady=(8, 2))
+        ttk.Label(
+            self.workflow_frame,
+            textvariable=self.next_steps_var,
+            wraplength=430,
+            foreground="#5b6880",
+        ).pack(anchor="w", padx=6, pady=(0, 2))
 
-        self.analysis_frame = ttk.Labelframe(controls_parent, text="Analysis settings", style="Section.TLabelframe")
+        self.analysis_frame = ttk.Labelframe(
+            controls_parent, text="Analysis settings", style="Section.TLabelframe"
+        )
         self.analysis_frame.pack(fill=X, expand=False, pady=(0, 10))
         ttk.Label(
             self.analysis_frame,
@@ -284,10 +344,23 @@ class QGravApp:
         for col in range(2):
             analysis_fields.columnconfigure(col, weight=1)
         self._labeled_entry(analysis_fields, "Run name", self.run_name_var, 0, 0)
-        self._labeled_combo(analysis_fields, "Allan backend", self.backend_var, ["auto", "custom"] + [b for b in available_allan_backends() if b not in {"custom"}], 0, 1)
-        self._labeled_combo(analysis_fields, "Allan data type", self.data_type_var, ["freq", "phase"], 1, 0)
-        self._labeled_combo(analysis_fields, "PSD method", self.psd_method_var, ["welch", "periodogram"], 1, 1)
-        ttk.Checkbutton(analysis_fields, text="Compare Allan backends", variable=self.compare_backends_var).grid(row=2, column=0, sticky="w", padx=6, pady=6)
+        self._labeled_combo(
+            analysis_fields,
+            "Allan backend",
+            self.backend_var,
+            ["auto", "custom"] + [b for b in available_allan_backends() if b not in {"custom"}],
+            0,
+            1,
+        )
+        self._labeled_combo(
+            analysis_fields, "Allan data type", self.data_type_var, ["freq", "phase"], 1, 0
+        )
+        self._labeled_combo(
+            analysis_fields, "PSD method", self.psd_method_var, ["welch", "periodogram"], 1, 1
+        )
+        ttk.Checkbutton(
+            analysis_fields, text="Compare Allan backends", variable=self.compare_backends_var
+        ).grid(row=2, column=0, sticky="w", padx=6, pady=6)
         ttk.Label(
             analysis_fields,
             text="Use Allantools/Welch for report-quality real-data analysis. Periodogram/custom are mainly for debugging or comparison.",
@@ -295,13 +368,17 @@ class QGravApp:
             foreground="#5b6880",
         ).grid(row=2, column=1, sticky="w", padx=6, pady=6)
 
-        self.real_data_frame = ttk.Labelframe(controls_parent, text="Real-data input", style="Section.TLabelframe")
+        self.real_data_frame = ttk.Labelframe(
+            controls_parent, text="Real-data input", style="Section.TLabelframe"
+        )
         self.real_data_frame.pack(fill=X, expand=False, pady=(0, 10))
         real_top = ttk.Frame(self.real_data_frame)
         real_top.pack(fill=X, expand=True)
         for col in range(2):
             real_top.columnconfigure(col, weight=1)
-        self._labeled_combo(real_top, "Bench type", self.bench_type_var, ["real_gravity", "real"], 0, 0)
+        self._labeled_combo(
+            real_top, "Bench type", self.bench_type_var, ["real_gravity", "real"], 0, 0
+        )
         ttk.Label(
             real_top,
             text="Use real_gravity for IGETS/Larzac-style gravity residual analysis. Use real for interferometer-style CSV data.",
@@ -315,9 +392,15 @@ class QGravApp:
         rg_fields.pack(fill=X, expand=True)
         for col in range(2):
             rg_fields.columnconfigure(col, weight=1)
-        self._labeled_entry(rg_fields, "Gravity source (.zip/.ggp/dir/csv)", self.real_gravity_source_var, 0, 0)
+        self._labeled_entry(
+            rg_fields, "Gravity source (.zip/.ggp/dir/csv)", self.real_gravity_source_var, 0, 0
+        )
         self._labeled_entry(rg_fields, "Gravity station code", self.real_gravity_station_var, 0, 1)
-        ttk.Button(self.real_gravity_subframe, text="Use browser selection", command=self._use_browser_selection_for_gravity).pack(anchor="w", padx=6, pady=(4, 0))
+        ttk.Button(
+            self.real_gravity_subframe,
+            text="Use browser selection",
+            command=self._use_browser_selection_for_gravity,
+        ).pack(anchor="w", padx=6, pady=(4, 0))
 
         self.real_ifo_subframe = ttk.Frame(self.real_data_frame)
         rifo_fields = ttk.Frame(self.real_ifo_subframe)
@@ -333,7 +416,9 @@ class QGravApp:
             foreground="#5b6880",
         ).pack(anchor="w", padx=6, pady=(4, 0))
 
-        self.synthetic_frame = ttk.Labelframe(controls_parent, text="Synthetic gravimeter study", style="Section.TLabelframe")
+        self.synthetic_frame = ttk.Labelframe(
+            controls_parent, text="Synthetic gravimeter study", style="Section.TLabelframe"
+        )
         self.synthetic_frame.pack(fill=X, expand=False, pady=(0, 10))
         ttk.Label(
             self.synthetic_frame,
@@ -346,13 +431,32 @@ class QGravApp:
             sim_top.columnconfigure(col, weight=1)
         en = ttk.Checkbutton(sim_top, text="Enable AISim module", variable=self.sim_enabled_var)
         en.grid(row=0, column=0, sticky="w", padx=6, pady=6)
-        attach_tooltip(en, "Turn the synthetic atom-interferometer engine on. When off, the pipeline only does data analysis.")
-        self._labeled_combo(sim_top, "Simulation backend", self.sim_backend_var, ["aisim"], 0, 1,
-                            tip="AISim is the vendored semiclassical atom-interferometer backend (the only backend currently shipped).")
+        attach_tooltip(
+            en,
+            "Turn the synthetic atom-interferometer engine on. When off, the pipeline only does data analysis.",
+        )
         self._labeled_combo(
-            sim_top, "Study model", self.sim_model_var,
-            ["rabi_scan", "mach_zehnder_phase_scan", "gravity_sweep", "multi_drop_cycle", "vibration_sensitivity_sweep"],
-            1, 0,
+            sim_top,
+            "Simulation backend",
+            self.sim_backend_var,
+            ["aisim"],
+            0,
+            1,
+            tip="AISim is the vendored semiclassical atom-interferometer backend (the only backend currently shipped).",
+        )
+        self._labeled_combo(
+            sim_top,
+            "Study model",
+            self.sim_model_var,
+            [
+                "rabi_scan",
+                "mach_zehnder_phase_scan",
+                "gravity_sweep",
+                "multi_drop_cycle",
+                "vibration_sensitivity_sweep",
+            ],
+            1,
+            0,
             tip=(
                 "rabi_scan: pulse-area calibration.\n"
                 "mach_zehnder_phase_scan: a single 3-pulse fringe.\n"
@@ -361,24 +465,78 @@ class QGravApp:
                 "vibration_sensitivity_sweep: contrast vs reference-mirror vibration."
             ),
         )
-        self._labeled_entry(sim_top, "Atoms", self.sim_atoms_var, 1, 1,
-                            tip="Number of atoms in the Monte-Carlo ensemble. More atoms = lower projection-noise floor (sigma_g ~ 1/sqrt(N)) but slower.")
-        self._labeled_entry(sim_top, "Steps / points", self.sim_steps_var, 2, 0,
-                            tip="Number of scan points (Rabi tau steps, phase points, or gravity points). Ignored by multi_drop_cycle (use 'drops per cycle' below).")
-        self._labeled_entry(sim_top, "π/2 pulse duration (s)", self.sim_tau_pi_half_var, 2, 1,
-                            tip="Duration of a pi/2 Raman pulse. Freier 2016 uses ~17 us; the default is 23 us.")
-        self._labeled_entry(sim_top, "Tau step (s)", self.sim_tau_step_var, 3, 0,
-                            tip="Rabi-scan pulse-duration increment per step (rabi_scan only).")
-        self._labeled_entry(sim_top, "Interferometer T (s)", self.sim_interferometer_time_var, 3, 1,
-                            tip="Pulse-separation time T. Phase scales as k_eff*g*T^2, so sensitivity grows as T^2. Freier 2016 uses 260 ms.")
-        self._labeled_entry(sim_top, "Gravity center (m/s²)", self.sim_gravity_center_var, 4, 0,
-                            tip="Central gravity value for a gravity_sweep, or the reference g for vibration studies.")
-        self._labeled_entry(sim_top, "Gravity span (m/s²)", self.sim_gravity_span_var, 4, 1,
-                            tip="Full width of the gravity_sweep around the centre value (e.g. 6e-6 m/s^2).")
-        self._labeled_entry(sim_top, "Vibration freq (Hz)", self.sim_vibration_freq_var, 5, 0,
-                            tip="Reference-mirror vibration frequency (vibration_sensitivity_sweep only).")
-        self._labeled_entry(sim_top, "Max vibration amp (m)", self.sim_vibration_amp_max_var, 5, 1,
-                            tip="Largest mirror-vibration amplitude in the sweep (vibration_sensitivity_sweep only).")
+        self._labeled_entry(
+            sim_top,
+            "Atoms",
+            self.sim_atoms_var,
+            1,
+            1,
+            tip="Number of atoms in the Monte-Carlo ensemble. More atoms = lower projection-noise floor (sigma_g ~ 1/sqrt(N)) but slower.",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Steps / points",
+            self.sim_steps_var,
+            2,
+            0,
+            tip="Number of scan points (Rabi tau steps, phase points, or gravity points). Ignored by multi_drop_cycle (use 'drops per cycle' below).",
+        )
+        self._labeled_entry(
+            sim_top,
+            "π/2 pulse duration (s)",
+            self.sim_tau_pi_half_var,
+            2,
+            1,
+            tip="Duration of a pi/2 Raman pulse. Freier 2016 uses ~17 us; the default is 23 us.",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Tau step (s)",
+            self.sim_tau_step_var,
+            3,
+            0,
+            tip="Rabi-scan pulse-duration increment per step (rabi_scan only).",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Interferometer T (s)",
+            self.sim_interferometer_time_var,
+            3,
+            1,
+            tip="Pulse-separation time T. Phase scales as k_eff*g*T^2, so sensitivity grows as T^2. Freier 2016 uses 260 ms.",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Gravity center (m/s²)",
+            self.sim_gravity_center_var,
+            4,
+            0,
+            tip="Central gravity value for a gravity_sweep, or the reference g for vibration studies.",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Gravity span (m/s²)",
+            self.sim_gravity_span_var,
+            4,
+            1,
+            tip="Full width of the gravity_sweep around the centre value (e.g. 6e-6 m/s^2).",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Vibration freq (Hz)",
+            self.sim_vibration_freq_var,
+            5,
+            0,
+            tip="Reference-mirror vibration frequency (vibration_sensitivity_sweep only).",
+        )
+        self._labeled_entry(
+            sim_top,
+            "Max vibration amp (m)",
+            self.sim_vibration_amp_max_var,
+            5,
+            1,
+            tip="Largest mirror-vibration amplitude in the sweep (vibration_sensitivity_sweep only).",
+        )
 
         # --- Advanced physics (collapsed by default) ---------------------
         adv = CollapsibleSection(
@@ -390,20 +548,62 @@ class QGravApp:
         adv_fields = adv.body
         for col in range(2):
             adv_fields.columnconfigure(col, weight=1)
-        self._labeled_entry(adv_fields, "Random seed", self.sim_seed_var, 0, 0,
-                            tip="Seed for the atom-ensemble RNG. Fix it for reproducible runs.")
-        self._labeled_entry(adv_fields, "Single-photon detuning (Hz)", self.sim_single_photon_detuning_var, 0, 1,
-                            tip="Raman single-photon detuning Delta. Sets the AC-Stark / light shift. Freier 2016 uses about -700 MHz.")
-        self._labeled_check(adv_fields, "Gravity propagation (ballistic)", self.sim_gravity_propagation_var, 1, 0,
-                            tip="If on, the phase emerges from real ballistic free-fall + chirped laser instead of being injected analytically. The honest 'emergent gravity' path.")
-        self._labeled_check(adv_fields, "Lock to mid-fringe", self.sim_lock_to_midfringe_var, 1, 1,
-                            tip="gravity_sweep only: bias the interferometer to the steepest, most sensitive point of the fringe.")
-        self._labeled_entry(adv_fields, "Gravity gradient (1/m)", self.sim_gravity_gradient_var, 2, 0,
-                            tip="Vertical gravity gradient d g / d z (e.g. -3.1e-6 s^-2). 0 disables it.")
-        self._labeled_entry(adv_fields, "Wavefront Zernike coeffs", self.sim_wavefront_zernike_var, 2, 1,
-                            tip="Comma-separated Zernike coefficients in metres of wavefront error, e.g. '0,0,0,5e-9' (defocus). Blank = flat wavefront.")
-        self._labeled_entry(adv_fields, "Wavefront radius (m)", self.sim_wavefront_radius_var, 3, 0,
-                            tip="Beam radius over which the Zernike wavefront is normalised (default 0.05 m).")
+        self._labeled_entry(
+            adv_fields,
+            "Random seed",
+            self.sim_seed_var,
+            0,
+            0,
+            tip="Seed for the atom-ensemble RNG. Fix it for reproducible runs.",
+        )
+        self._labeled_entry(
+            adv_fields,
+            "Single-photon detuning (Hz)",
+            self.sim_single_photon_detuning_var,
+            0,
+            1,
+            tip="Raman single-photon detuning Delta. Sets the AC-Stark / light shift. Freier 2016 uses about -700 MHz.",
+        )
+        self._labeled_check(
+            adv_fields,
+            "Gravity propagation (ballistic)",
+            self.sim_gravity_propagation_var,
+            1,
+            0,
+            tip="If on, the phase emerges from real ballistic free-fall + chirped laser instead of being injected analytically. The honest 'emergent gravity' path.",
+        )
+        self._labeled_check(
+            adv_fields,
+            "Lock to mid-fringe",
+            self.sim_lock_to_midfringe_var,
+            1,
+            1,
+            tip="gravity_sweep only: bias the interferometer to the steepest, most sensitive point of the fringe.",
+        )
+        self._labeled_entry(
+            adv_fields,
+            "Gravity gradient (1/m)",
+            self.sim_gravity_gradient_var,
+            2,
+            0,
+            tip="Vertical gravity gradient d g / d z (e.g. -3.1e-6 s^-2). 0 disables it.",
+        )
+        self._labeled_entry(
+            adv_fields,
+            "Wavefront Zernike coeffs",
+            self.sim_wavefront_zernike_var,
+            2,
+            1,
+            tip="Comma-separated Zernike coefficients in metres of wavefront error, e.g. '0,0,0,5e-9' (defocus). Blank = flat wavefront.",
+        )
+        self._labeled_entry(
+            adv_fields,
+            "Wavefront radius (m)",
+            self.sim_wavefront_radius_var,
+            3,
+            0,
+            tip="Beam radius over which the Zernike wavefront is normalised (default 0.05 m).",
+        )
 
         # --- Multi-drop noise budget (collapsed by default) --------------
         noise = CollapsibleSection(
@@ -415,37 +615,118 @@ class QGravApp:
         nf = noise.body
         for col in range(2):
             nf.columnconfigure(col, weight=1)
-        self._labeled_entry(nf, "Drops per cycle", self.sim_n_drops_var, 0, 0,
-                            tip="Number of repeated measurement drops. The simulated ASD/Allan curve is built from this time series.")
-        self._labeled_entry(nf, "Cycle time (s)", self.sim_cycle_time_var, 0, 1,
-                            tip="Time per drop (1/repetition-rate). Sets the time axis for ASD and Allan deviation. Freier 2016: 1.5 s.")
-        self._labeled_entry(nf, "True gravity (m/s²)", self.sim_gravity_true_var, 1, 0,
-                            tip="The ground-truth g the simulated instrument is trying to recover.")
-        self._labeled_entry(nf, "Detection sigma_p", self.sim_detection_sigma_p_var, 1, 1,
-                            tip="Per-shot detection noise on the excited fraction P (technical/electronic). Blank = use shot-noise from atom number only. Freier 2016: ~6e-3.")
-        self._labeled_entry(nf, "Raman phase noise (rad)", self.sim_raman_phase_noise_var, 2, 0,
-                            tip="Per-shot laser/Raman + residual-vibration phase noise (rad RMS), added directly to the interferometer phase.")
-        self._labeled_check(nf, "Correlated seismic vibration", self.sim_correlated_vibration_var, 2, 1,
-                            tip="If on, inject a time-correlated seismic vibration series (Peterson model) instead of white phase noise.")
-        self._labeled_combo(nf, "Seismic model", self.sim_seismic_model_var, ["nlnm", "nhnm"], 3, 0,
-                            tip="Peterson New Low / High Noise Model for the correlated seismic background.")
-        self._labeled_entry(nf, "Isolation cutoff (Hz)", self.sim_isolation_cutoff_var, 3, 1,
-                            tip="Vibration-isolation corner frequency. Vibration below this is suppressed. 0 = no isolation.")
-        self._labeled_check(nf, "Fit fringe visibility", self.sim_fit_visibility_var, 4, 0,
-                            tip="Fit the contrast V from the simulated data and use the same V for the P->g inversion (keeps the noise budget self-consistent).")
-        self._labeled_check(nf, "Enable fringe-lock servo", self.sim_servo_enabled_var, 4, 1,
-                            tip="Close a feedback loop that steers each drop back to mid-fringe (as a real gravimeter does).")
-        self._labeled_combo(nf, "Servo type", self.sim_servo_type_var, ["integrator", "pid"], 5, 0,
-                            tip="integrator: simple I servo. pid: full proportional-integral-derivative with anti-windup.")
+        self._labeled_entry(
+            nf,
+            "Drops per cycle",
+            self.sim_n_drops_var,
+            0,
+            0,
+            tip="Number of repeated measurement drops. The simulated ASD/Allan curve is built from this time series.",
+        )
+        self._labeled_entry(
+            nf,
+            "Cycle time (s)",
+            self.sim_cycle_time_var,
+            0,
+            1,
+            tip="Time per drop (1/repetition-rate). Sets the time axis for ASD and Allan deviation. Freier 2016: 1.5 s.",
+        )
+        self._labeled_entry(
+            nf,
+            "True gravity (m/s²)",
+            self.sim_gravity_true_var,
+            1,
+            0,
+            tip="The ground-truth g the simulated instrument is trying to recover.",
+        )
+        self._labeled_entry(
+            nf,
+            "Detection sigma_p",
+            self.sim_detection_sigma_p_var,
+            1,
+            1,
+            tip="Per-shot detection noise on the excited fraction P (technical/electronic). Blank = use shot-noise from atom number only. Freier 2016: ~6e-3.",
+        )
+        self._labeled_entry(
+            nf,
+            "Raman phase noise (rad)",
+            self.sim_raman_phase_noise_var,
+            2,
+            0,
+            tip="Per-shot laser/Raman + residual-vibration phase noise (rad RMS), added directly to the interferometer phase.",
+        )
+        self._labeled_check(
+            nf,
+            "Correlated seismic vibration",
+            self.sim_correlated_vibration_var,
+            2,
+            1,
+            tip="If on, inject a time-correlated seismic vibration series (Peterson model) instead of white phase noise.",
+        )
+        self._labeled_combo(
+            nf,
+            "Seismic model",
+            self.sim_seismic_model_var,
+            ["nlnm", "nhnm"],
+            3,
+            0,
+            tip="Peterson New Low / High Noise Model for the correlated seismic background.",
+        )
+        self._labeled_entry(
+            nf,
+            "Isolation cutoff (Hz)",
+            self.sim_isolation_cutoff_var,
+            3,
+            1,
+            tip="Vibration-isolation corner frequency. Vibration below this is suppressed. 0 = no isolation.",
+        )
+        self._labeled_check(
+            nf,
+            "Fit fringe visibility",
+            self.sim_fit_visibility_var,
+            4,
+            0,
+            tip="Fit the contrast V from the simulated data and use the same V for the P->g inversion (keeps the noise budget self-consistent).",
+        )
+        self._labeled_check(
+            nf,
+            "Enable fringe-lock servo",
+            self.sim_servo_enabled_var,
+            4,
+            1,
+            tip="Close a feedback loop that steers each drop back to mid-fringe (as a real gravimeter does).",
+        )
+        self._labeled_combo(
+            nf,
+            "Servo type",
+            self.sim_servo_type_var,
+            ["integrator", "pid"],
+            5,
+            0,
+            tip="integrator: simple I servo. pid: full proportional-integral-derivative with anti-windup.",
+        )
         servo_gains = ttk.Frame(nf)
         servo_gains.grid(row=6, column=0, columnspan=2, sticky="ew")
         for col in range(3):
             servo_gains.columnconfigure(col, weight=1)
-        self._labeled_entry(servo_gains, "Servo kp", self.sim_servo_kp_var, 0, 0, tip="Proportional gain (pid).")
-        self._labeled_entry(servo_gains, "Servo ki", self.sim_servo_ki_var, 0, 1, tip="Integral gain (integrator and pid).")
-        self._labeled_entry(servo_gains, "Servo kd", self.sim_servo_kd_var, 0, 2, tip="Derivative gain (pid).")
+        self._labeled_entry(
+            servo_gains, "Servo kp", self.sim_servo_kp_var, 0, 0, tip="Proportional gain (pid)."
+        )
+        self._labeled_entry(
+            servo_gains,
+            "Servo ki",
+            self.sim_servo_ki_var,
+            0,
+            1,
+            tip="Integral gain (integrator and pid).",
+        )
+        self._labeled_entry(
+            servo_gains, "Servo kd", self.sim_servo_kd_var, 0, 2, tip="Derivative gain (pid)."
+        )
 
-        self.workflow_compare_note = ttk.Labelframe(controls_parent, text="Advanced mode", style="Section.TLabelframe")
+        self.workflow_compare_note = ttk.Labelframe(
+            controls_parent, text="Advanced mode", style="Section.TLabelframe"
+        )
         self.workflow_compare_note.pack(fill=X, expand=False, pady=(0, 10))
         ttk.Label(
             self.workflow_compare_note,
@@ -456,29 +737,45 @@ class QGravApp:
 
         actions = ttk.Labelframe(controls_parent, text="Actions", style="Section.TLabelframe")
         actions.pack(fill=X, expand=False, pady=(0, 10))
-        ttk.Label(actions, textvariable=self.current_context_var, wraplength=430, foreground="#5b6880").pack(anchor="w", padx=6, pady=(2, 6))
+        ttk.Label(
+            actions, textvariable=self.current_context_var, wraplength=430, foreground="#5b6880"
+        ).pack(anchor="w", padx=6, pady=(2, 6))
         btns = ttk.Frame(actions)
         btns.pack(fill=X, padx=6, pady=(0, 4))
-        ttk.Button(btns, text="Pull from editor", command=self.sync_controls_from_editor).pack(side=LEFT, padx=(0, 6))
-        ttk.Button(btns, text="Apply controls to editor", command=self.apply_quick_controls_to_editor).pack(side=LEFT, padx=6)
+        ttk.Button(btns, text="Pull from editor", command=self.sync_controls_from_editor).pack(
+            side=LEFT, padx=(0, 6)
+        )
+        ttk.Button(
+            btns, text="Apply controls to editor", command=self.apply_quick_controls_to_editor
+        ).pack(side=LEFT, padx=6)
         ttk.Button(btns, text="Open report", command=self.open_report).pack(side=LEFT, padx=6)
-        ttk.Button(btns, text="Open run folder", command=self.open_run_folder).pack(side=LEFT, padx=6)
+        ttk.Button(btns, text="Open run folder", command=self.open_run_folder).pack(
+            side=LEFT, padx=6
+        )
 
-        summary = ttk.Labelframe(right, text="Recommended next steps & run summary", style="Section.TLabelframe")
+        summary = ttk.Labelframe(
+            right, text="Recommended next steps & run summary", style="Section.TLabelframe"
+        )
         summary.grid(row=0, column=0, sticky="nsew", pady=(0, 8))
         summary.rowconfigure(1, weight=1)
         summary.columnconfigure(0, weight=1)
-        ttk.Label(summary, textvariable=self.next_steps_var, wraplength=760, foreground="#334e68").grid(row=0, column=0, sticky="ew", padx=6, pady=(4, 8))
+        ttk.Label(
+            summary, textvariable=self.next_steps_var, wraplength=760, foreground="#334e68"
+        ).grid(row=0, column=0, sticky="ew", padx=6, pady=(4, 8))
         summary_frame = ttk.Frame(summary)
         summary_frame.grid(row=1, column=0, sticky="nsew")
         summary_frame.rowconfigure(0, weight=1)
         summary_frame.columnconfigure(0, weight=1)
         self.live_summary = tk.Text(summary_frame, wrap="word", height=24)
         self.live_summary.grid(row=0, column=0, sticky="nsew")
-        summary_scroll = ttk.Scrollbar(summary_frame, orient=VERTICAL, command=self.live_summary.yview)
+        summary_scroll = ttk.Scrollbar(
+            summary_frame, orient=VERTICAL, command=self.live_summary.yview
+        )
         summary_scroll.grid(row=0, column=1, sticky="ns")
         self.live_summary.configure(yscrollcommand=summary_scroll.set)
-        self.live_summary.insert("1.0", "Load a config, choose a workflow, then run the pipeline.\n")
+        self.live_summary.insert(
+            "1.0", "Load a config, choose a workflow, then run the pipeline.\n"
+        )
 
         runlog = ttk.Labelframe(right, text="Live run log", style="Section.TLabelframe")
         runlog.grid(row=1, column=0, sticky="nsew")
@@ -511,10 +808,16 @@ class QGravApp:
         row.pack(fill=X, expand=True)
         row.columnconfigure(1, weight=1)
         ttk.Label(row, text="Source").grid(row=0, column=0, sticky="w")
-        ttk.Entry(row, textvariable=self.browser_dataset_var).grid(row=0, column=1, sticky="ew", padx=8)
-        ttk.Button(row, text="Browse", command=self._browse_dataset_source).grid(row=0, column=2, padx=4)
+        ttk.Entry(row, textvariable=self.browser_dataset_var).grid(
+            row=0, column=1, sticky="ew", padx=8
+        )
+        ttk.Button(row, text="Browse", command=self._browse_dataset_source).grid(
+            row=0, column=2, padx=4
+        )
         ttk.Button(row, text="Scan", command=self.scan_dataset_source).grid(row=0, column=3, padx=4)
-        ttk.Button(row, text="Use sample", command=self._load_sample_dataset).grid(row=0, column=4, padx=4)
+        ttk.Button(row, text="Use sample", command=self._load_sample_dataset).grid(
+            row=0, column=4, padx=4
+        )
         ttk.Label(
             top,
             text="Use this tab to inspect available stations before filling the Setup form. For IGETS/Larzac data, scan the folder first, then preview one station.",
@@ -530,7 +833,9 @@ class QGravApp:
         tree_frame.grid(row=0, column=0, sticky="nsew")
         tree_frame.rowconfigure(0, weight=1)
         tree_frame.columnconfigure(0, weight=1)
-        self.station_tree = ttk.Treeview(tree_frame, columns=("lon", "lat"), show="tree headings", height=18)
+        self.station_tree = ttk.Treeview(
+            tree_frame, columns=("lon", "lat"), show="tree headings", height=18
+        )
         self.station_tree.heading("#0", text="Station")
         self.station_tree.heading("lon", text="Longitude")
         self.station_tree.heading("lat", text="Latitude")
@@ -538,7 +843,9 @@ class QGravApp:
         self.station_tree.column("lon", width=90)
         self.station_tree.column("lat", width=90)
         self.station_tree.grid(row=0, column=0, sticky="nsew")
-        station_tree_scroll = ttk.Scrollbar(tree_frame, orient=VERTICAL, command=self.station_tree.yview)
+        station_tree_scroll = ttk.Scrollbar(
+            tree_frame, orient=VERTICAL, command=self.station_tree.yview
+        )
         station_tree_scroll.grid(row=0, column=1, sticky="ns")
         self.station_tree.configure(yscrollcommand=station_tree_scroll.set)
         self.station_tree.bind("<<TreeviewSelect>>", lambda _e: self._on_station_selected())
@@ -553,14 +860,22 @@ class QGravApp:
         info_frame.columnconfigure(0, weight=1)
         self.station_info = tk.Text(info_frame, wrap="word", height=12)
         self.station_info.grid(row=0, column=0, sticky="nsew")
-        station_info_scroll = ttk.Scrollbar(info_frame, orient=VERTICAL, command=self.station_info.yview)
+        station_info_scroll = ttk.Scrollbar(
+            info_frame, orient=VERTICAL, command=self.station_info.yview
+        )
         station_info_scroll.grid(row=0, column=1, sticky="ns")
         self.station_info.configure(yscrollcommand=station_info_scroll.set)
         controls = ttk.Frame(info_box)
         controls.grid(row=1, column=0, sticky="ew", pady=(8, 0))
-        ttk.Button(controls, text="Preview selected", command=self.preview_selected_station).pack(side=LEFT, padx=4)
-        ttk.Button(controls, text="Create config", command=self.create_real_gravity_config_from_selection).pack(side=LEFT, padx=4)
-        ttk.Button(controls, text="Use in Setup", command=self._use_browser_selection_for_gravity).pack(side=LEFT, padx=4)
+        ttk.Button(controls, text="Preview selected", command=self.preview_selected_station).pack(
+            side=LEFT, padx=4
+        )
+        ttk.Button(
+            controls, text="Create config", command=self.create_real_gravity_config_from_selection
+        ).pack(side=LEFT, padx=4)
+        ttk.Button(
+            controls, text="Use in Setup", command=self._use_browser_selection_for_gravity
+        ).pack(side=LEFT, padx=4)
 
         preview = ttk.Labelframe(right, text="Station preview", style="Section.TLabelframe")
         preview.grid(row=0, column=0, sticky="nsew")
@@ -615,7 +930,12 @@ class QGravApp:
         metrics_box.columnconfigure(0, weight=1)
         artifact_bar = ttk.Frame(metrics_box)
         artifact_bar.grid(row=0, column=0, sticky="ew", pady=(0, 6))
-        for label, cmd in [("Open HTML", self.open_report), ("Run folder", self.open_run_folder), ("Metrics JSON", self.open_metrics_file), ("Summary", self.open_summary_file)]:
+        for label, cmd in [
+            ("Open HTML", self.open_report),
+            ("Run folder", self.open_run_folder),
+            ("Metrics JSON", self.open_metrics_file),
+            ("Summary", self.open_summary_file),
+        ]:
             ttk.Button(artifact_bar, text=label, command=cmd).pack(side=LEFT, padx=6)
         ttk.Label(
             metrics_box,
@@ -633,21 +953,31 @@ class QGravApp:
         self.metrics_tree.column("#0", width=220, stretch=True)
         self.metrics_tree.column("value", width=220, stretch=True)
         self.metrics_tree.grid(row=0, column=0, sticky="nsew")
-        metrics_scroll_y = ttk.Scrollbar(metrics_frame, orient=VERTICAL, command=self.metrics_tree.yview)
+        metrics_scroll_y = ttk.Scrollbar(
+            metrics_frame, orient=VERTICAL, command=self.metrics_tree.yview
+        )
         metrics_scroll_y.grid(row=0, column=1, sticky="ns")
-        metrics_scroll_x = ttk.Scrollbar(metrics_frame, orient="horizontal", command=self.metrics_tree.xview)
+        metrics_scroll_x = ttk.Scrollbar(
+            metrics_frame, orient="horizontal", command=self.metrics_tree.xview
+        )
         metrics_scroll_x.grid(row=1, column=0, sticky="ew")
-        self.metrics_tree.configure(yscrollcommand=metrics_scroll_y.set, xscrollcommand=metrics_scroll_x.set)
+        self.metrics_tree.configure(
+            yscrollcommand=metrics_scroll_y.set, xscrollcommand=metrics_scroll_x.set
+        )
 
         visuals_box = ttk.Labelframe(right, text="Interactive visuals", style="Section.TLabelframe")
         visuals_box.grid(row=0, column=0, sticky="nsew")
         visuals_box.rowconfigure(3, weight=1)
         visuals_box.columnconfigure(0, weight=1)
-        ttk.Label(visuals_box, textvariable=self.plot_title_var, foreground="#5b6880", wraplength=760).grid(row=0, column=0, sticky="ew", padx=6, pady=(4, 4))
+        ttk.Label(
+            visuals_box, textvariable=self.plot_title_var, foreground="#5b6880", wraplength=760
+        ).grid(row=0, column=0, sticky="ew", padx=6, pady=(4, 4))
         top = ttk.Frame(visuals_box)
         top.grid(row=1, column=0, sticky="ew", padx=6)
         ttk.Label(top, text="Plot:").pack(side=LEFT)
-        self.plot_kind_combo = ttk.Combobox(top, textvariable=self.plot_kind_var, values=["dashboard"], state="readonly", width=22)
+        self.plot_kind_combo = ttk.Combobox(
+            top, textvariable=self.plot_kind_var, values=["dashboard"], state="readonly", width=22
+        )
         self.plot_kind_combo.pack(side=LEFT, padx=8)
         self.plot_kind_combo.bind("<<ComboboxSelected>>", lambda _e: self.refresh_plot())
         ttk.Button(top, text="Refresh", command=self.refresh_plot).pack(side=LEFT, padx=4)
@@ -708,16 +1038,20 @@ class QGravApp:
         ttk.Label(
             left,
             text="qgrav ships a registry of measured values from published atom-gravimeter papers. "
-                 "These are the numbers the automated regression suite checks against.",
+            "These are the numbers the automated regression suite checks against.",
             wraplength=420,
             foreground="#334e68",
         ).grid(row=0, column=0, sticky="ew", padx=4, pady=(2, 6))
 
-        refs_box = ttk.Labelframe(left, text="Published reference library", style="Section.TLabelframe")
+        refs_box = ttk.Labelframe(
+            left, text="Published reference library", style="Section.TLabelframe"
+        )
         refs_box.grid(row=1, column=0, sticky="nsew")
         refs_box.rowconfigure(0, weight=1)
         refs_box.columnconfigure(0, weight=1)
-        self.refs_tree = ttk.Treeview(refs_box, columns=("value", "unit", "year"), show="tree headings", height=12)
+        self.refs_tree = ttk.Treeview(
+            refs_box, columns=("value", "unit", "year"), show="tree headings", height=12
+        )
         self.refs_tree.heading("#0", text="Key")
         self.refs_tree.heading("value", text="Value")
         self.refs_tree.heading("unit", text="Unit")
@@ -732,26 +1066,32 @@ class QGravApp:
         self.refs_tree.configure(yscrollcommand=refs_scroll.set)
         self.refs_tree.bind("<<TreeviewSelect>>", lambda _e: self._on_reference_selected())
 
-        ttk.Label(left, text="Reference details", foreground="#5b6880").grid(row=2, column=0, sticky="w", padx=4, pady=(8, 0))
+        ttk.Label(left, text="Reference details", foreground="#5b6880").grid(
+            row=2, column=0, sticky="w", padx=4, pady=(8, 0)
+        )
         detail_frame = ttk.Frame(left)
         detail_frame.grid(row=3, column=0, sticky="nsew")
         detail_frame.rowconfigure(0, weight=1)
         detail_frame.columnconfigure(0, weight=1)
         self.ref_detail = tk.Text(detail_frame, wrap="word", height=7)
         self.ref_detail.grid(row=0, column=0, sticky="nsew")
-        ref_detail_scroll = ttk.Scrollbar(detail_frame, orient=VERTICAL, command=self.ref_detail.yview)
+        ref_detail_scroll = ttk.Scrollbar(
+            detail_frame, orient=VERTICAL, command=self.ref_detail.yview
+        )
         ref_detail_scroll.grid(row=0, column=1, sticky="ns")
         self.ref_detail.configure(yscrollcommand=ref_detail_scroll.set, state="disabled")
 
         # --- RIGHT: reproductions + QuTiP cross-check --------------------
-        repro_box = ttk.Labelframe(right, text="Reproduce a published measurement (one click)", style="Section.TLabelframe")
+        repro_box = ttk.Labelframe(
+            right, text="Reproduce a published measurement (one click)", style="Section.TLabelframe"
+        )
         repro_box.grid(row=0, column=0, sticky="nsew", pady=(0, 6))
         repro_box.columnconfigure(0, weight=1)
         ttk.Label(
             repro_box,
             text="Each row builds a ready-to-run multi_drop_cycle config from that paper's documented "
-                 "parameters and noise budget. 'Predicted' is qgrav's analytic short-term ASD; 'Published' "
-                 "is the paper's reported value. Select a row, then load it into the editor and press Run.",
+            "parameters and noise budget. 'Predicted' is qgrav's analytic short-term ASD; 'Published' "
+            "is the paper's reported value. Select a row, then load it into the editor and press Run.",
             wraplength=720,
             foreground="#5b6880",
         ).grid(row=0, column=0, sticky="ew", padx=6, pady=(2, 6))
@@ -782,32 +1122,58 @@ class QGravApp:
         ttk.Label(controls, text="Atoms (blank=paper default):").pack(side=LEFT)
         atoms_entry = ttk.Entry(controls, textvariable=self.repro_atoms_var, width=8)
         atoms_entry.pack(side=LEFT, padx=(4, 10))
-        attach_tooltip(atoms_entry, "Override the ensemble size. Higher = lower projection-noise floor and a more faithful (but slower) reproduction. The regression suite uses 4000.")
+        attach_tooltip(
+            atoms_entry,
+            "Override the ensemble size. Higher = lower projection-noise floor and a more faithful (but slower) reproduction. The regression suite uses 4000.",
+        )
         ttk.Label(controls, text="Drops:").pack(side=LEFT)
         drops_entry = ttk.Entry(controls, textvariable=self.repro_drops_var, width=8)
         drops_entry.pack(side=LEFT, padx=(4, 10))
-        attach_tooltip(drops_entry, "Override the number of measurement drops. Blank uses the paper's default.")
-        ttk.Button(controls, text="Load into editor →", command=lambda: self._load_selected_reproduction(run_after=False)).pack(side=LEFT, padx=4)
-        ttk.Button(controls, text="Load & Run", style="Accent.TButton", command=lambda: self._load_selected_reproduction(run_after=True)).pack(side=LEFT, padx=4)
+        attach_tooltip(
+            drops_entry, "Override the number of measurement drops. Blank uses the paper's default."
+        )
+        ttk.Button(
+            controls,
+            text="Load into editor →",
+            command=lambda: self._load_selected_reproduction(run_after=False),
+        ).pack(side=LEFT, padx=4)
+        ttk.Button(
+            controls,
+            text="Load & Run",
+            style="Accent.TButton",
+            command=lambda: self._load_selected_reproduction(run_after=True),
+        ).pack(side=LEFT, padx=4)
 
-        qutip_box = ttk.Labelframe(right, text="Independent cross-check (QuTiP)", style="Section.TLabelframe")
+        qutip_box = ttk.Labelframe(
+            right, text="Independent cross-check (QuTiP)", style="Section.TLabelframe"
+        )
         qutip_box.grid(row=2, column=0, sticky="nsew", pady=(6, 0))
         qutip_box.columnconfigure(0, weight=1)
         ttk.Label(
             qutip_box,
             text="qgrav computes each Raman pulse from a closed-form 2x2 matrix. These checks recompute the "
-                 "same physics a different way and report the disagreement. 'AISim vs analytic' needs no extra "
-                 "packages; the full QuTiP check integrates the Schrödinger equation independently.",
+            "same physics a different way and report the disagreement. 'AISim vs analytic' needs no extra "
+            "packages; the full QuTiP check integrates the Schrödinger equation independently.",
             wraplength=720,
             foreground="#5b6880",
         ).grid(row=0, column=0, sticky="ew", padx=6, pady=(2, 6))
         qbtns = ttk.Frame(qutip_box)
         qbtns.grid(row=1, column=0, sticky="ew", padx=6)
-        self.btn_check_analytic = ttk.Button(qbtns, text="AISim vs analytic (no deps)", command=lambda: self._run_validation_check("analytic"))
+        self.btn_check_analytic = ttk.Button(
+            qbtns,
+            text="AISim vs analytic (no deps)",
+            command=lambda: self._run_validation_check("analytic"),
+        )
         self.btn_check_analytic.pack(side=LEFT, padx=(0, 6))
-        self.btn_check_qutip = ttk.Button(qbtns, text="Full QuTiP cross-check", command=lambda: self._run_validation_check("qutip"))
+        self.btn_check_qutip = ttk.Button(
+            qbtns,
+            text="Full QuTiP cross-check",
+            command=lambda: self._run_validation_check("qutip"),
+        )
         self.btn_check_qutip.pack(side=LEFT, padx=6)
-        ttk.Label(qbtns, textvariable=self.validation_status_var, foreground="#5b6880").pack(side=LEFT, padx=12)
+        ttk.Label(qbtns, textvariable=self.validation_status_var, foreground="#5b6880").pack(
+            side=LEFT, padx=12
+        )
 
         vr_frame = ttk.Frame(qutip_box)
         vr_frame.grid(row=2, column=0, sticky="nsew", padx=6, pady=(6, 6))
@@ -839,7 +1205,10 @@ class QGravApp:
         for key in sorted(REFERENCES):
             ref = REFERENCES[key]
             self.refs_tree.insert(
-                "", END, iid=key, text=key,
+                "",
+                END,
+                iid=key,
+                text=key,
                 values=(f"{ref.value:.3g}", ref.unit, ref.year),
             )
 
@@ -869,6 +1238,7 @@ class QGravApp:
 
     def _reproduction_data(self) -> list[dict[str, Any]]:
         import importlib
+
         rows: list[dict[str, Any]] = []
         for suffix, label, role in self._REPRODUCTIONS:
             entry: dict[str, Any] = {"suffix": suffix, "label": label, "role": role}
@@ -880,8 +1250,12 @@ class QGravApp:
                 predicted = float(mod.predicted_short_term_asd_m_s2_per_sqrt_hz())
                 ratio = predicted / published if published else float("nan")
                 entry.update(
-                    module=mod, published=published, predicted=predicted,
-                    ratio=ratio, tol=tol, within=(1.0 / tol) <= ratio <= tol,
+                    module=mod,
+                    published=published,
+                    predicted=predicted,
+                    ratio=ratio,
+                    tol=tol,
+                    within=(1.0 / tol) <= ratio <= tol,
                 )
             except Exception as exc:  # pragma: no cover - defensive
                 entry["error"] = str(exc)
@@ -893,11 +1267,18 @@ class QGravApp:
         self.repro_tree.delete(*self.repro_tree.get_children())
         for row in self._repro_rows:
             if "error" in row:
-                self.repro_tree.insert("", END, iid=row["suffix"], text=f"{row['label']} (unavailable)",
-                                       values=("—", "—", "—", "—"))
+                self.repro_tree.insert(
+                    "",
+                    END,
+                    iid=row["suffix"],
+                    text=f"{row['label']} (unavailable)",
+                    values=("—", "—", "—", "—"),
+                )
                 continue
             self.repro_tree.insert(
-                "", END, iid=row["suffix"],
+                "",
+                END,
+                iid=row["suffix"],
                 text=f"{row['label']}  [{row['role']}]",
                 values=(
                     f"{row['published']:.2e}",
@@ -945,13 +1326,17 @@ class QGravApp:
         self.sync_controls_from_dict(cfg)
         self.workflow_var.set("synthetic")
         self._append_experiment_log(f"Loaded {row['label']} reproduction config.")
-        self._append_log(self.live_summary, f"Loaded {row['label']} reproduction config into the editor.")
+        self._append_log(
+            self.live_summary, f"Loaded {row['label']} reproduction config into the editor."
+        )
         if run_after:
             self.notebook.select(0)
             self.run_async()
         else:
             self.notebook.select(2)
-            self.validation_status_var.set(f"Loaded {row['label']}. Press 'Run Pipeline' (top right) to reproduce it.")
+            self.validation_status_var.set(
+                f"Loaded {row['label']}. Press 'Run Pipeline' (top right) to reproduce it."
+            )
 
     def _set_validation_busy(self, busy: bool) -> None:
         self._validation_busy = busy
@@ -1004,12 +1389,14 @@ class QGravApp:
                 )
             self._queue.put(("validation", msg))
         except ImportError:
-            self._queue.put((
-                "validation",
-                "QuTiP is not installed.\n"
-                "  Install it with:   pip install qgrav[qutip]\n"
-                "  The 'AISim vs analytic' check needs no extra packages and works now.\n",
-            ))
+            self._queue.put(
+                (
+                    "validation",
+                    "QuTiP is not installed.\n"
+                    "  Install it with:   pip install qgrav[qutip]\n"
+                    "  The 'AISim vs analytic' check needs no extra packages and works now.\n",
+                )
+            )
         except Exception as exc:  # pragma: no cover - defensive
             self._queue.put(("validation", f"Cross-check failed: {exc}\n"))
 
@@ -1041,7 +1428,12 @@ class QGravApp:
         toolbar = ttk.Frame(right)
         toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 4))
         ttk.Label(toolbar, text="Guides & tips", foreground="#5b6880").pack(side=LEFT, padx=(2, 0))
-        self.guide_open_btn = ttk.Button(toolbar, text="Open this document externally", command=self._open_current_guide_doc, state="disabled")
+        self.guide_open_btn = ttk.Button(
+            toolbar,
+            text="Open this document externally",
+            command=self._open_current_guide_doc,
+            state="disabled",
+        )
         self.guide_open_btn.pack(side="right")
 
         text_frame = ttk.Frame(right)
@@ -1289,7 +1681,15 @@ class QGravApp:
         if self._current_guide_path and self._current_guide_path.exists():
             webbrowser.open(self._current_guide_path.resolve().as_uri())
 
-    def _labeled_entry(self, parent: ttk.Frame, label: str, variable: tk.StringVar, row: int, column: int, tip: str = "") -> None:
+    def _labeled_entry(
+        self,
+        parent: ttk.Frame,
+        label: str,
+        variable: tk.StringVar,
+        row: int,
+        column: int,
+        tip: str = "",
+    ) -> None:
         box = ttk.Frame(parent)
         box.grid(row=row, column=column, sticky="ew", padx=6, pady=6)
         lbl = ttk.Label(box, text=label)
@@ -1300,7 +1700,16 @@ class QGravApp:
             attach_tooltip(lbl, tip)
             attach_tooltip(entry, tip)
 
-    def _labeled_combo(self, parent: ttk.Frame, label: str, variable: tk.StringVar, values: list[str], row: int, column: int, tip: str = "") -> None:
+    def _labeled_combo(
+        self,
+        parent: ttk.Frame,
+        label: str,
+        variable: tk.StringVar,
+        values: list[str],
+        row: int,
+        column: int,
+        tip: str = "",
+    ) -> None:
         box = ttk.Frame(parent)
         box.grid(row=row, column=column, sticky="ew", padx=6, pady=6)
         lbl = ttk.Label(box, text=label)
@@ -1311,7 +1720,15 @@ class QGravApp:
             attach_tooltip(lbl, tip)
             attach_tooltip(combo, tip)
 
-    def _labeled_check(self, parent: ttk.Frame, label: str, variable: tk.BooleanVar, row: int, column: int, tip: str = "") -> None:
+    def _labeled_check(
+        self,
+        parent: ttk.Frame,
+        label: str,
+        variable: tk.BooleanVar,
+        row: int,
+        column: int,
+        tip: str = "",
+    ) -> None:
         chk = ttk.Checkbutton(parent, text=label, variable=variable)
         chk.grid(row=row, column=column, sticky="w", padx=6, pady=6)
         if tip:
@@ -1333,7 +1750,9 @@ class QGravApp:
         self.sim_model_var.trace_add("write", lambda *_: self._sync_workflow_sections())
 
     def _workflow_from_config(self, cfg: dict[str, Any]) -> str:
-        simulation = cfg.get("simulation", {}) if isinstance(cfg.get("simulation", {}), dict) else {}
+        simulation = (
+            cfg.get("simulation", {}) if isinstance(cfg.get("simulation", {}), dict) else {}
+        )
         bench_type = str(cfg.get("bench", {}).get("type", "virtual"))
         if bool(simulation.get("enabled", False)):
             return "synthetic"
@@ -1372,17 +1791,35 @@ class QGravApp:
         self._show_frame(self.workflow_compare_note, workflow == "advanced")
 
         if show_real:
-            self.workflow_summary_var.set("Analyze real gravimetry data from IGETS, Larzac, CSV, or .ggp sources.")
-            self.next_steps_var.set("1. Choose a dataset source.  2. Select a station.  3. Preview data quality.  4. Run the benchmark.")
-            self.current_context_var.set("Recommended for PSD, Allan deviation, coverage/gap checks, and report generation.")
+            self.workflow_summary_var.set(
+                "Analyze real gravimetry data from IGETS, Larzac, CSV, or .ggp sources."
+            )
+            self.next_steps_var.set(
+                "1. Choose a dataset source.  2. Select a station.  3. Preview data quality.  4. Run the benchmark."
+            )
+            self.current_context_var.set(
+                "Recommended for PSD, Allan deviation, coverage/gap checks, and report generation."
+            )
         elif show_synth:
-            self.workflow_summary_var.set("Run a synthetic atom-gravimeter study with AISim-backed or hybrid gravimeter models.")
-            self.next_steps_var.set("1. Choose a study model.  2. Keep defaults for a first run.  3. Run simulation.  4. Inspect truth checks and report.")
-            self.current_context_var.set("Recommended for phase scan, gravity sweep, and vibration sensitivity studies.")
+            self.workflow_summary_var.set(
+                "Run a synthetic atom-gravimeter study with AISim-backed or hybrid gravimeter models."
+            )
+            self.next_steps_var.set(
+                "1. Choose a study model.  2. Keep defaults for a first run.  3. Run simulation.  4. Inspect truth checks and report."
+            )
+            self.current_context_var.set(
+                "Recommended for phase scan, gravity sweep, and vibration sensitivity studies."
+            )
         else:
-            self.workflow_summary_var.set("Advanced mode exposes all controls for manual editing and configuration work.")
-            self.next_steps_var.set("Use Load/Validate, edit YAML as needed, then run the pipeline. Results and comparisons appear in the Results tab.")
-            self.current_context_var.set("Use this mode only if you already understand the config structure.")
+            self.workflow_summary_var.set(
+                "Advanced mode exposes all controls for manual editing and configuration work."
+            )
+            self.next_steps_var.set(
+                "Use Load/Validate, edit YAML as needed, then run the pipeline. Results and comparisons appear in the Results tab."
+            )
+            self.current_context_var.set(
+                "Use this mode only if you already understand the config structure."
+            )
 
         if bench_type == "real":
             self._show_frame(self.real_ifo_subframe, True)
@@ -1420,7 +1857,9 @@ class QGravApp:
                 "(metres of wavefront error), e.g. '0, 0, 0, 5e-9'."
             ) from exc
 
-    def _apply_advanced_physics(self, sim: dict[str, Any], *, with_propagation: bool, with_lock: bool) -> None:
+    def _apply_advanced_physics(
+        self, sim: dict[str, Any], *, with_propagation: bool, with_lock: bool
+    ) -> None:
         """Write the optional 'Advanced physics' knobs into a simulation dict."""
         if self.sim_single_photon_detuning_var.get().strip():
             sim["single_photon_detuning_hz"] = self._parse_required_float(
@@ -1445,7 +1884,9 @@ class QGravApp:
         """Write the multi-drop noise-budget + servo knobs into a simulation dict."""
         sim["n_drops"] = self._parse_required_int(self.sim_n_drops_var, "Drops per cycle")
         sim["cycle_time_s"] = self._parse_required_float(self.sim_cycle_time_var, "Cycle time (s)")
-        sim["gravity_true_m_s2"] = self._parse_required_float(self.sim_gravity_true_var, "True gravity (m/s²)")
+        sim["gravity_true_m_s2"] = self._parse_required_float(
+            self.sim_gravity_true_var, "True gravity (m/s²)"
+        )
         if self.sim_detection_sigma_p_var.get().strip():
             sim["detection_sigma_p"] = self._parse_required_float(
                 self.sim_detection_sigma_p_var, "Detection sigma_p"
@@ -1482,7 +1923,7 @@ class QGravApp:
     def _cleanup_temp_configs(self) -> None:
         for p in self._temp_config_paths:
             try:
-                if hasattr(p, 'exists') and p.exists():
+                if hasattr(p, "exists") and p.exists():
                     p.unlink()
                 elif isinstance(p, str):
                     if os.path.exists(p):
@@ -1492,7 +1933,9 @@ class QGravApp:
         self._temp_config_paths.clear()
 
     def pick_config(self) -> None:
-        path = filedialog.askopenfilename(filetypes=[("YAML files", "*.yaml *.yml"), ("All files", "*")])
+        path = filedialog.askopenfilename(
+            filetypes=[("YAML files", "*.yaml *.yml"), ("All files", "*")]
+        )
         if path:
             self.config_path_var.set(path)
             self.load_config_into_editor(Path(path))
@@ -1570,7 +2013,9 @@ class QGravApp:
             self.browser_dataset_var.set(str(self._asset_root / "data" / "raw" / "sg_sample"))
 
     def save_editor_as(self) -> None:
-        path = filedialog.asksaveasfilename(defaultextension=".yaml", filetypes=[("YAML files", "*.yaml *.yml")])
+        path = filedialog.asksaveasfilename(
+            defaultextension=".yaml", filetypes=[("YAML files", "*.yaml *.yml")]
+        )
         if path:
             Path(path).write_text(self.editor.get("1.0", END), encoding="utf-8")
             self.config_path_var.set(path)
@@ -1625,16 +2070,28 @@ class QGravApp:
         self.psd_method_var.set(str(stats.get("psd_method", "welch")))
         self.compare_backends_var.set(bool(stats.get("compare_allan_backends", False)))
 
-        virtual = cfg.get("bench_virtual_ifo", {}) if isinstance(cfg.get("bench_virtual_ifo", {}), dict) else {}
+        virtual = (
+            cfg.get("bench_virtual_ifo", {})
+            if isinstance(cfg.get("bench_virtual_ifo", {}), dict)
+            else {}
+        )
         self.sample_rate_var.set(str(virtual.get("sample_rate_hz", "")))
         self.duration_var.set(str(virtual.get("duration_s", "")))
-        real_ifo = cfg.get("bench_real_ifo", {}) if isinstance(cfg.get("bench_real_ifo", {}), dict) else {}
+        real_ifo = (
+            cfg.get("bench_real_ifo", {}) if isinstance(cfg.get("bench_real_ifo", {}), dict) else {}
+        )
         self.real_ifo_path_var.set(str(real_ifo.get("csv_path", "")))
-        real_gravity = cfg.get("bench_real_gravity", {}) if isinstance(cfg.get("bench_real_gravity", {}), dict) else {}
+        real_gravity = (
+            cfg.get("bench_real_gravity", {})
+            if isinstance(cfg.get("bench_real_gravity", {}), dict)
+            else {}
+        )
         self.real_gravity_source_var.set(str(real_gravity.get("source_path", "")))
         self.real_gravity_station_var.set(str(real_gravity.get("station_code", "")))
 
-        simulation = cfg.get("simulation", {}) if isinstance(cfg.get("simulation", {}), dict) else {}
+        simulation = (
+            cfg.get("simulation", {}) if isinstance(cfg.get("simulation", {}), dict) else {}
+        )
         sim_model = str(simulation.get("model", "rabi_scan"))
         self.sim_enabled_var.set(bool(simulation.get("enabled", False)))
         self.sim_backend_var.set(str(simulation.get("backend", "aisim")))
@@ -1643,19 +2100,23 @@ class QGravApp:
         self.sim_tau_step_var.set(str(simulation.get("tau_step_s", "1e-6")))
         self.sim_tau_pi_half_var.set(str(simulation.get("tau_pi_half_s", "2.3e-5")))
         self.sim_interferometer_time_var.set(str(simulation.get("interferometer_time_s", "0.260")))
-        self.sim_gravity_center_var.set(str(simulation.get("gravity_center_m_s2", simulation.get("gravity_ref_m_s2", "9.81"))))
+        self.sim_gravity_center_var.set(
+            str(simulation.get("gravity_center_m_s2", simulation.get("gravity_ref_m_s2", "9.81")))
+        )
         self.sim_gravity_span_var.set(str(simulation.get("gravity_span_m_s2", "6e-6")))
         self.sim_vibration_freq_var.set(str(simulation.get("vibration_frequency_hz", "1.0")))
         self.sim_vibration_amp_max_var.set(str(simulation.get("amplitude_max_m", "5e-8")))
 
         # Advanced physics knobs
         self.sim_seed_var.set(str(simulation.get("seed", "1")))
-        self.sim_single_photon_detuning_var.set(str(simulation.get("single_photon_detuning_hz", "0.0")))
+        self.sim_single_photon_detuning_var.set(
+            str(simulation.get("single_photon_detuning_hz", "0.0"))
+        )
         self.sim_gravity_propagation_var.set(bool(simulation.get("gravity_propagation", False)))
         self.sim_lock_to_midfringe_var.set(bool(simulation.get("lock_to_midfringe", True)))
         self.sim_gravity_gradient_var.set(str(simulation.get("gravity_gradient_per_m", "0.0")))
         zernike = simulation.get("wavefront_zernike_coeffs")
-        if isinstance(zernike, (list, tuple)):
+        if isinstance(zernike, list | tuple):
             self.sim_wavefront_zernike_var.set(", ".join(str(c) for c in zernike))
         else:
             self.sim_wavefront_zernike_var.set(str(zernike) if zernike else "")
@@ -1670,7 +2131,9 @@ class QGravApp:
         self.sim_raman_phase_noise_var.set(str(simulation.get("raman_phase_noise_rad", "0.0")))
         self.sim_correlated_vibration_var.set(bool(simulation.get("correlated_vibration", False)))
         self.sim_seismic_model_var.set(str(simulation.get("seismic_model", "nlnm")))
-        self.sim_isolation_cutoff_var.set(str(simulation.get("vibration_isolation_cutoff_hz", "0.0")))
+        self.sim_isolation_cutoff_var.set(
+            str(simulation.get("vibration_isolation_cutoff_hz", "0.0"))
+        )
         self.sim_fit_visibility_var.set(bool(simulation.get("fit_visibility", False)))
         self.sim_servo_enabled_var.set(bool(simulation.get("servo_enabled", False)))
         self.sim_servo_type_var.set(str(simulation.get("servo_type", "integrator")))
@@ -1722,9 +2185,13 @@ class QGravApp:
             if bench_type == "virtual":
                 virt = cfg.setdefault("bench_virtual_ifo", {})
                 if self.sample_rate_var.get().strip():
-                    virt["sample_rate_hz"] = self._parse_required_float(self.sample_rate_var, "Sample rate (Hz)")
+                    virt["sample_rate_hz"] = self._parse_required_float(
+                        self.sample_rate_var, "Sample rate (Hz)"
+                    )
                 if self.duration_var.get().strip():
-                    virt["duration_s"] = self._parse_required_float(self.duration_var, "Duration (s)")
+                    virt["duration_s"] = self._parse_required_float(
+                        self.duration_var, "Duration (s)"
+                    )
             elif bench_type == "real":
                 real_ifo = cfg.setdefault("bench_real_ifo", {})
                 csv_path = self.real_ifo_path_var.get().strip()
@@ -1732,7 +2199,9 @@ class QGravApp:
                     raise ValueError("Real IFO CSV is required for bench type 'real'.")
                 real_ifo["csv_path"] = csv_path
                 if self.sample_rate_var.get().strip():
-                    real_ifo["sample_rate_hz"] = self._parse_required_float(self.sample_rate_var, "Sample rate (Hz)")
+                    real_ifo["sample_rate_hz"] = self._parse_required_float(
+                        self.sample_rate_var, "Sample rate (Hz)"
+                    )
             elif bench_type == "real_gravity":
                 grav = cfg.setdefault("bench_real_gravity", {})
                 source_path = self.real_gravity_source_var.get().strip()
@@ -1751,32 +2220,60 @@ class QGravApp:
             sim["model"] = sim_model
             if sim_enabled:
                 sim["n_atoms"] = self._parse_required_int(self.sim_atoms_var, "Atoms")
-                sim["tau_pi_half_s"] = self._parse_required_float(self.sim_tau_pi_half_var, "π/2 pulse duration (s)")
+                sim["tau_pi_half_s"] = self._parse_required_float(
+                    self.sim_tau_pi_half_var, "π/2 pulse duration (s)"
+                )
                 if self.sim_seed_var.get().strip():
                     sim["seed"] = self._parse_required_int(self.sim_seed_var, "Random seed")
                 if sim_model == "rabi_scan":
                     sim["n_steps"] = self._parse_required_int(self.sim_steps_var, "Steps / points")
-                    sim["tau_step_s"] = self._parse_required_float(self.sim_tau_step_var, "Tau step (s)")
+                    sim["tau_step_s"] = self._parse_required_float(
+                        self.sim_tau_step_var, "Tau step (s)"
+                    )
                 elif sim_model == "mach_zehnder_phase_scan":
-                    sim["n_phase_points"] = self._parse_required_int(self.sim_steps_var, "Steps / points")
-                    sim["interferometer_time_s"] = self._parse_required_float(self.sim_interferometer_time_var, "Interferometer T (s)")
+                    sim["n_phase_points"] = self._parse_required_int(
+                        self.sim_steps_var, "Steps / points"
+                    )
+                    sim["interferometer_time_s"] = self._parse_required_float(
+                        self.sim_interferometer_time_var, "Interferometer T (s)"
+                    )
                     self._apply_advanced_physics(sim, with_propagation=False, with_lock=False)
                 elif sim_model == "gravity_sweep":
-                    sim["n_gravity_points"] = self._parse_required_int(self.sim_steps_var, "Steps / points")
-                    sim["interferometer_time_s"] = self._parse_required_float(self.sim_interferometer_time_var, "Interferometer T (s)")
-                    sim["gravity_center_m_s2"] = self._parse_required_float(self.sim_gravity_center_var, "Gravity center (m/s²)")
-                    sim["gravity_span_m_s2"] = self._parse_required_float(self.sim_gravity_span_var, "Gravity span (m/s²)")
+                    sim["n_gravity_points"] = self._parse_required_int(
+                        self.sim_steps_var, "Steps / points"
+                    )
+                    sim["interferometer_time_s"] = self._parse_required_float(
+                        self.sim_interferometer_time_var, "Interferometer T (s)"
+                    )
+                    sim["gravity_center_m_s2"] = self._parse_required_float(
+                        self.sim_gravity_center_var, "Gravity center (m/s²)"
+                    )
+                    sim["gravity_span_m_s2"] = self._parse_required_float(
+                        self.sim_gravity_span_var, "Gravity span (m/s²)"
+                    )
                     self._apply_advanced_physics(sim, with_propagation=True, with_lock=True)
                 elif sim_model == "multi_drop_cycle":
-                    sim["interferometer_time_s"] = self._parse_required_float(self.sim_interferometer_time_var, "Interferometer T (s)")
+                    sim["interferometer_time_s"] = self._parse_required_float(
+                        self.sim_interferometer_time_var, "Interferometer T (s)"
+                    )
                     self._apply_advanced_physics(sim, with_propagation=True, with_lock=False)
                     self._apply_multi_drop_noise(sim)
                 elif sim_model == "vibration_sensitivity_sweep":
-                    sim["n_amplitude_points"] = self._parse_required_int(self.sim_steps_var, "Steps / points")
-                    sim["interferometer_time_s"] = self._parse_required_float(self.sim_interferometer_time_var, "Interferometer T (s)")
-                    sim["gravity_ref_m_s2"] = self._parse_required_float(self.sim_gravity_center_var, "Gravity center (m/s²)")
-                    sim["vibration_frequency_hz"] = self._parse_required_float(self.sim_vibration_freq_var, "Vibration freq (Hz)")
-                    sim["amplitude_max_m"] = self._parse_required_float(self.sim_vibration_amp_max_var, "Max vibration amp (m)")
+                    sim["n_amplitude_points"] = self._parse_required_int(
+                        self.sim_steps_var, "Steps / points"
+                    )
+                    sim["interferometer_time_s"] = self._parse_required_float(
+                        self.sim_interferometer_time_var, "Interferometer T (s)"
+                    )
+                    sim["gravity_ref_m_s2"] = self._parse_required_float(
+                        self.sim_gravity_center_var, "Gravity center (m/s²)"
+                    )
+                    sim["vibration_frequency_hz"] = self._parse_required_float(
+                        self.sim_vibration_freq_var, "Vibration freq (Hz)"
+                    )
+                    sim["amplitude_max_m"] = self._parse_required_float(
+                        self.sim_vibration_amp_max_var, "Max vibration amp (m)"
+                    )
 
             self.editor.delete("1.0", END)
             self.editor.insert("1.0", yaml.safe_dump(cfg, sort_keys=False))
@@ -1853,9 +2350,15 @@ class QGravApp:
                 self._append_experiment_log(f"Finished run: {report}")
                 kinds = available_plot_kinds(bundle)
                 self.plot_kind_combo.configure(values=kinds)
-                preferred = "gravity_series" if "gravity_series" in kinds else ("displacement" if "displacement" in kinds else kinds[0])
+                preferred = (
+                    "gravity_series"
+                    if "gravity_series" in kinds
+                    else ("displacement" if "displacement" in kinds else kinds[0])
+                )
                 self.plot_kind_var.set(preferred)
-                self.current_context_var.set("Run complete. Open the report or inspect single plots first (gravity_series / displacement / PSD) before switching to dashboard.")
+                self.current_context_var.set(
+                    "Run complete. Open the report or inspect single plots first (gravity_series / displacement / PSD) before switching to dashboard."
+                )
                 self.refresh_plot()
             else:
                 self.status_var.set("Run failed")
@@ -1886,7 +2389,15 @@ class QGravApp:
         for key, value in metrics.items():
             add_items("", str(key), value)
 
-    def _render_figure(self, fig: Figure, *, canvas_attr: str, toolbar_attr: str, frame: ttk.Frame, toolbar_frame: ttk.Frame | None = None) -> None:
+    def _render_figure(
+        self,
+        fig: Figure,
+        *,
+        canvas_attr: str,
+        toolbar_attr: str,
+        frame: ttk.Frame,
+        toolbar_frame: ttk.Frame | None = None,
+    ) -> None:
         current_canvas = getattr(self, canvas_attr, None)
         if current_canvas is not None:
             old_figure = current_canvas.figure
@@ -1917,8 +2428,16 @@ class QGravApp:
             "dashboard": "Dashboard combines several summaries, but single plots are usually easier to interpret first.",
             "displacement": "Use this first for synthetic interferometer runs.",
         }
-        self.plot_title_var.set(f"{plot_name}: {descriptions.get(plot_name, 'Interactive plot view.')}")
-        self._render_figure(fig, canvas_attr="_current_canvas", toolbar_attr="_current_toolbar", frame=self.plot_frame, toolbar_frame=self.plot_toolbar_frame)
+        self.plot_title_var.set(
+            f"{plot_name}: {descriptions.get(plot_name, 'Interactive plot view.')}"
+        )
+        self._render_figure(
+            fig,
+            canvas_attr="_current_canvas",
+            toolbar_attr="_current_toolbar",
+            frame=self.plot_frame,
+            toolbar_frame=self.plot_toolbar_frame,
+        )
 
     def _browse_dataset_source(self) -> None:
         choice = messagebox.askyesnocancel(
@@ -1951,9 +2470,16 @@ class QGravApp:
             return
         self.station_tree.delete(*self.station_tree.get_children())
         for item in stations:
-            self.station_tree.insert("", END, text=item["station_code"], values=(item.get("longitude_deg"), item.get("latitude_deg")))
+            self.station_tree.insert(
+                "",
+                END,
+                text=item["station_code"],
+                values=(item.get("longitude_deg"), item.get("latitude_deg")),
+            )
         self.station_info.delete("1.0", END)
-        self.station_info.insert("1.0", f"Loaded {len(stations)} stations from {source}\nSelect a station to preview.\n")
+        self.station_info.insert(
+            "1.0", f"Loaded {len(stations)} stations from {source}\nSelect a station to preview.\n"
+        )
 
     def _on_station_selected(self) -> None:
         selected = self.station_tree.selection()
@@ -1963,7 +2489,10 @@ class QGravApp:
         code = str(item["text"])
         self.browser_station_var.set(code)
         self.station_info.delete("1.0", END)
-        self.station_info.insert("1.0", f"Station: {code}\nLongitude: {item['values'][0]}\nLatitude: {item['values'][1]}\n")
+        self.station_info.insert(
+            "1.0",
+            f"Station: {code}\nLongitude: {item['values'][0]}\nLatitude: {item['values'][1]}\n",
+        )
 
     def _build_station_preview_figure(self, data: dict[str, Any]) -> Figure:
         fig = Figure(figsize=(9.6, 6.4), dpi=110, constrained_layout=True)
@@ -1978,7 +2507,13 @@ class QGravApp:
         span = t[-1] - t[0] if len(t) > 1 else 1.0
         taus = np.logspace(np.log10(1.0 / fs), np.log10(max(2.0 / fs, 0.25 * span)), 20)
         adev = allan_deviation_overlapping(x, fs, taus, backend="auto", data_type="freq")
-        psd = compute_psd(x, fs, method="welch", nperseg=min(max(8, len(x) // 4), len(x)), noverlap=max(1, min(len(x) // 8, len(x) // 4 - 1)))
+        psd = compute_psd(
+            x,
+            fs,
+            method="welch",
+            nperseg=min(max(8, len(x) // 4), len(x)),
+            noverlap=max(1, min(len(x) // 8, len(x) // 4 - 1)),
+        )
 
         ax = axes[0, 0]
         ax.plot(t_full / 86400.0, x_full, linewidth=0.8)
@@ -2007,13 +2542,21 @@ class QGravApp:
             messagebox.showerror("qgrav", "Select a dataset source and a station first.")
             return
         try:
-            data = load_real_gravity(source_path=source, station_code=station, segment_strategy="longest_contiguous")
+            data = load_real_gravity(
+                source_path=source, station_code=station, segment_strategy="longest_contiguous"
+            )
         except Exception as exc:
             messagebox.showerror("qgrav", str(exc))
             return
         self._browser_data = data
         fig = self._build_station_preview_figure(data)
-        self._render_figure(fig, canvas_attr="_browser_canvas", toolbar_attr="_browser_toolbar", frame=self.browser_plot_frame, toolbar_frame=self.browser_toolbar_frame)
+        self._render_figure(
+            fig,
+            canvas_attr="_browser_canvas",
+            toolbar_attr="_browser_toolbar",
+            frame=self.browser_plot_frame,
+            toolbar_frame=self.browser_toolbar_frame,
+        )
         info = data.get("gap_report", {})
         segment = data.get("analysis_segment", {})
         self.station_info.delete("1.0", END)
@@ -2037,7 +2580,11 @@ class QGravApp:
         cfg = {
             "output": {"runs_dir": "runs", "name": f"gravity_{station}"},
             "bench": {"type": "real_gravity"},
-            "bench_real_gravity": {"source_path": source, "station_code": station, "segment_strategy": "longest_contiguous"},
+            "bench_real_gravity": {
+                "source_path": source,
+                "station_code": station,
+                "segment_strategy": "longest_contiguous",
+            },
             "stats": {
                 "metrics_backend": self.backend_var.get().strip() or "auto",
                 "allan_data_type": "freq",
@@ -2069,7 +2616,9 @@ class QGravApp:
         self.real_gravity_source_var.set(source)
         if station:
             self.real_gravity_station_var.set(station)
-        self.current_context_var.set("Data Browser selection copied into Setup. Apply controls to editor or run directly.")
+        self.current_context_var.set(
+            "Data Browser selection copied into Setup. Apply controls to editor or run directly."
+        )
 
     def open_report(self) -> None:
         if self.last_report:
@@ -2100,7 +2649,14 @@ def main(default_config: Path | None = None) -> None:
     try:
         root = tk.Tk()
     except tk.TclError as exc:
-        raise RuntimeError("GUI could not start. This environment may be headless or missing Tk support.") from exc
+        raise RuntimeError(
+            "GUI could not start. This environment may be headless or missing Tk support."
+        ) from exc
     app = QGravApp(root, default_config=default_config)
-    root.protocol("WM_DELETE_WINDOW", lambda: (app._cleanup_temp_configs(), root.destroy()))
+
+    def _on_close() -> None:
+        app._cleanup_temp_configs()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", _on_close)
     root.mainloop()

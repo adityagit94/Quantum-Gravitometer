@@ -3,39 +3,43 @@
 These tests verify mathematical invariants and structural properties that
 must hold for ALL valid inputs, not just a few manually chosen examples.
 """
+
 from __future__ import annotations
 
 import numpy as np
 import pytest
-from hypothesis import given, settings, assume, HealthCheck
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
-from qgrav.metrics.psd import compute_psd
+from qgrav.datasets._tides_hw95 import gravity_tide_m_s2, gravity_tide_ugal
 from qgrav.metrics.allan import allan_deviation_overlapping
+from qgrav.metrics.psd import compute_psd
 from qgrav.metrics.summary import compute_error_statistics, improvement_percent
 from qgrav.physics.phase_models import (
-    gravity_phase_rad,
     equivalent_gravity_error_m_s2,
-    shot_noise_sensitivity_m_s2_per_sqrt_hz,
+    gravity_phase_rad,
     normalized_differential_signal,
+    shot_noise_sensitivity_m_s2_per_sqrt_hz,
 )
 from qgrav.physics.sensitivity_function import (
     sensitivity_function_time_domain,
     transfer_function_vibration,
 )
-from qgrav.datasets._tides_hw95 import gravity_tide_ugal, gravity_tide_m_s2
-
 
 # ─── Reusable strategies ────────────────────────────────────────────────
 
 
 def _finite_floats(min_value=-1e6, max_value=1e6):
-    return st.floats(min_value=min_value, max_value=max_value, allow_nan=False, allow_infinity=False)
+    return st.floats(
+        min_value=min_value, max_value=max_value, allow_nan=False, allow_infinity=False
+    )
 
 
 def _positive_floats(min_value=1e-6, max_value=1e6):
-    return st.floats(min_value=min_value, max_value=max_value, allow_nan=False, allow_infinity=False)
+    return st.floats(
+        min_value=min_value, max_value=max_value, allow_nan=False, allow_infinity=False
+    )
 
 
 def _signal_arrays(min_size=20, max_size=500):
@@ -167,7 +171,9 @@ def test_phase_bias_shifts_phase(g, k_eff, T, bias):
     to account for floating-point cancellation in subtraction.
     """
     phi_no_bias = gravity_phase_rad(g, k_eff_rad_per_m=k_eff, interferometer_time_s=T)
-    phi_with_bias = gravity_phase_rad(g, k_eff_rad_per_m=k_eff, interferometer_time_s=T, phase_bias_rad=bias)
+    phi_with_bias = gravity_phase_rad(
+        g, k_eff_rad_per_m=k_eff, interferometer_time_s=T, phase_bias_rad=bias
+    )
     # Tolerance must account for catastrophic cancellation when |phi| >> |bias|
     eps_scale = max(abs(float(phi_no_bias)), abs(bias), 1.0) * 1e-12
     np.testing.assert_allclose(phi_with_bias - phi_no_bias, bias, atol=eps_scale)
@@ -298,7 +304,9 @@ def test_tide_amplitude_bounded(lat, lon):
     # One full day of data
     t = np.linspace(1_700_000_000.0, 1_700_086_400.0, 1000)
     result = gravity_tide_ugal(t, latitude_deg=lat, longitude_deg=lon)
-    assert np.all(np.abs(result) < 500.0), f"Tide amplitude {np.max(np.abs(result)):.1f} uGal exceeds bounds"
+    assert np.all(
+        np.abs(result) < 500.0
+    ), f"Tide amplitude {np.max(np.abs(result)):.1f} uGal exceeds bounds"
 
 
 # ═══════════════════════════════════════════════════════════════════════

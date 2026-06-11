@@ -1,4 +1,5 @@
 """Edge-case tests for the custom Allan deviation implementation."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -6,8 +7,6 @@ import pytest
 
 from qgrav.metrics.allan import (
     allan_deviation_overlapping,
-    _custom_oadev_freq,
-    _validate_inputs,
 )
 
 

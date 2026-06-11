@@ -1,18 +1,17 @@
 """Tests for AC Stark / light-shift correction in TwoLevelTransitionPropagator (Phase 8)."""
+
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
+# v1.1 (Phase 12): AC-Stark + integrated-phase live in the override subclass.
+from qgrav.sim_ai import (
+    IntegratedPhaseSpatialSuperpositionTransitionPropagator as SpatialSuperpositionTransitionPropagator,
+)
 from qgrav.vendor.aisim import (
     AtomicEnsemble,
     IntensityProfile,
     Wavevectors,
-)
-# v1.1 (Phase 12): AC-Stark + integrated-phase live in the override subclass.
-from qgrav.sim_ai import (
-    IntegratedPhaseSpatialSuperpositionTransitionPropagator
-    as SpatialSuperpositionTransitionPropagator,
 )
 
 
@@ -27,16 +26,22 @@ class TestACStarkZeroUnchanged:
     def test_ac_stark_zero_unchanged(self):
         atoms = _single_atom_at_origin()
         tau = 25e-6
-        beam = IntensityProfile(r_profile=0.01, center_rabi_freq=2*np.pi/(4*tau))
+        beam = IntensityProfile(r_profile=0.01, center_rabi_freq=2 * np.pi / (4 * tau))
         wv = Wavevectors()
 
         bs1_baseline = SpatialSuperpositionTransitionPropagator(
-            tau, n_pulse=1, n_pulses=3,
-            intensity_profile=beam, wave_vectors=wv,
+            tau,
+            n_pulse=1,
+            n_pulses=3,
+            intensity_profile=beam,
+            wave_vectors=wv,
         )
         bs1_zero = SpatialSuperpositionTransitionPropagator(
-            tau, n_pulse=1, n_pulses=3,
-            intensity_profile=beam, wave_vectors=wv,
+            tau,
+            n_pulse=1,
+            n_pulses=3,
+            intensity_profile=beam,
+            wave_vectors=wv,
             single_photon_detuning_hz=0.0,
         )
 
@@ -52,27 +57,37 @@ class TestACStarkShiftsFringePhase:
         # Run an MZ sequence with and without AC Stark, compare final populations
         tau = 25e-6
         T = 0.1  # shorter T for speed
-        beam = IntensityProfile(r_profile=0.01, center_rabi_freq=2*np.pi/(4*tau))
+        beam = IntensityProfile(r_profile=0.01, center_rabi_freq=2 * np.pi / (4 * tau))
         wv = Wavevectors()
 
         from qgrav.vendor.aisim import FreePropagator
+
         atoms = _single_atom_at_origin()
 
         def run_mz(detuning_hz):
             bs1 = SpatialSuperpositionTransitionPropagator(
-                tau, n_pulse=1, n_pulses=3,
-                intensity_profile=beam, wave_vectors=wv,
+                tau,
+                n_pulse=1,
+                n_pulses=3,
+                intensity_profile=beam,
+                wave_vectors=wv,
                 single_photon_detuning_hz=detuning_hz,
             )
             mir = SpatialSuperpositionTransitionPropagator(
-                2*tau, n_pulse=2, n_pulses=3,
-                intensity_profile=beam, wave_vectors=wv,
+                2 * tau,
+                n_pulse=2,
+                n_pulses=3,
+                intensity_profile=beam,
+                wave_vectors=wv,
                 single_photon_detuning_hz=detuning_hz,
             )
             bs2 = SpatialSuperpositionTransitionPropagator(
-                tau, n_pulse=3, n_pulses=3,
-                intensity_profile=beam, wave_vectors=wv,
-                phase_scan=np.pi/2,
+                tau,
+                n_pulse=3,
+                n_pulses=3,
+                intensity_profile=beam,
+                wave_vectors=wv,
+                phase_scan=np.pi / 2,
                 single_photon_detuning_hz=detuning_hz,
             )
             prop = FreePropagator(T)
@@ -93,9 +108,9 @@ class TestACStarkShiftsFringePhase:
         # That's big enough.
         p3_with_stark = run_mz(1e3)
         # The fringe should shift measurably
-        assert abs(p3_with_stark - p3_no_stark) > 0.05, (
-            f"AC Stark had no effect: no_stark={p3_no_stark}, with_stark={p3_with_stark}"
-        )
+        assert (
+            abs(p3_with_stark - p3_no_stark) > 0.05
+        ), f"AC Stark had no effect: no_stark={p3_no_stark}, with_stark={p3_with_stark}"
 
 
 class TestACStarkReducesContrast:
@@ -106,11 +121,14 @@ class TestACStarkReducesContrast:
         tau = 25e-6
         T = 0.1
         # Make beam tight relative to cloud so Omega varies significantly
-        from qgrav.vendor.aisim import FreePropagator, create_random_ensemble
-        import qgrav.vendor.aisim.dist as dist
         from functools import partial
 
-        beam = IntensityProfile(r_profile=2.0e-3, center_rabi_freq=2*np.pi/(4*tau))  # 2mm beam
+        import qgrav.vendor.aisim.dist as dist
+        from qgrav.vendor.aisim import FreePropagator, create_random_ensemble
+
+        beam = IntensityProfile(
+            r_profile=2.0e-3, center_rabi_freq=2 * np.pi / (4 * tau)
+        )  # 2mm beam
         wv = Wavevectors()
         atoms = create_random_ensemble(
             200,
@@ -125,22 +143,31 @@ class TestACStarkReducesContrast:
         )
 
         def run_fringe(detuning_hz, n_phases=21):
-            phis = np.linspace(0, 2*np.pi, n_phases)
+            phis = np.linspace(0, 2 * np.pi, n_phases)
             p3s = []
             for phi in phis:
                 bs1 = SpatialSuperpositionTransitionPropagator(
-                    tau, n_pulse=1, n_pulses=3,
-                    intensity_profile=beam, wave_vectors=wv,
+                    tau,
+                    n_pulse=1,
+                    n_pulses=3,
+                    intensity_profile=beam,
+                    wave_vectors=wv,
                     single_photon_detuning_hz=detuning_hz,
                 )
                 mir = SpatialSuperpositionTransitionPropagator(
-                    2*tau, n_pulse=2, n_pulses=3,
-                    intensity_profile=beam, wave_vectors=wv,
+                    2 * tau,
+                    n_pulse=2,
+                    n_pulses=3,
+                    intensity_profile=beam,
+                    wave_vectors=wv,
                     single_photon_detuning_hz=detuning_hz,
                 )
                 bs2 = SpatialSuperpositionTransitionPropagator(
-                    tau, n_pulse=3, n_pulses=3,
-                    intensity_profile=beam, wave_vectors=wv,
+                    tau,
+                    n_pulse=3,
+                    n_pulses=3,
+                    intensity_profile=beam,
+                    wave_vectors=wv,
                     phase_scan=phi,
                     single_photon_detuning_hz=detuning_hz,
                 )

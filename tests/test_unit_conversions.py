@@ -1,5 +1,6 @@
 """Regression test: every paired m/s^2 + uGal output must use the exact
 conversion factor 1 microGal = 1e-8 m/s^2."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -42,7 +43,8 @@ def test_integrate_vibration_noise_paired_units():
     f = np.logspace(-2, 1, 200)
     psd = np.full_like(f, 1e-14)
     out = integrate_vibration_noise(
-        psd, f,
+        psd,
+        f,
         interferometer_time_s=0.26,
         k_eff_rad_per_m=K_EFF_RB87_D2.value,
     )

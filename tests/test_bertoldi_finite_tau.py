@@ -7,6 +7,7 @@ analytical prediction rather than an unjustified numerical workaround.
 
 References: docs/research/RESEARCH_FINITE_TAU_FORMULAS.md (Topic 14).
 """
+
 from __future__ import annotations
 
 import math
@@ -24,7 +25,8 @@ class TestBertoldiClosedForm:
     def test_returns_unity_when_tau_zero(self):
         # Bertoldi correction vanishes for delta pulses.
         s = bertoldi_finite_tau_scale_factor(
-            tau_pi_half_s=0.0, interferometer_time_s=0.26,
+            tau_pi_half_s=0.0,
+            interferometer_time_s=0.26,
         )
         assert s == 1.0
 
@@ -32,7 +34,8 @@ class TestBertoldiClosedForm:
         # (2pi - 4)/pi ~ 0.72676 is the canonical Bertoldi/Shao coefficient.
         # For tau/T = 0.1, factor = 1 - 0.7268*0.1 = 0.92732.
         s = bertoldi_finite_tau_scale_factor(
-            tau_pi_half_s=0.026, interferometer_time_s=0.26,
+            tau_pi_half_s=0.026,
+            interferometer_time_s=0.26,
         )
         assert math.isclose(s, 1.0 - 0.72676 * 0.1, rel_tol=1e-4)
 
@@ -40,21 +43,24 @@ class TestBertoldiClosedForm:
         # Freier 2016 tau=17us, T=260ms -> eta=6.54e-5 -> correction ~5e-5
         # below unity (tiny, as expected for a quality lab gravimeter).
         s = bertoldi_finite_tau_scale_factor(
-            tau_pi_half_s=17e-6, interferometer_time_s=0.260,
+            tau_pi_half_s=17e-6,
+            interferometer_time_s=0.260,
         )
         assert 1.0 - 1e-4 < s < 1.0
 
     def test_menoret_2018_parameters(self):
         # Menoret tau=10us, T=60ms -> eta=1.67e-4 -> correction ~1.2e-4
         s = bertoldi_finite_tau_scale_factor(
-            tau_pi_half_s=10e-6, interferometer_time_s=0.060,
+            tau_pi_half_s=10e-6,
+            interferometer_time_s=0.060,
         )
         assert 1.0 - 2e-4 < s < 1.0
 
     def test_rejects_invalid_T(self):
         with pytest.raises(ValueError):
             bertoldi_finite_tau_scale_factor(
-                tau_pi_half_s=10e-6, interferometer_time_s=0.0,
+                tau_pi_half_s=10e-6,
+                interferometer_time_s=0.0,
             )
 
 
@@ -64,8 +70,11 @@ class TestBertoldiInGravitySweep:
 
     def test_gravity_sweep_reports_bertoldi(self):
         result = run_aisim_gravity_sweep(
-            n_atoms=100, seed=42, n_gravity_points=11,
-            gravity_span_m_s2=4e-6, lock_to_midfringe=True,
+            n_atoms=100,
+            seed=42,
+            n_gravity_points=11,
+            gravity_span_m_s2=4e-6,
+            lock_to_midfringe=True,
             gravity_propagation=True,
         )
         # Both diagnostics must be present and finite.
@@ -80,8 +89,11 @@ class TestBertoldiInGravitySweep:
         # Even in hybrid mode the analytical scale factor is meaningful
         # (it's the prediction for what the simulated mode would carry).
         result = run_aisim_gravity_sweep(
-            n_atoms=100, seed=42, n_gravity_points=11,
-            gravity_span_m_s2=4e-6, lock_to_midfringe=True,
+            n_atoms=100,
+            seed=42,
+            n_gravity_points=11,
+            gravity_span_m_s2=4e-6,
+            lock_to_midfringe=True,
             gravity_propagation=False,
         )
         assert "bertoldi_finite_tau_scale_factor" in result

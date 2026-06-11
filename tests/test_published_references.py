@@ -70,7 +70,16 @@ def test_compare_result_keys():
     # v1.0.2: sg_noise_floor corrected to 1.8e-9 m/s^2/sqrt(Hz); use a value
     # in-band so the result dict is populated normally.
     result = compare_to_reference("sg_noise_floor", 1.8e-9)
-    for k in ("key", "measured", "reference_value", "unit", "source", "within_tolerance", "deviation_pct", "tolerance_pct"):
+    for k in (
+        "key",
+        "measured",
+        "reference_value",
+        "unit",
+        "source",
+        "within_tolerance",
+        "deviation_pct",
+        "tolerance_pct",
+    ):
         assert k in result
 
 
@@ -100,13 +109,21 @@ def test_all_references_have_doi():
     """Every published reference should have a non-empty DOI."""
     for key, ref in REFERENCES.items():
         assert ref.doi, f"Reference {key!r} is missing a DOI"
-        assert ref.doi.startswith("10."), f"Reference {key!r} DOI does not start with '10.': {ref.doi}"
+        assert ref.doi.startswith(
+            "10."
+        ), f"Reference {key!r} DOI does not start with '10.': {ref.doi}"
 
 
 def test_doi_field_exists_on_dataclass():
     """Verify doi is a proper field on the frozen dataclass."""
     ref = PublishedReference(
-        key="test", description="test", value=1.0, unit="m", source="test", year=2024, doi="10.1234/test"
+        key="test",
+        description="test",
+        value=1.0,
+        unit="m",
+        source="test",
+        year=2024,
+        doi="10.1234/test",
     )
     assert ref.doi == "10.1234/test"
     # Default doi should be empty string

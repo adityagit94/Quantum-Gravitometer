@@ -5,10 +5,12 @@ included in the AISim simulation.
 
 Constants are sourced from :mod:`qgrav.physics.constants`.
 """
+
 from __future__ import annotations
 
-import numpy as np
 from typing import Any
+
+import numpy as np
 
 from qgrav.physics.constants import (
     FREE_AIR_GRADIENT,

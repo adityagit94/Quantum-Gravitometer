@@ -3,6 +3,7 @@
 Uses synthetic .ggp data in a temporary directory to exercise
 ``batch_scan_stations.scan_station`` and the CLI entry points.
 """
+
 from __future__ import annotations
 
 import csv
@@ -24,7 +25,9 @@ Longitude: 11.000
 """
 
 
-def _make_ggp_file(path: Path, code: str, n_samples: int = 200, *, include_nan: bool = False) -> None:
+def _make_ggp_file(
+    path: Path, code: str, n_samples: int = 200, *, include_nan: bool = False
+) -> None:
     """Write a synthetic .ggp file with ``n_samples`` rows."""
     rng = np.random.default_rng(42)
     lines = [_GGP_HEADER.format(code=code)]
@@ -54,6 +57,7 @@ def synthetic_source(tmp_path: Path) -> Path:
 # Tests for batch_scan_stations
 # ---------------------------------------------------------------------------
 
+
 def test_scan_station_returns_metrics(synthetic_source: Path):
     """scan_station should return a dict with statistical keys."""
     sys.path.insert(0, str(Path(__file__).resolve().parents[0] / ".." / "scripts"))
@@ -81,7 +85,14 @@ def test_batch_scan_cli_produces_csv(synthetic_source: Path, tmp_path: Path):
     script = Path(__file__).resolve().parents[0] / ".." / "scripts" / "batch_scan_stations.py"
     output_csv = tmp_path / "output.csv"
     result = subprocess.run(
-        [sys.executable, str(script), "--source", str(synthetic_source), "--output", str(output_csv)],
+        [
+            sys.executable,
+            str(script),
+            "--source",
+            str(synthetic_source),
+            "--output",
+            str(output_csv),
+        ],
         capture_output=True,
         text=True,
         timeout=60,
@@ -113,12 +124,20 @@ def test_batch_scan_cli_missing_source(tmp_path: Path):
 # Tests for multi_station_comparison
 # ---------------------------------------------------------------------------
 
+
 def test_multi_station_comparison_cli_produces_png(synthetic_source: Path, tmp_path: Path):
     """Running multi_station_comparison.py via CLI should produce a PNG."""
     script = Path(__file__).resolve().parents[0] / ".." / "scripts" / "multi_station_comparison.py"
     output_png = tmp_path / "comparison.png"
     result = subprocess.run(
-        [sys.executable, str(script), "--source", str(synthetic_source), "--output", str(output_png)],
+        [
+            sys.executable,
+            str(script),
+            "--source",
+            str(synthetic_source),
+            "--output",
+            str(output_png),
+        ],
         capture_output=True,
         text=True,
         timeout=60,

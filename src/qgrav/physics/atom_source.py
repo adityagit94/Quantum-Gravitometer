@@ -29,13 +29,13 @@ class AtomSourceConfig:
 def source_summary_rows(config: AtomSourceConfig, detected_count: int) -> dict[str, Any]:
     total = max(int(config.n_atoms_total), 1)
     return {
-        'Total atoms': int(config.n_atoms_total),
-        'Detected atoms': int(detected_count),
-        'Detected fraction': float(detected_count / total),
-        'Cloud radius (m)': float(config.cloud_radius_m),
-        'Temp XY (K)': float(config.temp_xy_K),
-        'Temp Z (K)': float(config.temp_z_K),
-        'Detector time (s)': float(config.detector_time_s),
-        'Detector radius (m)': float(config.detector_radius_m),
-        'Multiport source': bool(config.multiport),
+        "Total atoms": int(config.n_atoms_total),
+        "Detected atoms": int(detected_count),
+        "Detected fraction": float(detected_count / total),
+        "Cloud radius (m)": float(config.cloud_radius_m),
+        "Temp XY (K)": float(config.temp_xy_K),
+        "Temp Z (K)": float(config.temp_z_K),
+        "Detector time (s)": float(config.detector_time_s),
+        "Detector radius (m)": float(config.detector_radius_m),
+        "Multiport source": bool(config.multiport),
     }

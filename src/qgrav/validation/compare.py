@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import numpy as np
 
-def curve_correlation(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> dict[str, float]:
+
+def curve_correlation(
+    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray
+) -> dict[str, float]:
     """Interpolate curve 2 onto curve 1 grid (overlap only) and compute corr + R-squared.
 
     Parameters

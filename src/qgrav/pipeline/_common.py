@@ -1,4 +1,5 @@
 """Shared helpers for the pipeline package."""
+
 from __future__ import annotations
 
 import json
@@ -9,14 +10,15 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from pathlib import Path as _PathForMPL
 from typing import Any
 
-from pathlib import Path as _PathForMPL
 _MPLDIR = _PathForMPL.home() / ".qgrav_mpl"
 _MPLDIR.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("MPLCONFIGDIR", str(_MPLDIR))
 
 import matplotlib
+
 if str(matplotlib.get_backend()).lower() != "tkagg":
     matplotlib.use("Agg")
 import numpy as np
@@ -72,7 +74,7 @@ def _logspace_taus(duration_s: float, sample_rate_hz: float, n: int = 25) -> np.
 def _jsonable(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {str(k): _jsonable(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
+    if isinstance(obj, list | tuple):
         return [_jsonable(v) for v in obj]
     if isinstance(obj, np.ndarray):
         return obj.tolist()
@@ -83,9 +85,9 @@ def _jsonable(obj: Any) -> Any:
     if isinstance(obj, np.timedelta64):
         # Preserve sub-second precision as float seconds
         return float(obj / np.timedelta64(1, "s")) if not np.isnat(obj) else None
-    if isinstance(obj, (np.floating, np.integer, np.bool_)):
+    if isinstance(obj, np.floating | np.integer | np.bool_):
         return obj.item()
-    if isinstance(obj, (np.str_, np.bytes_)):
+    if isinstance(obj, np.str_ | np.bytes_):
         return str(obj)
     return obj
 
@@ -134,7 +136,9 @@ def _compare_allan_backends(
     data_type: str,
 ) -> dict[str, Any]:
     primary = allan_deviation_overlapping(x, fs, taus, backend=primary_backend, data_type=data_type)
-    reference = allan_deviation_overlapping(x, fs, taus, backend=reference_backend, data_type=data_type)
+    reference = allan_deviation_overlapping(
+        x, fs, taus, backend=reference_backend, data_type=data_type
+    )
     taus1 = np.asarray(primary["taus_s"], dtype=np.float64)
     adev1 = np.asarray(primary["adev"], dtype=np.float64)
     taus2 = np.asarray(reference["taus_s"], dtype=np.float64)
@@ -170,11 +174,23 @@ def _stats_cfg(cfg: dict[str, Any]) -> tuple[str, int, int, str, str, bool, str]
     psd_method = str(stats_cfg.get("psd_method", "welch")).strip().lower()
     nperseg = int(stats_cfg.get("welch_nperseg", 1024))
     noverlap = int(stats_cfg.get("welch_noverlap", max(1, nperseg // 2)))
-    metrics_backend = str(stats_cfg.get("metrics_backend", stats_cfg.get("allan_backend", "auto"))).strip().lower()
+    metrics_backend = (
+        str(stats_cfg.get("metrics_backend", stats_cfg.get("allan_backend", "auto")))
+        .strip()
+        .lower()
+    )
     allan_data_type = str(stats_cfg.get("allan_data_type", "freq")).strip().lower()
     compare_allan_backends = bool(stats_cfg.get("compare_allan_backends", False))
     comparison_backend = str(stats_cfg.get("comparison_backend", "custom")).strip().lower()
-    return psd_method, nperseg, noverlap, metrics_backend, allan_data_type, compare_allan_backends, comparison_backend
+    return (
+        psd_method,
+        nperseg,
+        noverlap,
+        metrics_backend,
+        allan_data_type,
+        compare_allan_backends,
+        comparison_backend,
+    )
 
 
 def _write_run_metadata(path: Path, config: dict[str, Any], metrics: dict[str, Any]) -> None:
@@ -195,37 +211,41 @@ def _write_summary(path: Path, metrics: dict[str, Any]) -> None:
     lines.append(f"- Allan backend used: `{metrics.get('allan_backend_used')}`")
     lines.append(f"- Allan data type: `{metrics.get('allan_data_type')}`")
     if metrics.get("bench_type") == "real_gravity":
-        lines.extend([
-            "",
-            "## Real gravimetry dataset",
-            f"- Station code: `{metrics.get('station_code')}`",
-            f"- Longitude (deg): `{metrics.get('longitude_deg')}`",
-            f"- Latitude (deg): `{metrics.get('latitude_deg')}`",
-            f"- Record start: `{metrics.get('record_start')}`",
-            f"- Record end: `{metrics.get('record_end')}`",
-            f"- Mean: `{metrics.get('gravity_summary', {}).get('mean')}`",
-            f"- Std: `{metrics.get('gravity_summary', {}).get('std')}`",
-            f"- Gap count: `{metrics.get('gap_report', {}).get('gap_count')}`",
-            f"- Missing samples estimate: `{metrics.get('gap_report', {}).get('missing_samples_estimate')}`",
-            f"- Analysis segment samples: `{metrics.get('analysis_segment', {}).get('segment_samples')}`",
-            f"- Dropped malformed rows: `{metrics.get('dropped_rows', 0)}`",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Real gravimetry dataset",
+                f"- Station code: `{metrics.get('station_code')}`",
+                f"- Longitude (deg): `{metrics.get('longitude_deg')}`",
+                f"- Latitude (deg): `{metrics.get('latitude_deg')}`",
+                f"- Record start: `{metrics.get('record_start')}`",
+                f"- Record end: `{metrics.get('record_end')}`",
+                f"- Mean: `{metrics.get('gravity_summary', {}).get('mean')}`",
+                f"- Std: `{metrics.get('gravity_summary', {}).get('std')}`",
+                f"- Gap count: `{metrics.get('gap_report', {}).get('gap_count')}`",
+                f"- Missing samples estimate: `{metrics.get('gap_report', {}).get('missing_samples_estimate')}`",
+                f"- Analysis segment samples: `{metrics.get('analysis_segment', {}).get('segment_samples')}`",
+                f"- Dropped malformed rows: `{metrics.get('dropped_rows', 0)}`",
+            ]
+        )
         for warning in metrics.get("unit_warnings", []):
             lines.append(f"- Unit warning: `{warning}`")
     elif metrics.get("have_truth"):
         base = metrics["baseline"]
         imp = metrics["improved"]
-        lines.extend([
-            "",
-            "## Error statistics",
-            f"- Baseline RMSE: `{base['rmse']}`",
-            f"- Improved RMSE: `{imp['rmse']}`",
-            f"- RMSE improvement: `{metrics.get('rmse_improvement_percent')}` %",
-            f"- Baseline MAE: `{base['mae']}`",
-            f"- Improved MAE: `{imp['mae']}`",
-            f"- Baseline time correlation: `{base['time_corr']}`",
-            f"- Improved time correlation: `{imp['time_corr']}`",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Error statistics",
+                f"- Baseline RMSE: `{base['rmse']}`",
+                f"- Improved RMSE: `{imp['rmse']}`",
+                f"- RMSE improvement: `{metrics.get('rmse_improvement_percent')}` %",
+                f"- Baseline MAE: `{base['mae']}`",
+                f"- Improved MAE: `{imp['mae']}`",
+                f"- Baseline time correlation: `{base['time_corr']}`",
+                f"- Improved time correlation: `{imp['time_corr']}`",
+            ]
+        )
     if "noise_identification" in metrics:
         ni = metrics["noise_identification"]
         lines.append(f"- Dominant noise type: `{ni.get('noise_type', 'unknown')}`")
@@ -237,11 +257,17 @@ def _write_summary(path: Path, metrics: dict[str, Any]) -> None:
         ni_i = metrics["noise_identification_improved"]
         _slope_b = ni_b.get("slope", float("nan"))
         _slope_i = ni_i.get("slope", float("nan"))
-        lines.append(f"- Baseline noise type: `{ni_b.get('noise_type', 'unknown')}` (slope={float(_slope_b):.3f})")
-        lines.append(f"- Improved noise type: `{ni_i.get('noise_type', 'unknown')}` (slope={float(_slope_i):.3f})")
+        lines.append(
+            f"- Baseline noise type: `{ni_b.get('noise_type', 'unknown')}` (slope={float(_slope_b):.3f})"
+        )
+        lines.append(
+            f"- Improved noise type: `{ni_i.get('noise_type', 'unknown')}` (slope={float(_slope_i):.3f})"
+        )
     if "allan_minimum" in metrics:
         am = metrics["allan_minimum"]
-        lines.append(f"- Allan minimum: `{am.get('min_adev', 'N/A')}` at tau=`{am.get('min_tau_s', 'N/A')}` s")
+        lines.append(
+            f"- Allan minimum: `{am.get('min_adev', 'N/A')}` at tau=`{am.get('min_tau_s', 'N/A')}` s"
+        )
     if "allan_improvement_percent_mean" in metrics:
         lines.append(f"- Mean Allan improvement: `{metrics['allan_improvement_percent_mean']}` %")
     if "simulation" in metrics:
@@ -255,19 +281,23 @@ def _write_summary(path: Path, metrics: dict[str, Any]) -> None:
             lines.extend([f"- Backend: `{sim.get('backend')}`", f"- Model: `{sim.get('model')}`"])
         truth = sim.get("truth_checks", {}) if isinstance(sim, dict) else {}
         if isinstance(truth, dict) and truth:
-            lines.extend([
-                f"- Truth checks passed: `{truth.get('passed_count')}/{truth.get('total_count')}`",
-                f"- All truth checks passed: `{truth.get('all_passed')}`",
-            ])
+            lines.extend(
+                [
+                    f"- Truth checks passed: `{truth.get('passed_count')}/{truth.get('total_count')}`",
+                    f"- All truth checks passed: `{truth.get('all_passed')}`",
+                ]
+            )
     if "allan_backend_comparison" in metrics:
         comp = metrics["allan_backend_comparison"]
-        lines.extend([
-            "",
-            "## Allan backend comparison",
-            f"- Primary backend: `{comp['primary_backend']}`",
-            f"- Reference backend: `{comp['reference_backend']}`",
-            f"- Tau count: `{comp['tau_count']}`",
-            f"- Mean relative difference: `{comp.get('mean_rel_diff')}`",
-            f"- Max relative difference: `{comp.get('max_rel_diff')}`",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Allan backend comparison",
+                f"- Primary backend: `{comp['primary_backend']}`",
+                f"- Reference backend: `{comp['reference_backend']}`",
+                f"- Tau count: `{comp['tau_count']}`",
+                f"- Mean relative difference: `{comp.get('mean_rel_diff')}`",
+                f"- Max relative difference: `{comp.get('max_rel_diff')}`",
+            ]
+        )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

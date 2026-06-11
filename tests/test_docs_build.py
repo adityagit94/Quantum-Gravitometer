@@ -5,11 +5,11 @@ well-formed, so a broken nav entry or missing paper file is caught in CI.  The
 actual `mkdocs build` runs in the Docs workflow; these tests are hermetic and
 do not require mkdocs to be installed.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent

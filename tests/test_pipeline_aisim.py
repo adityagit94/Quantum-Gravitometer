@@ -43,6 +43,7 @@ simulation:
   n_steps: 10
 """
 
+
 def test_pipeline_creates_aisim_outputs(tmp_path: Path):
     cfg = tmp_path / "config.yaml"
     cfg.write_text(CFG, encoding="utf-8")

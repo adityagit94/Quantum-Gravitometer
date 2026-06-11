@@ -1,6 +1,8 @@
 import numpy as np
-from qgrav.bench_ifo import generate_virtual_ifo
+
 from qgrav.algorithms import estimate_displacement_baseline, estimate_displacement_improved
+from qgrav.bench_ifo import generate_virtual_ifo
+
 
 def test_improved_beats_baseline_on_drifty_data():
     cfg = dict(

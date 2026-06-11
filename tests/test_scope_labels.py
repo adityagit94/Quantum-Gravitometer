@@ -5,18 +5,17 @@ Per PRD W10/R16.4: every ``run_aisim_*`` function in
 the existing free-text ``study_scope`` and a canonical
 ``study_scope_category`` whose value is one of the allowed enum members.
 """
+
 from __future__ import annotations
 
 import inspect
 
-import pytest
-
 from qgrav.sim_ai import aisim_adapter
 from qgrav.sim_ai.aisim_adapter import (
+    _ALLOWED_STUDY_SCOPE_CATEGORIES,
     STUDY_SCOPE_ANALYTICAL_ONLY,
     STUDY_SCOPE_FULLY_SIMULATED,
     STUDY_SCOPE_HYBRID,
-    _ALLOWED_STUDY_SCOPE_CATEGORIES,
     _classify_study_scope,
 )
 
@@ -69,14 +68,17 @@ def test_allowed_categories_are_three():
 def test_pack_result_propagates_category_and_description():
     """Calling _pack_result directly with a hybrid scope string adds both
     canonical fields."""
-    from qgrav.sim_ai.aisim_adapter import _pack_result
     from qgrav.physics import AtomSourceConfig
+    from qgrav.sim_ai.aisim_adapter import _pack_result
 
     src = AtomSourceConfig(
-        n_atoms_total=100, seed=0,
+        n_atoms_total=100,
+        seed=0,
         cloud_radius_m=3e-3,
-        temp_xy_K=1e-6, temp_z_K=1e-7,
-        detector_time_s=0.7, detector_radius_m=5e-3,
+        temp_xy_K=1e-6,
+        temp_z_K=1e-7,
+        detector_time_s=0.7,
+        detector_radius_m=5e-3,
         multiport=False,
     )
     out = _pack_result(

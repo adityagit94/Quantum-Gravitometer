@@ -10,6 +10,7 @@ navigable Guides tab.
 They skip cleanly when Tk is absent (a Python built without Tk) or has no
 display (headless CI without an X server), so the core suite is unaffected.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -68,8 +69,12 @@ def app(gui_root, monkeypatch):
 def test_app_builds_six_tabs(app):
     names = [app.notebook.tab(i, "text") for i in range(app.notebook.index("end"))]
     assert names == [
-        "Setup & Run", "Data Browser", "Config Editor",
-        "Results & Visuals", "Validation", "Guides",
+        "Setup & Run",
+        "Data Browser",
+        "Config Editor",
+        "Results & Visuals",
+        "Validation",
+        "Guides",
     ]
 
 
@@ -155,7 +160,7 @@ def test_reproduction_rows_present_and_within_band(app):
 
 def test_one_click_reproduction_builds_runnable_config(app):
     app.repro_tree.selection_set("freier_2016")
-    app.repro_atoms_var.set("60")   # tiny: keep the test fast
+    app.repro_atoms_var.set("60")  # tiny: keep the test fast
     app.repro_drops_var.set("8")
     app._load_selected_reproduction(run_after=False)
 

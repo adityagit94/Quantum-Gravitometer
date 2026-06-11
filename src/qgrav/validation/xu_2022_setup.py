@@ -11,12 +11,13 @@ Reported headline (verbatim): "HUST-QG exhibited a short-term sensitivity of
 24 µGal Hz⁻¹ᐟ² and a combined uncertainty of 3 µGal.  The degree of
 equivalence for HUST-QG in this comparison is 1.3 µGal."  (ICAG-2017.)
 """
+
 from __future__ import annotations
 
 import math
 
 XU_2022_PARAMS: dict[str, float] = {
-    "interferometer_time_s": 0.300,           # similar to Hu 2013 lineage
+    "interferometer_time_s": 0.300,  # similar to Hu 2013 lineage
     "cycle_time_s": 1.0,
     "tau_pi_half_s": 23e-6,
     "n_atoms_mot": 3e9,
@@ -24,15 +25,15 @@ XU_2022_PARAMS: dict[str, float] = {
     "temp_cloud_K": 7e-6,
     "single_photon_detuning_hz": -1.5e9,
     "k_eff_rad_per_m": 1.611e7,
-    "contrast": 0.30,                          # higher than Hu 2013 lab
+    "contrast": 0.30,  # higher than Hu 2013 lab
     "gravity_true_m_s2": 9.81,
 }
 
 XU_2022_TARGETS: dict[str, float] = {
-    "short_term_noise_m_s2_per_sqrt_hz": 2.4e-7,   # 24 µGal/√Hz
-    "combined_uncertainty_m_s2": 3e-8,             # 3 µGal combined uncertainty
-    "icag_equivalence_m_s2": 1.3e-8,               # 1.3 µGal degree of equivalence
-    "tolerance_factor": 2.5,                        # transportable wider envelope
+    "short_term_noise_m_s2_per_sqrt_hz": 2.4e-7,  # 24 µGal/√Hz
+    "combined_uncertainty_m_s2": 3e-8,  # 3 µGal combined uncertainty
+    "icag_equivalence_m_s2": 1.3e-8,  # 1.3 µGal degree of equivalence
+    "tolerance_factor": 2.5,  # transportable wider envelope
 }
 
 
@@ -52,7 +53,13 @@ def _detection_sigma_p_for_target() -> float:
     """Choose σ_P so the multi-drop simulation reproduces ~24 µGal/√Hz."""
     p = XU_2022_PARAMS
     sigma_g_per_shot = total_per_shot_g_noise_m_s2()
-    return sigma_g_per_shot * 0.5 * p["contrast"] * p["k_eff_rad_per_m"] * p["interferometer_time_s"] ** 2
+    return (
+        sigma_g_per_shot
+        * 0.5
+        * p["contrast"]
+        * p["k_eff_rad_per_m"]
+        * p["interferometer_time_s"] ** 2
+    )
 
 
 def multi_drop_kwargs(

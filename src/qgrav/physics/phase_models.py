@@ -49,7 +49,9 @@ def equivalent_gravity_error_m_s2(
     return np.asarray(phase_rad, dtype=np.float64) / denom
 
 
-def normalized_differential_signal(port2: np.ndarray | float, port3: np.ndarray | float) -> np.ndarray:
+def normalized_differential_signal(
+    port2: np.ndarray | float, port3: np.ndarray | float
+) -> np.ndarray:
     p2 = np.asarray(port2, dtype=np.float64)
     p3 = np.asarray(port3, dtype=np.float64)
     closed_total = np.maximum(p2 + p3, 1e-15)
@@ -92,6 +94,9 @@ def sensitivity_ugal_per_sqrt_hz(
     cycle_time_s: float = 1.0,
 ) -> float:
     """Same as shot_noise_sensitivity_m_s2_per_sqrt_hz but in uGal/sqrt(Hz)."""
-    return shot_noise_sensitivity_m_s2_per_sqrt_hz(
-        k_eff_rad_per_m, interferometer_time_s, n_atoms, contrast, cycle_time_s
-    ) * 1e8
+    return (
+        shot_noise_sensitivity_m_s2_per_sqrt_hz(
+            k_eff_rad_per_m, interferometer_time_s, n_atoms, contrast, cycle_time_s
+        )
+        * 1e8
+    )

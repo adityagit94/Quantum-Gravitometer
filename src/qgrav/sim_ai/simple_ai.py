@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
+
 def phase_mach_zehnder(k_eff: float, acceleration: float, T: float) -> float:
     """Idealized phase for a 3-pulse light‑pulse atom interferometer (minimal baseline).
 
@@ -19,7 +20,8 @@ def phase_mach_zehnder(k_eff: float, acceleration: float, T: float) -> float:
     Returns:
         Phase shift (radians)
     """
-    return float(k_eff * acceleration * (T ** 2))
+    return float(k_eff * acceleration * (T**2))
+
 
 def simulate_phase_timeseries(
     *,

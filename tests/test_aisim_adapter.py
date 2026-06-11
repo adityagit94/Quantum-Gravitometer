@@ -87,6 +87,7 @@ def test_aisim_does_not_mutate_global_random_state():
     actual = np.random.random(5)
 
     np.testing.assert_array_equal(
-        actual, expected,
+        actual,
+        expected,
         err_msg="AISim mutated the global numpy random state",
     )

@@ -13,6 +13,7 @@ Scope (honest):
   a user/collaboration track (see docs/REVIEW_REQUEST_TEMPLATE.md).
 - Hermetic: uses the bundled `data/raw/sg_sample` station, no network.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

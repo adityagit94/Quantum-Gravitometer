@@ -10,9 +10,10 @@ logger = logging.getLogger(__name__)
 
 def _cmd_run(args: argparse.Namespace) -> None:
     import matplotlib
+
     matplotlib.use("Agg")
-    from qgrav.pipeline import run_pipeline
     from qgrav.config import load_config, validate_config
+    from qgrav.pipeline import run_pipeline
 
     config_path = Path(args.config)
     if args.dry_run:
@@ -41,11 +42,13 @@ def _cmd_run(args: argparse.Namespace) -> None:
 
 def _cmd_gui(args: argparse.Namespace) -> None:
     from qgrav.gui import main as gui_main
+
     gui_main(default_config=Path(args.config).resolve() if args.config else None)
 
 
 def _cmd_convert_ggp(args: argparse.Namespace) -> None:
     from qgrav.datasets import convert_ggp_to_csv
+
     out = convert_ggp_to_csv(
         source_path=args.source,
         output_path=args.out,
@@ -62,14 +65,15 @@ def _safe_dispatch(handler, args: argparse.Namespace) -> None:
     except SystemExit:
         raise
     except KeyboardInterrupt:
-        raise SystemExit(130)
+        raise SystemExit(130) from None
     except Exception as exc:
         exc_name = type(exc).__name__
         print(f"Error ({exc_name}): {exc}", file=sys.stderr)
         if getattr(args, "verbose", False):
             import traceback
+
             traceback.print_exc(file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
 
 def _cmd_validate_data(args: argparse.Namespace) -> None:
@@ -89,10 +93,11 @@ def _cmd_validate_data(args: argparse.Namespace) -> None:
         )
     except Exception as exc:
         print(f"Error loading dataset: {exc}", file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     # Try IGETS level detection
     from qgrav.datasets.corrections import detect_igets_level
+
     level = detect_igets_level(data)
 
     print("=== qgrav validate-data ===")
@@ -119,6 +124,7 @@ def _cmd_validate_data(args: argparse.Namespace) -> None:
     x = data.get("gravity_residual")
     if x is not None and len(x) > 0:
         import numpy as np
+
         x = np.asarray(x)
         print(f"  Mean:          {float(np.mean(x)):.6e}")
         print(f"  Std:           {float(np.std(x)):.6e}")
@@ -143,6 +149,7 @@ def _cmd_validate_data(args: argparse.Namespace) -> None:
 def _cmd_info(_args: argparse.Namespace) -> None:
     """Print version and environment information."""
     import platform
+
     from qgrav import __version__
 
     print("=== qgrav info ===")
@@ -181,11 +188,13 @@ def _cmd_info(_args: argparse.Namespace) -> None:
     print("  Vendored packages:")
     try:
         from qgrav.vendor.allantools import allantools as at
+
         print(f"    allantools:        {getattr(at, '__version__', '?')}")
     except Exception:
         print("    allantools:        unavailable")
     try:
-        import qgrav.vendor.aisim
+        import qgrav.vendor.aisim  # noqa: F401 - availability probe
+
         print("    aisim:             available")
     except Exception:
         print("    aisim:             unavailable")
@@ -193,17 +202,20 @@ def _cmd_info(_args: argparse.Namespace) -> None:
 
 def main() -> None:
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+        level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
     parser = argparse.ArgumentParser(prog="qgrav", description="Quantum gravimeter R&D platform")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show full tracebacks on error")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show full tracebacks on error"
+    )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     # --- run ---
     run_p = sub.add_parser("run", help="Run pipeline from YAML config")
     run_p.add_argument("--config", required=True, help="Path to YAML configuration file")
-    run_p.add_argument("--dry-run", action="store_true", help="Validate config and print summary without running")
+    run_p.add_argument(
+        "--dry-run", action="store_true", help="Validate config and print summary without running"
+    )
 
     # --- gui ---
     gui_p = sub.add_parser("gui", help="Launch the desktop GUI")
@@ -211,15 +223,21 @@ def main() -> None:
 
     # --- convert-ggp ---
     conv_p = sub.add_parser("convert-ggp", help="Convert .ggp gravimetry data to CSV")
-    conv_p.add_argument("--source", required=True, help="Path to .ggp file, directory, or .zip archive")
+    conv_p.add_argument(
+        "--source", required=True, help="Path to .ggp file, directory, or .zip archive"
+    )
     conv_p.add_argument("--out", required=True, help="Output CSV path")
-    conv_p.add_argument("--station", required=False, help="Station code when source is a directory or zip")
+    conv_p.add_argument(
+        "--station", required=False, help="Station code when source is a directory or zip"
+    )
     conv_p.add_argument("--metadata", required=False, help="Optional SG station metadata path")
 
     # --- validate-data ---
     val_p = sub.add_parser("validate-data", help="Validate a gravimetry dataset and print summary")
     val_p.add_argument("--source", required=True, help="Path to .ggp, .csv, or directory")
-    val_p.add_argument("--station", required=False, help="Station code (when source is a directory/zip)")
+    val_p.add_argument(
+        "--station", required=False, help="Station code (when source is a directory/zip)"
+    )
     val_p.add_argument("--metadata", required=False, help="Optional SG station metadata path")
 
     # --- info ---

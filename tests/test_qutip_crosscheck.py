@@ -8,6 +8,7 @@ The point: qgrav's closed-form 2x2 Raman matrix vs QuTiP's numerical
 Schrodinger integration — a genuinely independent code path. Agreement is
 evidence the matrix is correct (partial mitigation of "no independent review").
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -16,7 +17,6 @@ import pytest
 pytest.importorskip("qutip")
 
 from qgrav.validation.qutip_crosscheck import (  # noqa: E402
-    analytic_rabi_population,
     aisim_rabi_population,
     compare_rabi_grid,
     qutip_rabi_population,
@@ -52,11 +52,11 @@ class TestRabiAgreement:
     def test_off_resonance_suppression(self):
         # Large detuning strongly suppresses transfer; both engines must agree.
         omega = 2 * np.pi * 1e4
-        delta = 2 * np.pi * 5e4   # 5x the Rabi freq
+        delta = 2 * np.pi * 5e4  # 5x the Rabi freq
         tau = np.pi / omega
         p_ai = aisim_rabi_population(omega, delta, tau)
         p_qt = qutip_rabi_population(omega, delta, tau)
-        assert p_ai < 0.1               # strongly suppressed
+        assert p_ai < 0.1  # strongly suppressed
         assert p_ai == pytest.approx(p_qt, abs=1e-4)
 
 
@@ -71,11 +71,14 @@ class TestSpontaneousEmissionCrosscheck:
         delta_hz = 1e9
         tau = 25e-6
         analytic = spontaneous_emission_loss_probability(
-            rabi_freq_rad_s=omega, single_photon_detuning_hz=delta_hz,
+            rabi_freq_rad_s=omega,
+            single_photon_detuning_hz=delta_hz,
             pulse_duration_s=tau,
         )
         qt_loss = qutip_spontaneous_emission_loss(
-            omega_eff=omega, single_photon_detuning_hz=delta_hz, tau=tau,
+            omega_eff=omega,
+            single_photon_detuning_hz=delta_hz,
+            tau=tau,
         )
         # Both should be small (~1e-7) and within ~2 orders of magnitude of
         # each other (the two models use different adiabatic-elimination

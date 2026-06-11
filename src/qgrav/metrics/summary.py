@@ -19,7 +19,11 @@ def compute_error_statistics(y_true: np.ndarray, y_hat: np.ndarray) -> dict[str,
 
     signal_var = float(np.var(y_true))
     noise_var = float(np.var(err))
-    snr_db = float(10.0 * np.log10(signal_var / noise_var)) if signal_var > 0 and noise_var > 0 else float("nan")
+    snr_db = (
+        float(10.0 * np.log10(signal_var / noise_var))
+        if signal_var > 0 and noise_var > 0
+        else float("nan")
+    )
 
     corr = float(np.corrcoef(y_true, y_hat)[0, 1]) if len(y_true) > 1 else float("nan")
     return {

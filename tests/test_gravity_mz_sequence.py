@@ -4,6 +4,7 @@ The key cross-validation: simulated mode (GravityFreePropagator + chirped laser)
 must produce the same fringe pattern as the hybrid mode (analytical gravity phase),
 since both implement the same underlying physics.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -15,7 +16,6 @@ from qgrav.sim_ai.aisim_adapter import (
     run_aisim_gravity_sweep,
     run_simulation_from_config,
 )
-
 
 # Use small atom counts + few points for speed in CI.
 _COMMON = dict(
@@ -52,22 +52,25 @@ class TestGravitySweepSimulatedMatchesAnalytical:
         p3_h = hybrid["output_port_3"]
         p3_s = simulated["output_port_3"]
         # Populations agree within finite-tau physics differences (atol=0.15)
-        np.testing.assert_allclose(p3_s, p3_h, atol=0.15,
-                                   err_msg="Simulated and hybrid port-3 populations disagree")
+        np.testing.assert_allclose(
+            p3_s, p3_h, atol=0.15, err_msg="Simulated and hybrid port-3 populations disagree"
+        )
 
     def test_port2_populations_agree(self, both_results):
         hybrid, simulated = both_results
         p2_h = hybrid["output_port_2"]
         p2_s = simulated["output_port_2"]
-        np.testing.assert_allclose(p2_s, p2_h, atol=0.15,
-                                   err_msg="Simulated and hybrid port-2 populations disagree")
+        np.testing.assert_allclose(
+            p2_s, p2_h, atol=0.15, err_msg="Simulated and hybrid port-2 populations disagree"
+        )
 
     def test_normalized_diff_agrees(self, both_results):
         hybrid, simulated = both_results
         nd_h = hybrid["normalized_differential_signal"]
         nd_s = simulated["normalized_differential_signal"]
-        np.testing.assert_allclose(nd_s, nd_h, atol=0.30,
-                                   err_msg="Normalized differential signals disagree")
+        np.testing.assert_allclose(
+            nd_s, nd_h, atol=0.30, err_msg="Normalized differential signals disagree"
+        )
 
 
 class TestGravitySweepFringeVisibility:
@@ -81,9 +84,9 @@ class TestGravitySweepFringeVisibility:
         p3_s = simulated["output_port_3"]
         vis_h = (np.max(p3_h) - np.min(p3_h)) / max(np.max(p3_h) + np.min(p3_h), 1e-15)
         vis_s = (np.max(p3_s) - np.min(p3_s)) / max(np.max(p3_s) + np.min(p3_s), 1e-15)
-        assert abs(vis_s - vis_h) < 0.1, (
-            f"Visibility mismatch: simulated={vis_s:.3f} vs hybrid={vis_h:.3f}"
-        )
+        assert (
+            abs(vis_s - vis_h) < 0.1
+        ), f"Visibility mismatch: simulated={vis_s:.3f} vs hybrid={vis_h:.3f}"
 
 
 class TestGravitySweepStudyScope:
@@ -105,7 +108,10 @@ class TestGravitySweepDefaultIsHybrid:
 
     def test_default_is_hybrid(self):
         result = run_aisim_gravity_sweep(
-            n_atoms=100, seed=1, n_gravity_points=5, gravity_span_m_s2=2.0e-6,
+            n_atoms=100,
+            seed=1,
+            n_gravity_points=5,
+            gravity_span_m_s2=2.0e-6,
         )
         assert result["study_scope_category"] == STUDY_SCOPE_HYBRID
         assert result["gravity_propagation"] is False

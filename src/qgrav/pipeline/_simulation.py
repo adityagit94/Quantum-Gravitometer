@@ -1,24 +1,29 @@
 """AISim simulation helpers for the pipeline."""
+
 from __future__ import annotations
 
 import logging
 from pathlib import Path
 from typing import Any
 
-from matplotlib.figure import Figure
 import numpy as np
+from matplotlib.figure import Figure
 
-from qgrav.sim_ai import run_simulation_from_config
 from qgrav.pipeline._common import RunPaths, _jsonable
+from qgrav.sim_ai import run_simulation_from_config
 
 logger = logging.getLogger(__name__)
 
 
-def _add_simulation(metrics: dict[str, Any], save_dict: dict[str, np.ndarray], sim_cfg: dict[str, Any]) -> None:
+def _add_simulation(
+    metrics: dict[str, Any], save_dict: dict[str, np.ndarray], sim_cfg: dict[str, Any]
+) -> None:
     simulation_result = run_simulation_from_config(sim_cfg)
     if simulation_result is None:
         return
-    metrics["simulation"] = {k: _jsonable(v) for k, v in simulation_result.items() if not isinstance(v, np.ndarray)}
+    metrics["simulation"] = {
+        k: _jsonable(v) for k, v in simulation_result.items() if not isinstance(v, np.ndarray)
+    }
     for key, value in simulation_result.items():
         if isinstance(value, np.ndarray):
             save_dict[f"sim_{key}"] = np.asarray(value, dtype=np.float64)
@@ -65,11 +70,13 @@ def _make_simulation_plots(paths: RunPaths, metrics: dict[str, Any]) -> list[dic
         out_path = paths.plots_dir / f"{name}.png"
         try:
             _plot_series_from_spec(spec, data, out_path)
-            rendered.append({
-                "name": name,
-                "title": str(spec.get("title", name.replace("_", " ").title())),
-                "path": str(out_path.relative_to(paths.run_dir)),
-            })
+            rendered.append(
+                {
+                    "name": name,
+                    "title": str(spec.get("title", name.replace("_", " ").title())),
+                    "path": str(out_path.relative_to(paths.run_dir)),
+                }
+            )
         except Exception:
             logger.exception("Plot generation failed")
     return rendered

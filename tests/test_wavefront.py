@@ -1,25 +1,22 @@
 """Tests for wavefront aberrations wiring (Phase 9)."""
+
 from __future__ import annotations
 
 from functools import partial
 
 import numpy as np
-import pytest
 
+import qgrav.vendor.aisim.dist as dist
 from qgrav.sim_ai.aisim_adapter import (
     _build_wavefront,
-    _run_mach_zehnder_sequence,
     _gaussian_beam,
+    _run_mach_zehnder_sequence,
     _wave_vectors,
 )
 from qgrav.vendor.aisim import (
-    AtomicEnsemble,
-    FreePropagator,
     Wavefront,
-    Wavevectors,
     create_random_ensemble,
 )
-import qgrav.vendor.aisim.dist as dist
 
 
 def _build_test_ensemble(n=200, cloud_radius=3e-3, temp=1e-6, seed=42):
@@ -45,19 +42,25 @@ class TestWavefrontNoneUnchanged:
         atoms = _build_test_ensemble(n=100)
         tau = 25e-6
         T = 0.1
-        beam = _gaussian_beam(beam_radius_m=0.015, center_rabi_freq_hz=1.0/(4*tau))
+        beam = _gaussian_beam(beam_radius_m=0.015, center_rabi_freq_hz=1.0 / (4 * tau))
         wv = _wave_vectors(wavelength_m=780.241e-9)
 
         r1 = _run_mach_zehnder_sequence(
-            atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-            intensity_profile=beam, wave_vectors=wv,
-            final_phase_rad=np.pi/2,
+            atoms,
+            tau_pi_half_s=tau,
+            interferometer_time_s=T,
+            intensity_profile=beam,
+            wave_vectors=wv,
+            final_phase_rad=np.pi / 2,
             wavefront=None,
         )
         r2 = _run_mach_zehnder_sequence(
-            atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-            intensity_profile=beam, wave_vectors=wv,
-            final_phase_rad=np.pi/2,
+            atoms,
+            tau_pi_half_s=tau,
+            interferometer_time_s=T,
+            intensity_profile=beam,
+            wave_vectors=wv,
+            final_phase_rad=np.pi / 2,
         )
         # Should be identical when no wavefront is applied
         np.testing.assert_allclose(r1["port_3"], r2["port_3"])
@@ -99,17 +102,21 @@ class TestWavefrontDefocusReducesContrast:
         atoms = _build_test_ensemble(n=300, cloud_radius=3e-3, temp=2e-6)
         tau = 25e-6
         T = 0.2  # moderate so atoms stay within wavefront radius
-        beam = _gaussian_beam(beam_radius_m=0.04, center_rabi_freq_hz=1.0/(4*tau))
+        beam = _gaussian_beam(beam_radius_m=0.04, center_rabi_freq_hz=1.0 / (4 * tau))
         wv = _wave_vectors(wavelength_m=780.241e-9)
 
         def fringe_visibility(wavefront, n_phases=9):
-            phis = np.linspace(0, 2*np.pi, n_phases)
+            phis = np.linspace(0, 2 * np.pi, n_phases)
             p3s = []
             for phi in phis:
                 r = _run_mach_zehnder_sequence(
-                    atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-                    intensity_profile=beam, wave_vectors=wv,
-                    final_phase_rad=phi, wavefront=wavefront,
+                    atoms,
+                    tau_pi_half_s=tau,
+                    interferometer_time_s=T,
+                    intensity_profile=beam,
+                    wave_vectors=wv,
+                    final_phase_rad=phi,
+                    wavefront=wavefront,
                 )
                 p3s.append(r["port_3"])
             p3s = np.array(p3s)
@@ -139,13 +146,17 @@ class TestWavefrontTiltShiftsFringe:
         atoms = _build_test_ensemble(n=200, cloud_radius=3e-3, temp=2e-6)
         tau = 25e-6
         T = 0.2
-        beam = _gaussian_beam(beam_radius_m=0.04, center_rabi_freq_hz=1.0/(4*tau))
+        beam = _gaussian_beam(beam_radius_m=0.04, center_rabi_freq_hz=1.0 / (4 * tau))
         wv = _wave_vectors(wavelength_m=780.241e-9)
 
         r_no_wf = _run_mach_zehnder_sequence(
-            atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-            intensity_profile=beam, wave_vectors=wv,
-            final_phase_rad=np.pi/2, wavefront=None,
+            atoms,
+            tau_pi_half_s=tau,
+            interferometer_time_s=T,
+            intensity_profile=beam,
+            wave_vectors=wv,
+            final_phase_rad=np.pi / 2,
+            wavefront=None,
         )
 
         # Strong tilt + coma + spherical aberration; large r_wf so no NaNs
@@ -154,9 +165,13 @@ class TestWavefrontTiltShiftsFringe:
             wavefront_radius_m=0.05,
         )
         r_aberr = _run_mach_zehnder_sequence(
-            atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-            intensity_profile=beam, wave_vectors=wv,
-            final_phase_rad=np.pi/2, wavefront=wf_aberr,
+            atoms,
+            tau_pi_half_s=tau,
+            interferometer_time_s=T,
+            intensity_profile=beam,
+            wave_vectors=wv,
+            final_phase_rad=np.pi / 2,
+            wavefront=wf_aberr,
         )
 
         # P3 should differ measurably with strong aberrations
@@ -190,16 +205,24 @@ class TestWavefrontQuantitative:
         atoms = _build_test_ensemble(n=150, cloud_radius=3e-3, temp=1e-12, seed=7)
 
         r_no_wf = _run_mach_zehnder_sequence(
-            atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-            intensity_profile=beam, wave_vectors=wv, final_phase_rad=np.pi / 2,
+            atoms,
+            tau_pi_half_s=tau,
+            interferometer_time_s=T,
+            intensity_profile=beam,
+            wave_vectors=wv,
+            final_phase_rad=np.pi / 2,
             wavefront=None,
         )
         wf = _build_wavefront(
             wavefront_zernike_coeffs={2: 5.0, 3: 5.0, 4: 5.0}, wavefront_radius_m=0.05
         )
         r_wf = _run_mach_zehnder_sequence(
-            atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-            intensity_profile=beam, wave_vectors=wv, final_phase_rad=np.pi / 2,
+            atoms,
+            tau_pi_half_s=tau,
+            interferometer_time_s=T,
+            intensity_profile=beam,
+            wave_vectors=wv,
+            final_phase_rad=np.pi / 2,
             wavefront=wf,
         )
         # Static ensemble: wavefront cancels in the MZ loop -> outputs match.
@@ -230,12 +253,19 @@ class TestWavefrontQuantitative:
         atoms = _build_test_ensemble(n=300, cloud_radius=3e-3, temp=2e-6, seed=11)
 
         def p3(z4):
-            wf = (None if z4 == 0 else
-                  _build_wavefront(wavefront_zernike_coeffs={4: z4}, wavefront_radius_m=0.04))
+            wf = (
+                None
+                if z4 == 0
+                else _build_wavefront(wavefront_zernike_coeffs={4: z4}, wavefront_radius_m=0.04)
+            )
             out = _run_mach_zehnder_sequence(
-                atoms, tau_pi_half_s=tau, interferometer_time_s=T,
-                intensity_profile=beam, wave_vectors=wv,
-                final_phase_rad=np.pi / 2, wavefront=wf,
+                atoms,
+                tau_pi_half_s=tau,
+                interferometer_time_s=T,
+                intensity_profile=beam,
+                wave_vectors=wv,
+                final_phase_rad=np.pi / 2,
+                wavefront=wf,
             )
             assert not np.isnan(out["port_3"]), "atoms drifted outside r_wf"
             return out["port_3"]
@@ -246,6 +276,6 @@ class TestWavefrontQuantitative:
         # (a) the curvature effect is real (nonzero).
         assert dev_lo > 1e-4, f"no wavefront-curvature effect: dev_lo={dev_lo:.5f}"
         # (b) it grows with the coefficient (linear in coeff -> dev_hi ~ 2*dev_lo).
-        assert dev_hi > 1.3 * dev_lo, (
-            f"deviation did not grow with coefficient: {dev_lo:.5f} -> {dev_hi:.5f}"
-        )
+        assert (
+            dev_hi > 1.3 * dev_lo
+        ), f"deviation did not grow with coefficient: {dev_lo:.5f} -> {dev_hi:.5f}"
