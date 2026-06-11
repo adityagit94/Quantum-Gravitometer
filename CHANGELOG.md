@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Internal
+- `sim_ai/aisim_adapter.py` (~2,000 lines) split into private modules
+  (`_adapter_core`, `_scans`, `_sweeps`, `_multi_drop`, `_config_run`);
+  `aisim_adapter` is now a 77-line facade re-exporting every historical
+  name (public and private), so all import paths keep working. Move-only:
+  identical test results (419 tests incl. slow).
+
 ## v1.4.0 (2026-06-11) - GUI integration
 
 Brings the full v1.0-v1.3 simulation/validation engine into the desktop

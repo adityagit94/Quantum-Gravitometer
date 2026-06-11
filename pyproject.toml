@@ -113,7 +113,7 @@ ignore_errors = true
 # mypy widens to `float | None`; typing it properly needs a TypedDict per study
 # model. Disabled per-module rather than fixed to keep the diff mechanical.
 [[tool.mypy.overrides]]
-module = "qgrav.sim_ai.aisim_adapter"
+module = "qgrav.sim_ai._config_run"
 disable_error_code = ["arg-type"]
 
 # TODO(typing): pipeline modules pass config-derived `str` where Literal[...]
