@@ -8,6 +8,11 @@
   `aisim_adapter` is now a 77-line facade re-exporting every historical
   name (public and private), so all import paths keep working. Move-only:
   identical test results (419 tests incl. slow).
+- `gui/app.py` (~2,650 lines) split into per-tab mixin modules
+  (`_tab_setup_run`, `_tab_data_browser`, `_tab_editor`, `_tab_results`,
+  `_tab_validation`, `_tab_guides`); `QGravApp` keeps `__init__`, shared
+  widget helpers, and the queue/worker-thread machinery (459 lines).
+  Move-only: all 15 GUI tests pass, `python -m qgrav.gui` launches.
 
 ## v1.4.0 (2026-06-11) - GUI integration
 
