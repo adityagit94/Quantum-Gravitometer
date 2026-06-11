@@ -51,6 +51,9 @@ workbench (`qgrav-gui`). **+12 GUI integration tests; fast suite 377 passed, 0 r
 - `tests/test_gui_integration.py` (12 tests) builds the entire app on a real
   (withdrawn) Tk root and exercises every new path; skips cleanly when Tk has no
   display so headless CI is unaffected.
+- GUI test modules now also skip cleanly on a Python built *without* Tk
+  (`import tkinter` raising `ImportError` previously crashed test collection
+  with 2 errors instead of skipping).
 - `tests/test_gui_import.py` adds a guard that `qgrav.gui.__main__` exposes `main`.
 
 ### Repo hygiene & packaging

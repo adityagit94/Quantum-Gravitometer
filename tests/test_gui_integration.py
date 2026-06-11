@@ -7,15 +7,18 @@ the multi_drop_cycle model, the advanced-physics / noise-budget controls, the
 Validation tab (published-reference reproductions + QuTiP cross-check), and the
 navigable Guides tab.
 
-They skip cleanly when Tk has no display (headless CI without an X server /
-Tk build), so the core suite is unaffected.
+They skip cleanly when Tk is absent (a Python built without Tk) or has no
+display (headless CI without an X server), so the core suite is unaffected.
 """
 from __future__ import annotations
 
-import tkinter as tk
-
 import pytest
 import yaml
+
+try:
+    import tkinter as tk
+except ImportError:  # pragma: no cover - depends on the Python build
+    pytest.skip("Tk not available in this Python build", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
