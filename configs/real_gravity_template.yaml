@@ -13,6 +13,26 @@ bench_real_gravity:
   # metadata_path is optional when SG station.txt sits next to the data or inside the zip.
   # metadata_path: /absolute/path/to/SG station.txt
 
+  # Optional residual reductions. Solid-earth tide and (with a pressure CSV)
+  # barometric admittance run when apply_corrections is true; polar motion
+  # and ocean loading additionally need their own enabled flags. All inputs
+  # are user-supplied (offline; nothing is fetched).
+  # apply_corrections: true
+  # tide_backend: auto            # auto | pygtide | internal_hw95
+  # pressure_csv_path: /path/to/pressure.csv   # columns: unix_seconds, pressure_hpa
+  # pressure_admittance_nm_s2_per_hpa: -3.0
+  # corrections:
+  #   polar_motion:
+  #     enabled: false
+  #     latitude_deg: 49.144      # defaults to station metadata if omitted
+  #     longitude_deg: 12.878
+  #     xp_arcsec: 0.12           # IERS EOP C04 x_pole / y_pole for the epoch
+  #     yp_arcsec: 0.33
+  #   ocean_loading:
+  #     enabled: false
+  #     constituents:             # values from an Onsala BLQ gravity block
+  #       - {name: M2, amplitude_nm_s2: 12.3, phase_deg: -47.0}
+
 stats:
   metrics_backend: auto
   allan_data_type: freq

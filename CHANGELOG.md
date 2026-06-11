@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Real-data corrections
+- **Polar-motion (pole tide) and ocean-loading reductions** complete the
+  standard SG residual chain (tide → pressure → polar motion → ocean
+  loading). Both are off by default, config-driven, and fully offline:
+  the user supplies IERS C04 pole coordinates / Onsala-BLQ constituent
+  amplitudes+phases. Ocean loading reuses the regression-locked HW95
+  astronomical-argument machinery; both follow the existing
+  `corrected = observed − effect` convention and are recorded in
+  `metrics.json` like the tide stage. New `tests/test_corrections_pm_ol.py`
+  (16 tests incl. an end-to-end pipeline wiring check).
+
 ### GUI
 - **Multi-run Allan-curve comparison** in the Results tab: a
   `Compare runs…` dialog overlays σ(τ) from any number of run folders on

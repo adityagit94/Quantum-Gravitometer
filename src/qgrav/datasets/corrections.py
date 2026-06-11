@@ -6,6 +6,9 @@ Provides:
 - :func:`apply_tide_correction` — solid earth tide subtraction (PyGTide
   preferred, simplified HW95 fallback)
 - :func:`apply_pressure_correction` — atmospheric pressure admittance
+- :func:`apply_polar_motion_correction` — pole tide from IERS x_p/y_p
+- :func:`apply_ocean_loading_correction` — ocean tidal loading from
+  per-constituent BLQ amplitudes/phases
 
 References
 ----------
@@ -20,6 +23,7 @@ References
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -264,8 +268,172 @@ def apply_pressure_correction(
     return g - correction
 
 
+def apply_polar_motion_correction(
+    g: np.ndarray,
+    latitude_deg: float,
+    longitude_deg: float,
+    xp_arcsec: np.ndarray | float,
+    yp_arcsec: np.ndarray | float,
+    *,
+    gravimetric_factor: float = 1.164,
+) -> np.ndarray:
+    """Apply the polar-motion (pole tide) gravity correction.
+
+    Physics (IERS Conventions 2010, ch. 7; IAGBN standard)::
+
+        delta_g = -delta * omega^2 * R * sin(2*phi) * (x_p*cos(lam) - y_p*sin(lam))
+
+    with Earth rotation rate ``omega = 7.292115e-5 rad/s``, mean radius
+    ``R = 6.371e6 m``, gravimetric factor ``delta = 1.164``, station latitude
+    ``phi`` / east longitude ``lam``, and pole coordinates ``x_p``/``y_p``
+    converted from arcseconds to radians.
+
+    Sign convention (same as :func:`apply_pressure_correction`):
+    **corrected = observed - effect**, i.e. the returned series is
+    ``g - delta_g``.
+
+    Parameters
+    ----------
+    g:
+        Observed gravity (residual) series in m/s^2.
+    latitude_deg, longitude_deg:
+        Station geodetic latitude and east longitude in degrees.
+    xp_arcsec, yp_arcsec:
+        Pole coordinates in arcseconds: either scalars (single epoch,
+        adequate for series much shorter than the ~433-day Chandler period)
+        or arrays aligned sample-by-sample with ``g``. Obtain them from the
+        IERS EOP 14 C04 series at
+        https://datacenter.iers.org/data/latestVersion/finals.all.iau2000.txt
+        (or https://hpiers.obspm.fr/iers/eop/eopc04/) - columns ``x_pole``
+        and ``y_pole`` (arcsec).
+
+    Returns
+    -------
+    Corrected gravity in m/s^2 (same shape as ``g``).
+    """
+    g_arr = np.asarray(g, dtype=np.float64)
+    xp = np.asarray(xp_arcsec, dtype=np.float64)
+    yp = np.asarray(yp_arcsec, dtype=np.float64)
+    if xp.ndim > 0 and xp.shape != g_arr.shape:
+        raise ValueError("array xp_arcsec must match the shape of g")
+    if yp.ndim > 0 and yp.shape != g_arr.shape:
+        raise ValueError("array yp_arcsec must match the shape of g")
+
+    omega_rad_s = 7.292115e-5  # Earth rotation rate (rad/s)
+    radius_m = 6.371e6  # mean Earth radius (m)
+    arcsec_to_rad = np.deg2rad(1.0 / 3600.0)
+
+    phi = np.deg2rad(float(latitude_deg))
+    lam = np.deg2rad(float(longitude_deg))
+    delta_g = (
+        -float(gravimetric_factor)
+        * omega_rad_s**2
+        * radius_m
+        * np.sin(2.0 * phi)
+        * (xp * arcsec_to_rad * np.cos(lam) - yp * arcsec_to_rad * np.sin(lam))
+    )
+    return g_arr - delta_g
+
+
+# Ocean-loading synthesis reuses the regression-locked HW95 astronomical
+# machinery (imported, never edited): Doodson arguments chi(t) at Greenwich.
+_OCEAN_LOADING_SUPPORTED = (
+    "M2",
+    "S2",
+    "N2",
+    "K2",
+    "K1",
+    "O1",
+    "P1",
+    "Q1",
+    "Mf",
+    "Mm",
+    "Ssa",
+)
+
+
+def _constituent_argument_deg(name: str, times_unix_s: np.ndarray) -> np.ndarray:
+    """Astronomical argument chi(t) in degrees at Greenwich for a constituent."""
+    from qgrav.datasets._tides_hw95 import (
+        _CONSTITUENTS,
+        _doodson_arguments,
+        _mjd_from_unix_seconds,
+    )
+
+    doodson = {c[0]: c[1] for c in _CONSTITUENTS}[name]
+    mjd = _mjd_from_unix_seconds(np.asarray(times_unix_s, dtype=np.float64))
+    args_deg = _doodson_arguments(mjd)
+    chi = np.zeros_like(mjd)
+    for mult, arg in zip(doodson, args_deg, strict=True):
+        chi = chi + mult * arg
+    return chi
+
+
+def apply_ocean_loading_correction(
+    times_unix_s: np.ndarray,
+    g: np.ndarray,
+    constituents: Sequence[dict],
+) -> np.ndarray:
+    """Apply an ocean tidal loading correction from per-constituent values.
+
+    The user supplies amplitude and local phase per constituent - the values
+    straight out of a BLQ file from the Onsala free-ocean-loading provider
+    (http://holt.oso.chalmers.se/loading/): request the *gravity* loading
+    for your station; in the returned BLQ block the **first row** holds the
+    amplitudes (m/s^2 there, commonly quoted as nm/s^2 - check the header)
+    and the **fourth row** the local phase lags in degrees, one column per
+    constituent. BLQ gravity amplitudes are positive-down by convention.
+
+    qgrav synthesizes the loading series with the same astronomical-argument
+    machinery the solid-earth tide module uses::
+
+        delta_g(t) = sum_i A_i * cos(chi_i(t) - phi_i)
+
+    where ``chi_i(t)`` is the constituent's Doodson argument at Greenwich
+    and ``phi_i`` the supplied local phase lag.
+
+    Sign convention (same as :func:`apply_pressure_correction`):
+    **corrected = observed - effect**, i.e. ``g - delta_g``.
+
+    Parameters
+    ----------
+    times_unix_s:
+        Timestamps (Unix seconds, UTC) aligned with ``g``.
+    g:
+        Observed gravity (residual) series in m/s^2.
+    constituents:
+        Sequence of dicts ``{"name": "M2", "amplitude_nm_s2": float,
+        "phase_deg": float}``. Supported names:
+        M2, S2, N2, K2, K1, O1, P1, Q1, Mf, Mm, Ssa.
+
+    Returns
+    -------
+    Corrected gravity in m/s^2 (same shape as ``g``).
+    """
+    t = np.asarray(times_unix_s, dtype=np.float64)
+    g_arr = np.asarray(g, dtype=np.float64)
+    if t.shape != g_arr.shape:
+        raise ValueError("times_unix_s and g must have the same shape")
+
+    delta_g = np.zeros_like(g_arr)
+    for entry in constituents:
+        name = str(entry["name"])
+        if name not in _OCEAN_LOADING_SUPPORTED:
+            raise ValueError(
+                f"unknown ocean-loading constituent {name!r}; supported: "
+                + ", ".join(_OCEAN_LOADING_SUPPORTED)
+            )
+        amplitude_m_s2 = float(entry["amplitude_nm_s2"]) * 1e-9
+        phase_rad = np.deg2rad(float(entry["phase_deg"]))
+        chi_rad = np.deg2rad(_constituent_argument_deg(name, t))
+        delta_g = delta_g + amplitude_m_s2 * np.cos(chi_rad - phase_rad)
+    return g_arr - delta_g
+
+
 __all__ = [
     "detect_igets_level",
     "apply_tide_correction",
     "apply_pressure_correction",
+    "apply_polar_motion_correction",
+    "apply_ocean_loading_correction",
 ]

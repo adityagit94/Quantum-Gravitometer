@@ -185,6 +185,61 @@ def _run_real_gravity_pipeline(
                         correction_metrics["pressure_coverage_fraction"] = float(coverage)
             except Exception as exc:
                 logger.warning("Pressure correction skipped: %s", exc)
+
+        # ----- v1.5: polar motion + ocean loading (both off by default) -----
+        corr_cfg = grav_cfg.get("corrections")
+        corr_cfg = corr_cfg if isinstance(corr_cfg, dict) else {}
+        ts_seg = data.get("timestamps")
+        unix_seg_corr = (
+            np.asarray(ts_seg, dtype="datetime64[ns]").astype("int64") / 1e9
+            if ts_seg is not None
+            else None
+        )
+
+        pm_cfg = corr_cfg.get("polar_motion")
+        pm_cfg = pm_cfg if isinstance(pm_cfg, dict) else {}
+        if bool(pm_cfg.get("enabled", False)):
+            try:
+                from qgrav.datasets.corrections import apply_polar_motion_correction
+
+                pm_lat = pm_cfg.get("latitude_deg", data.get("latitude_deg"))
+                pm_lon = pm_cfg.get("longitude_deg", data.get("longitude_deg"))
+                if pm_lat is None or pm_lon is None:
+                    raise ValueError("polar_motion needs station coordinates")
+                before = x.copy()
+                x = apply_polar_motion_correction(
+                    x,
+                    latitude_deg=float(pm_lat),
+                    longitude_deg=float(pm_lon),
+                    xp_arcsec=float(pm_cfg.get("xp_arcsec", 0.0)),
+                    yp_arcsec=float(pm_cfg.get("yp_arcsec", 0.0)),
+                    gravimetric_factor=float(pm_cfg.get("gravimetric_factor", 1.164)),
+                )
+                corrections_applied.append("polar_motion")
+                correction_metrics["polar_motion_delta_g_ugal"] = float(np.mean(before - x) * 1e8)
+            except Exception as exc:
+                logger.warning("Polar-motion correction skipped: %s", exc)
+                corrections_warnings.append(f"Polar-motion correction failed: {exc}")
+
+        ol_cfg = corr_cfg.get("ocean_loading")
+        ol_cfg = ol_cfg if isinstance(ol_cfg, dict) else {}
+        if bool(ol_cfg.get("enabled", False)):
+            try:
+                from qgrav.datasets.corrections import apply_ocean_loading_correction
+
+                if unix_seg_corr is None:
+                    raise ValueError("ocean_loading needs sample timestamps")
+                ol_constituents = ol_cfg.get("constituents") or []
+                before = x.copy()
+                x = apply_ocean_loading_correction(unix_seg_corr, x, ol_constituents)
+                names = ",".join(str(c.get("name")) for c in ol_constituents)
+                corrections_applied.append(f"ocean_loading ({names})")
+                correction_metrics["ocean_loading_rms_subtracted_ugal"] = float(
+                    np.sqrt(np.mean((before - x) ** 2)) * 1e8
+                )
+            except Exception as exc:
+                logger.warning("Ocean-loading correction skipped: %s", exc)
+                corrections_warnings.append(f"Ocean-loading correction failed: {exc}")
     # ----- end v0.8 corrections -----
     (
         psd_method,
