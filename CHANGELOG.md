@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v1.5.0 (2026-06-11) - Emergent pulse physics & complete residual chain
+
+Sub-pulse Raman integration, emergent projection noise, polar-motion &
+ocean-loading reductions, multi-run GUI comparison, modularized core.
+**450 tests (full suite incl. slow + QuTiP), 0 regressions.**
+
 ### Physics
 - **Emergent Monte-Carlo quantum projection noise** in multi-drop cycles
   (`projection_noise: true`, off by default): each drop's detected count

@@ -103,3 +103,25 @@ had never been formatted. Decisions taken:
   availability probe** (`import qgrav.vendor.aisim` inside `try`); restored
   with an explicit `# noqa: F401` and a comment. Watch for this pattern
   when running autofixes.
+
+---
+
+## 2026-06-11 - v1.5.0 design decisions (emergent pulse physics)
+
+- **Sub-pulse integration (raman_substeps)** lives in the override
+  subclass, not a new propagator: `propagate()` branches to the upstream
+  single-matrix path for N=1 (bit-identical default) and to the N-slice
+  midpoint-evaluated composition otherwise. Gravity parameters are
+  forwarded to the pulse propagators only for the substep path. The
+  calibration helpers run with the same N because the artefact they
+  measure is N-dependent (~1/N). Full derivation + measured convergence
+  table: docs/research/RESEARCH_SUBPULSE.md.
+- **Projection noise composition order**: binomial draw first (the
+  measurement physics), technical sigma_p on top; the legacy Gaussian
+  1/sqrt(N) draw is skipped when the flag is on because it approximates
+  the same physics (double-counting trap). New RNG stream seed+88_000.
+- The hybrid multi-drop operating point is NOT generally at mid-fringe
+  (phase_bias = pi/2 - k*g*T^2 has no compensating physics phase in
+  gravity-free propagation; the fringe also carries a fixed ~0.23 rad
+  device phase). Tests that need mid-fringe pick g_true accordingly -
+  see _midfringe_gravity in tests/test_projection_noise.py.

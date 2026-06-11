@@ -1,4 +1,4 @@
-﻿"""Emergent Monte-Carlo quantum projection noise (projection_noise flag).
+"""Emergent Monte-Carlo quantum projection noise (projection_noise flag).
 
 With ``projection_noise: true`` each drop's readout draws the detected
 excited-state count from ``Binomial(N_det, P)`` (seeded RNG stream), so the
