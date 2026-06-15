@@ -146,11 +146,13 @@ SGs achieve noise floors below 1 nanoGal/√Hz - better than any atom interferom
 
 ### Requirements
 
-- **Python 3.11 to 3.12** (recommended: 3.12)
+- **Python 3.11, 3.12, or 3.13** - all three are tested in CI on Linux and Windows
 - Works on Windows, macOS, and Linux
 - No GPU required
 
-> **Important:** Python 3.13+ may have compatibility issues with some scientific libraries. Python 3.12 is the tested and recommended version.
+> **Note:** The continuous-integration matrix runs the full test suite against
+> Python 3.11, 3.12, and 3.13. Any of the three is fine; 3.12 remains a safe
+> default if a dependency lacks 3.13 wheels on your platform.
 
 ### Step-by-Step Install
 
@@ -183,7 +185,7 @@ qgrav --help
 You should see:
 
 ```
-usage: qgrav [-h] {run,gui,convert-ggp} ...
+usage: qgrav [-h] {run,gui,convert-ggp,validate-data,info} ...
 Quantum gravimeter R&D platform
 ```
 
@@ -500,7 +502,10 @@ the performance notes, the roadmap, and the changelog).
 
 ## 7. The Command Line Interface
 
-qgrav provides three CLI commands:
+qgrav provides five CLI commands: `run`, `gui`, `convert-ggp`, `validate-data`,
+and `info`. The three you will use most are below; `validate-data` prints a
+dataset quality summary without running a full pipeline, and `info` prints the
+qgrav version and environment.
 
 ### `qgrav run` - Run a Pipeline
 
@@ -659,11 +664,23 @@ CSV must contain columns: `I_meas`, `Q_meas`. Optional: `t` (time), `x_true` (gr
 | `station_code` | string | Station identifier (e.g., `ap046`) |
 | `segment_strategy` | string | How to handle data gaps. Use `longest_contiguous` |
 | `metadata_path` | string | Optional path to `SG station.txt` metadata file |
-| `apply_corrections` | bool | Enable tide + pressure correction stage (default: `false`) |
+| `apply_corrections` | bool | Master switch for the residual-correction stage (default: `false`) |
 | `igets_level` | string | Force IGETS product level: `auto`, `1`, `2`, `3` (default: `auto`) |
 | `tide_backend` | string | Tide model: `auto`, `pygtide`, `internal_hw95` (default: `auto`) |
 | `pressure_csv_path` | string | Path to co-located pressure CSV (columns: `unix_seconds`, `pressure_hpa`) |
 | `pressure_admittance_nm_s2_per_hpa` | float | Barometric admittance (default: `-3.0`) |
+| `corrections.polar_motion.enabled` | bool | Pole-tide (polar-motion) correction (default: `false`) |
+| `corrections.polar_motion.xp_arcsec` / `yp_arcsec` | float or list | IERS C04 pole coordinates (constant or per-sample) |
+| `corrections.polar_motion.gravimetric_factor` | float | IERS gravimetric δ factor (default: `1.164`) |
+| `corrections.ocean_loading.enabled` | bool | Ocean tidal-loading correction (default: `false`) |
+| `corrections.ocean_loading.constituents` | list | Onsala-BLQ entries `{name, amplitude_nm_s2, phase_deg}` |
+
+> Tide and pressure are the workhorse corrections; polar motion and ocean
+> loading complete the standard SG residual chain and are both off by default.
+> They are config-driven and fully offline - you supply the IERS pole
+> coordinates and the Onsala free-ocean-loading constituents. The full nested
+> `corrections:` block is documented in
+> [REAL_GRAVITY_DATA.md](REAL_GRAVITY_DATA.md).
 
 #### `algorithms` - Signal Processing
 
@@ -743,7 +760,7 @@ Structured metrics. Example for a virtual run:
 ```json
 {
   "qgrav_output_format_version": "1.0",
-  "qgrav_version": "0.8.0",
+  "qgrav_version": "1.5.0",
   "error_stats": {
     "baseline": {"rmse_m": 1.2e-9, "mae_m": 0.9e-9, "snr_db": 15.3, "bias_m": 0.05e-9},
     "improved": {"rmse_m": 0.4e-9, "mae_m": 0.3e-9, "snr_db": 24.1, "bias_m": 0.01e-9}
@@ -764,10 +781,11 @@ For real gravity runs with corrections enabled, additional keys appear:
 ```json
 {
   "data_product_level_at_analysis": 1,
-  "corrections_applied": ["tide"],
+  "corrections_applied": ["tide", "pressure"],
   "correction_metrics": {
     "tide_rms_subtracted_ugal": 85.3,
-    "tide_backend_used": "internal_hw95"
+    "tide_backend_used": "internal_hw95",
+    "pressure_rms_subtracted_ugal": 1.2
   }
 }
 ```
@@ -899,12 +917,23 @@ phase formula. It is what the Validation tab's one-click reproductions drive.
 | `gravity_true_m_s2` | Ground-truth *g* to recover | `9.81` |
 | `detection_sigma_p` | Per-shot detection noise on the excited fraction | `6e-3` |
 | `raman_phase_noise_rad` | Per-shot laser + vibration phase noise | `1.2e-2` |
+| `projection_noise` | Draw each drop's count from `Binomial(N_det, P)` so the quantum projection-noise floor emerges from single-atom statistics (off by default) | `true` |
+| `raman_substeps` | Integrate each finite-τ Raman pulse as N composed slices (1 = exact previous behaviour) | `8` |
 | `fit_visibility` | Fit contrast and use it in the P→g inversion | `true` |
 | `servo_enabled` / `servo_type` | Fringe-lock loop (`integrator` or `pid`) | `true` / `integrator` |
 
 The short-term sensitivity is set by the noise budget, not the atom number - but
 too few atoms raises the 1/√N projection-noise floor and can swamp the budget,
 so a faithful reproduction uses several thousand atoms.
+
+> **v1.5 emergent refinements.** With `projection_noise: true`, the shot-noise
+> floor is no longer added analytically - each drop's detected count is drawn
+> from `Binomial(N_det, P)` via the run's seeded RNG, and the measured floor
+> matches `σ_g = 1/(√N_det·k_eff·T²)` to ~0.2 %. With `raman_substeps: N` (N > 1),
+> the finite-duration Raman pulses are integrated sub-pulse, with ballistic fall
+> *during* each pulse, so the finite-τ physics converges numerically to the
+> Bertoldi 2019 closed form. Both are off by default (exact previous behaviour)
+> and exposed in the GUI's multi-drop noise-budget section.
 
 ---
 
@@ -1020,14 +1049,22 @@ Available functions in `qgrav.physics.sensitivity_function`:
 
 Built-in Peterson 1993 NLNM/NHNM seismic noise models (`interpolate_psd(f, model="nlnm")`) provide reference acceleration PSDs for estimating vibration-limited performance at quiet and noisy sites.
 
-### Tide and Pressure Corrections (v0.8)
+### Real-Gravimetry Residual Chain (v0.8, completed in v1.5)
 
-For real gravity data at IGETS Level 1 or Level 2, enable `apply_corrections: true` to subtract:
+For real gravity data at IGETS Level 1 or Level 2, enable `apply_corrections: true`
+to run the standard superconducting-gravimeter residual chain, in order:
 
 1. **Solid-earth body tide** - using PyGTide (if installed) or the internal 20-constituent HW95 model
 2. **Atmospheric pressure loading** - linear admittance model (-3 nm/s^2/hPa, Crossley 1995)
+3. **Polar motion (pole tide)** - from user-supplied IERS C04 pole coordinates and the IERS gravimetric δ factor *(off by default, v1.5)*
+4. **Ocean tidal loading** - from user-supplied Onsala-BLQ constituent amplitudes and phases, reusing the HW95 astronomical-argument machinery *(off by default, v1.5)*
 
-Without these corrections, the Allan deviation is dominated by the ~100 uGal body-tide signal rather than instrument noise. See the `bench_real_gravity` configuration keys in Section 8 for details.
+Each stage follows the `corrected = observed − effect` convention and is recorded
+in `metrics.json` under `correction_metrics`. Without at least the tide
+correction, the Allan deviation is dominated by the ~100 µGal body-tide signal
+rather than instrument noise. See the `bench_real_gravity` configuration keys in
+Section 8, and [REAL_GRAVITY_DATA.md](REAL_GRAVITY_DATA.md) for the full nested
+`corrections:` block.
 
 ---
 
@@ -1090,10 +1127,16 @@ The output CSV has columns: `timestamp`, `gravity_residual`, `station_code`.
 
 ```
 src/qgrav/
-├── __init__.py              Version string (0.8.0)
-├── cli.py                   Command-line interface (3 commands)
+├── __init__.py              Version string (1.5.0)
+├── cli.py                   Command-line interface (run, gui, convert-ggp, validate-data, info)
 ├── config.py                YAML loading, validation (incl. corrections keys)
-├── pipeline.py              Main orchestrator - corrections stage, output_format_version
+├── types.py                 Shared dataclasses / type aliases
+├── pipeline/                Run orchestration (split package)
+│   ├── _interferometer.py   Virtual / real IFO path
+│   ├── _gravity.py          Real-gravity path + corrections stage
+│   ├── _simulation.py       AISim study dispatch
+│   ├── _plots.py            Per-run figure generation
+│   └── _common.py           Shared run scaffolding, output_format_version
 │
 ├── bench_ifo/               Data source layer
 │   ├── virtual_ifo.py       Synthetic I/Q signal generator
@@ -1107,39 +1150,51 @@ src/qgrav/
 ├── metrics/                 Statistical analysis
 │   ├── allan.py             Allan deviation, noise ID (ACF + slope), Allan minimum
 │   ├── psd.py               Power spectral density (Welch + periodogram)
-│   └── error_stats.py       RMSE, MAE, SNR, bias computation
+│   └── summary.py           Error stats (RMSE, MAE, SNR, bias), improvement %
 │
 ├── physics/                 Physical models and constants
-│   ├── constants.py         Physical constants registry (v0.8)
-│   ├── sensitivity_function.py  MZ sensitivity + vibration transfer functions (v0.8)
-│   ├── _seismic_models.py   Peterson NLNM/NHNM noise floor models (v0.8)
+│   ├── constants.py         Physical constants registry
+│   ├── sensitivity_function.py  MZ sensitivity + vibration transfer functions
+│   ├── _seismic_models.py   Peterson NLNM/NHNM noise floor models
 │   ├── phase_models.py      Gravity phase, vibration phase, shot-noise sensitivity
 │   ├── systematics.py       Gravity gradient, Coriolis effect (uses constants module)
 │   ├── noise_models.py      White noise, random walk, outlier injection
-│   ├── readout_models.py    Output port population models
-│   └── pulse_sequences.py   Three-pulse Mach-Zehnder timing
+│   ├── readout_models.py    Output port population + servo models
+│   ├── atom_source.py       Atom-cloud source distributions
+│   ├── ground_truth.py      Truth-signal generation for benchmarking
+│   └── pulse_sequence.py    Three-pulse Mach-Zehnder timing
 │
-├── sim_ai/                  Simulation engine
-│   └── aisim_adapter.py     AISim adapter with study_scope labels (v0.8)
+├── sim_ai/                  Simulation engine (AISim adapter, split package)
+│   ├── aisim_adapter.py     Facade re-exporting every historical name
+│   ├── _adapter_core.py     Shared cloud/pulse helpers, study_scope labels
+│   ├── _scans.py            Rabi scan, MZ phase scan
+│   ├── _sweeps.py           Gravity sweep, vibration sensitivity sweep
+│   ├── _multi_drop.py       Multi-drop cycle, projection noise, fringe-lock servo
+│   ├── _config_run.py       YAML-driven study dispatch
+│   ├── _aisim_overrides.py  Integrated-phase propagator, chirped wavevectors, sub-pulse
+│   └── simple_ai.py         Lightweight analytic fallback model
 │
 ├── datasets/                Data format handling
 │   ├── gravimetry.py        GGP parsing, station metadata, gap detection, CSV conversion
-│   ├── corrections.py       Tide + pressure corrections, IGETS level detection (v0.8)
-│   └── _tides_hw95.py       20-constituent HW95 internal tide model (v0.8)
+│   ├── corrections.py       Tide, pressure, polar-motion & ocean-loading; IGETS level detection
+│   └── _tides_hw95.py       20-constituent HW95 internal tide model
 │
 ├── validation/              Published references and truth checks
-│   ├── published_references.py  12 benchmark values with deprecation shims (v0.8)
+│   ├── published_references.py  14 benchmark values with DOI links
+│   ├── freier_2016_setup.py … wu_2019_setup.py  Per-paper reproduction setups (5)
+│   ├── qutip_crosscheck.py  Independent QuTiP Schrödinger cross-check
 │   ├── truth_checks.py      Per-study pass/fail checks
-│   └── curve_comparison.py  R-squared, Pearson correlation
+│   └── compare.py           R-squared, Pearson correlation, curve comparison
 │
 ├── reporting/               HTML report generation
 │   └── report.py            Jinja2 templates (scope panel, corrections, level banner)
 ├── visuals.py               Plot generation (dashboard, individual, simulation plots)
 │
 ├── gui/                     Desktop application
-│   ├── __init__.py          GUI entry point
-│   ├── app.py               Main application class (1200+ lines)
-│   └── widgets/             Custom widgets (MetricCards, ScrollableFrame)
+│   ├── __main__.py          GUI entry point
+│   ├── app.py               QGravApp - assembles the per-tab mixins
+│   ├── _tab_setup_run.py … _tab_guides.py  Per-tab mixin modules (6 tabs)
+│   └── widgets/             Custom widgets (MetricCards, ScrollableFrame, Tooltip, Collapsible)
 │
 └── vendor/                  Vendored dependencies
     ├── aisim/               Atom interferometer simulator
@@ -1169,7 +1224,7 @@ run_pipeline()
     │                   detect_igets_level()
     │                       │
     │                       ▼  (if apply_corrections: true)
-    │                   apply_tide_correction() → apply_pressure_correction()
+    │                   tide → pressure → polar motion → ocean loading
     │
     ├──→ [if simulation.enabled] run_aisim_*() → study_scope labels
     │
@@ -1273,8 +1328,9 @@ The 3 real-gravity tests require sample data in `data/raw/sg_sample/`. This dire
 
 ## 16. What's new since v1.0 (capabilities map)
 
-Sections 1-15 describe the v0.8 foundation. The v1.0-v1.2 releases added a full
-emergent-gravity simulation, realistic noise, published-reference validation, an
+Sections 1-15 describe the v0.8 foundation. The v1.0-v1.5 releases added a full
+emergent-gravity simulation, sub-pulse Raman integration, realistic and emergent
+noise, the complete real-data residual chain, published-reference validation, an
 independent cross-check, and release infrastructure. Use this section as the
 index into those capabilities; each links to its detailed doc.
 
@@ -1329,9 +1385,33 @@ public atom-gravimeter raw data exists).
 
 - **Performance:** single MZ ~1.3 ms, 60-pt sweep ~0.1-0.2 s, 100-drop cycle
   ~0.3 s. Harness: `pytest -m benchmark`; numbers in [PERFORMANCE.md](PERFORMANCE.md).
-- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.11-3.12),
+- **CI/packaging:** GitHub Actions (Linux + Windows × Python 3.11-3.13),
   nightly slow + QuTiP + benchmark runs, PyPI Trusted-Publishing release
   workflow, a Docker image, and this MkDocs site.
+
+### Emergent pulse physics & complete residual chain (v1.5)
+
+- **Sub-pulse Raman integration** (`raman_substeps: N`, default 1): each
+  finite-duration Raman pulse is applied as N composed slices with ballistic
+  fall *during* the pulse and midpoint-evaluated Rabi/Doppler/chirp, so the
+  finite-τ physics emerges numerically. φ(N) converges to the Bertoldi 2019 /
+  Fang 2018 closed form (within 2×10⁻³ relative at η = 0.04) and the
+  g-independent calibration artefact falls ≈1/N. Implemented entirely in the
+  override layer; the vendored AISim core is untouched.
+- **Emergent Monte-Carlo quantum projection noise** (`projection_noise: true`,
+  off by default): each drop's detected count is drawn from `Binomial(N_det, P)`
+  via the run's seeded RNG, so the QPN floor emerges from single-atom
+  statistics and matches `σ_g = 1/(√N_det·k_eff·T²)` to 0.2 %.
+- **Polar-motion and ocean-loading reductions** complete the standard SG
+  residual chain (tide → pressure → polar motion → ocean loading). Both are off
+  by default, config-driven, and fully offline. See Sections 8 and 11 and
+  [REAL_GRAVITY_DATA.md](REAL_GRAVITY_DATA.md).
+- **GUI multi-run Allan-curve comparison** (Results tab): a `Compare runs…`
+  dialog overlays σ(τ) from any number of run folders on one log-log figure,
+  with optional normalization to each curve's σ(τ=1 s) and PNG export.
+- **Internal modularization:** the ~2,000-line `aisim_adapter` and ~2,650-line
+  `gui/app.py` were split into private per-concern modules and per-tab mixins,
+  preserving every public and historical import path.
 
 ### Epistemic status
 
@@ -1342,4 +1422,6 @@ review, is laid out honestly in [PHYSICS_REVIEW_PACKET.md](PHYSICS_REVIEW_PACKET
 
 ---
 
-*This guide was written for qgrav v0.8.0. For the latest version, visit [github.com/adityagit94/Quantum-Gravitometer](https://github.com/adityagit94/Quantum-Gravitometer).*
+*This guide covers qgrav through v1.5.0 (Sections 1-15 describe the stable v0.8
+foundation; Section 16 maps the v1.0-v1.5 additions). For the latest version,
+visit [github.com/adityagit94/Quantum-Gravitometer](https://github.com/adityagit94/Quantum-Gravitometer).*
