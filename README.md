@@ -438,7 +438,7 @@ qgrav vendors [AISim](https://github.com/bleykauf/aisim) (GPL-3.0) and
 
 ## What's new
 
-The current release (**v1.5.0**) centres on **emergent pulse physics and a complete residual chain**:
+The current line (**v1.5.x**) centres on **emergent pulse physics and a complete residual chain** (v1.5.1 is a docs/packaging patch over v1.5.0):
 
 - **Sub-pulse Raman integration** (`raman_substeps`) - finite-τ pulses are integrated as composed slices with ballistic fall during the pulse, converging to the Bertoldi 2019 / Fang 2018 closed form.
 - **Emergent Monte-Carlo quantum projection noise** (`projection_noise`) - the shot-noise floor emerges from per-drop `Binomial(N_det, P)` statistics, matching the analytic limit to 0.2 %.

@@ -760,7 +760,7 @@ Structured metrics. Example for a virtual run:
 ```json
 {
   "qgrav_output_format_version": "1.0",
-  "qgrav_version": "1.5.0",
+  "qgrav_version": "1.5.1",
   "error_stats": {
     "baseline": {"rmse_m": 1.2e-9, "mae_m": 0.9e-9, "snr_db": 15.3, "bias_m": 0.05e-9},
     "improved": {"rmse_m": 0.4e-9, "mae_m": 0.3e-9, "snr_db": 24.1, "bias_m": 0.01e-9}
@@ -1127,7 +1127,7 @@ The output CSV has columns: `timestamp`, `gravity_residual`, `station_code`.
 
 ```
 src/qgrav/
-├── __init__.py              Version string (1.5.0)
+├── __init__.py              Version string (1.5.1)
 ├── cli.py                   Command-line interface (run, gui, convert-ggp, validate-data, info)
 ├── config.py                YAML loading, validation (incl. corrections keys)
 ├── types.py                 Shared dataclasses / type aliases
@@ -1422,6 +1422,6 @@ review, is laid out honestly in [PHYSICS_REVIEW_PACKET.md](PHYSICS_REVIEW_PACKET
 
 ---
 
-*This guide covers qgrav through v1.5.0 (Sections 1-15 describe the stable v0.8
+*This guide covers qgrav through v1.5.1 (Sections 1-15 describe the stable v0.8
 foundation; Section 16 maps the v1.0-v1.5 additions). For the latest version,
 visit [github.com/adityagit94/Quantum-Gravitometer](https://github.com/adityagit94/Quantum-Gravitometer).*

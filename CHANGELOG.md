@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## v1.5.1 (2026-06-16) - Documentation & packaging
+
+Documentation-only / packaging patch; no code or physics changes.
+
+- **README encoding fix.** The repository README (also the PyPI long
+  description and the GitHub/PyPI front page) was doubly mojibake-corrupted -
+  every `·`, `×`, `²`, `√`, `π`, `σ`, `Δ`, `é`, `ö`, and superscript rendered
+  as garbage (`Ã‚Â·`, `Ãƒâ€”`, `MÃƒÂ©noret`, …). Rewritten as clean UTF-8.
+- **COMPLETE_GUIDE sync to v1.5.** Refreshed the Python-version policy
+  (3.11-3.13 all CI-tested), the CLI command list (five commands), the
+  `bench_real_gravity` corrections keys (polar motion + ocean loading), the
+  multi-drop knobs (`raman_substeps`, `projection_noise`), the four-stage
+  residual chain, the architecture code map (pipeline/sim_ai/gui splits,
+  14 references), and the version stamps.
+- Bumped `version`/`__version__`/`CITATION.cff` to 1.5.1.
+
 ## v1.5.0 (2026-06-11) - Emergent pulse physics & complete residual chain
 
 Sub-pulse Raman integration, emergent projection noise, polar-motion &
