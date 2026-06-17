@@ -154,7 +154,20 @@ SGs achieve noise floors below 1 nanoGal/√Hz - better than any atom interferom
 > Python 3.11, 3.12, and 3.13. Any of the three is fine; 3.12 remains a safe
 > default if a dependency lacks 3.13 wheels on your platform.
 
-### Step-by-Step Install
+### Quick install (from PyPI)
+
+Most users just want:
+
+```bash
+pip install qgrav
+```
+
+That installs the latest release and the `qgrav` / `qgrav-gui` commands. The
+optional QuTiP cross-check backend is an extra: `pip install qgrav[qutip]`. The
+desktop GUI also needs Tk - bundled with the python.org installers; on
+Debian/Ubuntu run `sudo apt install python3-tk`.
+
+### Install from source (for development)
 
 ```bash
 # 1. Clone the repository
@@ -170,7 +183,7 @@ python -m venv .venv
 # On macOS/Linux:
 source .venv/bin/activate
 
-# 4. Install in development mode
+# 4. Install in editable/development mode
 pip install -e .
 ```
 

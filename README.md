@@ -1,8 +1,9 @@
 # qgrav - Software-first R&D pipeline for atom-interferometric gravimetry
 
+[![PyPI](https://img.shields.io/pypi/v/qgrav.svg)](https://pypi.org/project/qgrav/)
 [![Tests](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml/badge.svg)](https://github.com/adityagit94/Quantum-Gravitometer/actions/workflows/test.yml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/pypi/pyversions/qgrav.svg)](https://pypi.org/project/qgrav/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Docs](https://img.shields.io/badge/docs-online-success.svg)](https://adityagit94.github.io/Quantum-Gravitometer/)
 
@@ -17,7 +18,7 @@
 > superconducting-gravimeter analysis with a complete tide → pressure → polar-motion
 > → ocean-loading residual chain; and a six-tab desktop **GUI**.
 > **450 tests, green on Python 3.11-3.13.**
-> See [CHANGELOG.md](CHANGELOG.md) and [docs/ROADMAP_V1_TO_V2.md](docs/ROADMAP_V1_TO_V2.md).
+> See [CHANGELOG.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CHANGELOG.md) and [docs/ROADMAP_V1_TO_V2.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/ROADMAP_V1_TO_V2.md).
 
 **qgrav** is a software-first R&D pipeline for atom-interferometric gravimetry: simulation, real-data analysis, and reporting. It connects an atom-optics simulator (AISim) with **emergent gravity-phase physics**, a virtual interferometer, real gravity-residual ingest, statistical analysis (PSD, Allan deviation with multiple backends, noise-type identification), multi-drop measurement cycles, and an auto-generated HTML report - all driven from a single YAML config.
 
@@ -28,7 +29,7 @@
 - **A self-consistent numerical gravimeter simulation**: gravity phase emerges from a ballistic atom trajectory under a chirped Raman laser, not from injecting `k_eff·g·T²` analytically. An optional hybrid mode keeps the analytical path available.
 - An honest tool: every simulation result carries a **study-scope label** (fully simulated / hybrid / analytical only) so users can tell at a glance what is computed from first principles vs imposed analytically.
 
-**Documentation:** the full user guide, physics design, and validation notes are published at **<https://adityagit94.github.io/Quantum-Gravitometer/>**. See [CHANGELOG.md](CHANGELOG.md) for the change history.
+**Documentation:** the full user guide, physics design, and validation notes are published at **<https://adityagit94.github.io/Quantum-Gravitometer/>**. See [CHANGELOG.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CHANGELOG.md) for the change history.
 
 **Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** >= 3.11
 
@@ -64,6 +65,17 @@ qgrav is checked against the published literature and an independent solver, not
 ## Quick start
 
 ### Install
+
+```bash
+pip install qgrav
+```
+
+That pulls the latest release from [PyPI](https://pypi.org/project/qgrav/). The
+optional QuTiP cross-check backend is an extra: `pip install qgrav[qutip]`. The
+desktop GUI also needs Tk - bundled with the python.org installers; on
+Debian/Ubuntu run `sudo apt install python3-tk`.
+
+**From source** (for development or the latest unreleased code):
 
 ```bash
 git clone https://github.com/adityagit94/Quantum-Gravitometer.git
@@ -250,7 +262,7 @@ For IGETS Level 1 or Level 2 data, enable `apply_corrections: true` in `bench_re
 3. **Polar motion (pole tide)** - from user-supplied IERS C04 pole coordinates and the IERS gravimetric δ factor *(off by default)*
 4. **Ocean tidal loading** - from user-supplied Onsala-BLQ constituent amplitudes and phases, reusing the HW95 astronomical-argument machinery *(off by default)*
 
-Each stage follows the `corrected = observed − effect` convention, is fully offline, and is recorded in `metrics.json` under `correction_metrics`. The pipeline auto-detects the IGETS data product level from the sample rate and applies the corrections before Allan/PSD computation, so Allan deviation comparisons against published SG noise floors become meaningful. See [docs/REAL_GRAVITY_DATA.md](docs/REAL_GRAVITY_DATA.md) for the full config block.
+Each stage follows the `corrected = observed − effect` convention, is fully offline, and is recorded in `metrics.json` under `correction_metrics`. The pipeline auto-detects the IGETS data product level from the sample rate and applies the corrections before Allan/PSD computation, so Allan deviation comparisons against published SG noise floors become meaningful. See [docs/REAL_GRAVITY_DATA.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/REAL_GRAVITY_DATA.md) for the full config block.
 
 ### Published references
 Frozen registry of **14** benchmark values with DOI links, used directly by the automated validation suite:
@@ -308,7 +320,7 @@ scripts/run_aisim_gravimeter_studies.sh
 
 To enable fully-simulated mode, add `gravity_propagation: true` to the simulation block of any gravity_sweep or vibration_sensitivity_sweep YAML config. Add `raman_substeps: N` (N > 1) to integrate the finite-duration Raman pulses sub-pulse.
 
-See [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and scope of each study, and [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) for the emergent-physics design.
+See [docs/AISIM_GRAVIMETER_STUDIES.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/AISIM_GRAVIMETER_STUDIES.md) for the scientific meaning and scope of each study, and [docs/V1_PHYSICS_UPGRADE.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/V1_PHYSICS_UPGRADE.md) for the emergent-physics design.
 
 ---
 
@@ -390,36 +402,36 @@ The v1.5 release added sub-pulse Raman integration, emergent projection noise, a
 | Document | Description |
 |----------|-------------|
 | **[Online documentation](https://adityagit94.github.io/Quantum-Gravitometer/)** | The full rendered documentation site (recommended). |
-| [docs/COMPLETE_GUIDE.md](docs/COMPLETE_GUIDE.md) | The complete user guide: install, run, configure, interpret results. |
-| [CHANGELOG.md](CHANGELOG.md) | Full change log. |
-| [GUIDE.md](GUIDE.md) | Quick-start workflow guide. |
-| [docs/V1_PHYSICS_UPGRADE.md](docs/V1_PHYSICS_UPGRADE.md) | Emergent-physics design and equations. |
-| [docs/PHYSICS_REVIEW_PACKET.md](docs/PHYSICS_REVIEW_PACKET.md) | **Comprehensive review packet for external atom-interferometry experts** (with executable notebook `docs/reviewer_notebook.ipynb`) |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture overview |
-| [docs/SCIENTIFIC_HARDENING.md](docs/SCIENTIFIC_HARDENING.md) | What is AISim-backed vs. hybrid vs. analytic |
-| [docs/AISIM_INTEGRATION.md](docs/AISIM_INTEGRATION.md) | AISim vendor integration details |
-| [docs/AISIM_GRAVIMETER_STUDIES.md](docs/AISIM_GRAVIMETER_STUDIES.md) | Scientific meaning of each AISim study |
-| [docs/REAL_GRAVITY_DATA.md](docs/REAL_GRAVITY_DATA.md) | Real gravimetry data ingestion and corrections guide |
-| [docs/GUI.md](docs/GUI.md) | Desktop GUI documentation |
-| [docs/REPRODUCTION.md](docs/REPRODUCTION.md) | Reproducing pipeline runs |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Dev setup, tests, code style, PR flow |
-| [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Security policy · community standards |
+| [docs/COMPLETE_GUIDE.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/COMPLETE_GUIDE.md) | The complete user guide: install, run, configure, interpret results. |
+| [CHANGELOG.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CHANGELOG.md) | Full change log. |
+| [GUIDE.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/GUIDE.md) | Quick-start workflow guide. |
+| [docs/V1_PHYSICS_UPGRADE.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/V1_PHYSICS_UPGRADE.md) | Emergent-physics design and equations. |
+| [docs/PHYSICS_REVIEW_PACKET.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/PHYSICS_REVIEW_PACKET.md) | **Comprehensive review packet for external atom-interferometry experts** (with executable notebook `docs/reviewer_notebook.ipynb`) |
+| [docs/ARCHITECTURE.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/ARCHITECTURE.md) | System architecture overview |
+| [docs/SCIENTIFIC_HARDENING.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/SCIENTIFIC_HARDENING.md) | What is AISim-backed vs. hybrid vs. analytic |
+| [docs/AISIM_INTEGRATION.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/AISIM_INTEGRATION.md) | AISim vendor integration details |
+| [docs/AISIM_GRAVIMETER_STUDIES.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/AISIM_GRAVIMETER_STUDIES.md) | Scientific meaning of each AISim study |
+| [docs/REAL_GRAVITY_DATA.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/REAL_GRAVITY_DATA.md) | Real gravimetry data ingestion and corrections guide |
+| [docs/GUI.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/GUI.md) | Desktop GUI documentation |
+| [docs/REPRODUCTION.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/docs/REPRODUCTION.md) | Reproducing pipeline runs |
+| [CONTRIBUTING.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CONTRIBUTING.md) | Dev setup, tests, code style, PR flow |
+| [SECURITY.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/SECURITY.md) · [CODE_OF_CONDUCT.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CODE_OF_CONDUCT.md) | Security policy · community standards |
 
 ---
 
 ## Contributing & citing
 
-Contributions are welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup,
+Contributions are welcome - see [CONTRIBUTING.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CONTRIBUTING.md) for dev setup,
 the test commands, and the project's guiding principles, and
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Report bugs and request features via the
-GitHub issue templates; report vulnerabilities privately per [SECURITY.md](SECURITY.md).
+[CODE_OF_CONDUCT.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CODE_OF_CONDUCT.md). Report bugs and request features via the
+GitHub issue templates; report vulnerabilities privately per [SECURITY.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/SECURITY.md).
 
 If you use qgrav in academic work, please cite it via the **"Cite this
-repository"** button on GitHub (backed by [CITATION.cff](CITATION.cff)).
+repository"** button on GitHub (backed by [CITATION.cff](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CITATION.cff)).
 
 qgrav vendors [AISim](https://github.com/bleykauf/aisim) (GPL-3.0) and
 [allantools](https://github.com/aewallin/allantools) (LGPL-3.0); see
-[`src/qgrav/vendor/ATTRIBUTION.md`](src/qgrav/vendor/ATTRIBUTION.md).
+[`src/qgrav/vendor/ATTRIBUTION.md`](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/src/qgrav/vendor/ATTRIBUTION.md).
 
 ---
 
@@ -448,4 +460,4 @@ The current line (**v1.5.x**) centres on **emergent pulse physics and a complete
 
 Earlier releases added multi-drop measurement cycles with a fringe-lock servo, one-click reproductions of five published transportable gravimeters, an independent **QuTiP** cross-check, real **IGETS** superconducting-gravimeter analysis, and the six-tab desktop **GUI**.
 
-See **[CHANGELOG.md](CHANGELOG.md)** for the complete, version-by-version history.
+See **[CHANGELOG.md](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CHANGELOG.md)** for the complete, version-by-version history.
