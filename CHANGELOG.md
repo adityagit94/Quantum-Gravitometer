@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## v1.5.2 (2026-06-17) - PyPI-ready docs
+
+Documentation/packaging patch; no code or physics changes. Carries the polished
+README onto the PyPI project page (the v1.5.1 page predated these fixes).
+
+- **README polished for PyPI** - leads with `pip install qgrav`, adds a PyPI
+  version + Python-versions badge row, and converts all in-repo links to
+  absolute GitHub URLs so they resolve on the PyPI long-description (relative
+  links 404 there).
+- **Docs home page (`docs/index.md`)** refreshed with the v1.5 feature set
+  (sub-pulse Raman, emergent projection noise, full residual chain) and a
+  `pip install` quick-start.
+- **Complete guide** install section now leads with `pip install qgrav`.
+- Bumped `version`/`__version__`/`CITATION.cff` to 1.5.2.
+
 ## v1.5.1 (2026-06-16) - Documentation & packaging
 
 Documentation-only / packaging patch; no code or physics changes.
