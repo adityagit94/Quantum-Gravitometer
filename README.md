@@ -6,6 +6,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Docs](https://img.shields.io/badge/docs-online-success.svg)](https://adityagit94.github.io/Quantum-Gravitometer/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20618573.svg)](https://doi.org/10.5281/zenodo.20618573)
 
 > **Highlights** - a gravity phase that **emerges** from a simulated ballistic
 > trajectory under a chirped Raman laser (not injected analytically), now with
@@ -428,6 +429,9 @@ GitHub issue templates; report vulnerabilities privately per [SECURITY.md](https
 
 If you use qgrav in academic work, please cite it via the **"Cite this
 repository"** button on GitHub (backed by [CITATION.cff](https://github.com/adityagit94/Quantum-Gravitometer/blob/main/CITATION.cff)).
+Each release is archived on Zenodo; cite the concept DOI
+[10.5281/zenodo.20618573](https://doi.org/10.5281/zenodo.20618573), which always
+resolves to the latest version.
 
 qgrav vendors [AISim](https://github.com/bleykauf/aisim) (GPL-3.0) and
 [allantools](https://github.com/aewallin/allantools) (LGPL-3.0); see

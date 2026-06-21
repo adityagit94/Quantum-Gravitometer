@@ -16,6 +16,14 @@ authors:
     email: aditya_2312res46@iitp.ac.in
 version: "1.5.2"
 date-released: "2026-06-17"
+doi: "10.5281/zenodo.20618573"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20618573"
+    description: "Concept DOI - resolves to the latest version"
+  - type: doi
+    value: "10.5281/zenodo.20787106"
+    description: "Version DOI - v1.5.2"
 license: GPL-3.0-or-later
 repository-code: "https://github.com/adityagit94/Quantum-Gravitometer"
 url: "https://github.com/adityagit94/Quantum-Gravitometer"
