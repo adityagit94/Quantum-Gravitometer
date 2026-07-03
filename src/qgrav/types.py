@@ -7,10 +7,11 @@ autocompletion.
 
 from __future__ import annotations
 
-from typing import Any, NotRequired
+# TypedDict and NotRequired are both in stdlib typing on Python >= 3.11
+# (this package's floor), so no third-party typing_extensions dependency.
+from typing import Any, NotRequired, TypedDict
 
 import numpy as np
-from typing_extensions import TypedDict
 
 
 class GravityDataset(TypedDict):
