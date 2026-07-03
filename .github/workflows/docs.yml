@@ -27,7 +27,7 @@ jobs:
         # Not --strict: the docs intentionally cross-reference root files
         # (CHANGELOG.md, README.md) that live outside the mkdocs docs/ tree.
         run: mkdocs build
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
