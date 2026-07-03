@@ -97,7 +97,11 @@ precision = 1
 show_missing = false
 
 [tool.mypy]
-python_version = "3.11"
+# 3.12, not the 3.11 floor: numpy >= 2.5 (Requires-Python >= 3.12) ships stubs
+# using PEP 695 `type` statements, which mypy rejects as a syntax error (exit 2)
+# when targeting 3.11. Environments actually on 3.11 resolve numpy < 2.5, so no
+# 3.11-only code path is lost by checking with 3.12 semantics.
+python_version = "3.12"
 files = ["src/qgrav"]
 exclude = ["src/qgrav/vendor"]
 ignore_missing_imports = true

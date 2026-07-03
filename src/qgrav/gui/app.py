@@ -17,6 +17,11 @@ import matplotlib
 
 logger = logging.getLogger(__name__)
 try:
+    # Import pyplot first: matplotlib.use() only validates the backend (and
+    # raises on a headless display) once pyplot is loaded — without it the
+    # call silently sets rcParams and the failure surfaces much later.
+    import matplotlib.pyplot  # noqa: F401
+
     matplotlib.use("TkAgg")
 except Exception:
     logger.exception("Failed to enable TkAgg; falling back to Agg")

@@ -5,6 +5,8 @@ from typing import Any
 
 import numpy as np
 
+from qgrav.types import RealIfoData
+
 
 def _ensure_array(x: np.ndarray | float) -> np.ndarray:
     arr = np.asarray(x, dtype=np.float64)
@@ -34,7 +36,7 @@ def load_real_ifo_csv(
     sample_rate_hz: float | None = None,
     delimiter: str = ",",
     has_header: bool = True,
-) -> dict[str, np.ndarray]:
+) -> RealIfoData:
     """Load real interferometer-style data from a CSV file.
 
     Supported columns:
@@ -126,7 +128,7 @@ def load_real_ifo_csv(
     elif sample_rate_hz is not None:
         inferred_fs = float(sample_rate_hz)
 
-    out = {"t": t, "I_meas": I, "Q_meas": Q, "dropped_rows": dropped_count}
+    out: RealIfoData = {"t": t, "I_meas": I, "Q_meas": Q, "dropped_rows": dropped_count}
     if x_true is not None:
         out["x_true"] = x_true
     if inferred_fs is not None:

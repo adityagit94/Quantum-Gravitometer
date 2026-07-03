@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,10 @@ def _run_interferometer_pipeline(
 ) -> Path:
     bench_cfg = cfg.get("bench", {}) if isinstance(cfg.get("bench", {}), dict) else {}
     bench_type = str(bench_cfg.get("type", "virtual")).lower().strip()
+    # Mapping, not the branch-specific types (RealIfoData / dict[str, ndarray]):
+    # both branches are read-only below and mypy would otherwise pin the
+    # variable to whichever branch is assigned first.
+    data: Mapping[str, Any]
     if bench_type == "real":
         real_cfg = cfg.get("bench_real_ifo")
         if not isinstance(real_cfg, dict):

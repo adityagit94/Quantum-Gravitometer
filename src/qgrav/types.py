@@ -37,6 +37,17 @@ class GravityDataset(TypedDict):
     longitude_deg: NotRequired[float]
 
 
+class RealIfoData(TypedDict):
+    """Return type of ``load_real_ifo_csv``."""
+
+    t: np.ndarray
+    I_meas: np.ndarray
+    Q_meas: np.ndarray
+    dropped_rows: int
+    x_true: NotRequired[np.ndarray]
+    sample_rate_hz: NotRequired[np.ndarray]
+
+
 class AllanResult(TypedDict):
     """Return type of ``allan_deviation_overlapping``."""
 
