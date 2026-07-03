@@ -119,10 +119,11 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
             "mach_zehnder_phase_scan",
             "gravity_sweep",
             "vibration_sensitivity_sweep",
+            "multi_drop_cycle",
         }
         if model not in allowed_models:
             issues.append(
-                "`simulation.model` must be one of: rabi_scan, mach_zehnder_phase_scan, gravity_sweep, vibration_sensitivity_sweep."
+                "`simulation.model` must be one of: rabi_scan, mach_zehnder_phase_scan, gravity_sweep, vibration_sensitivity_sweep, multi_drop_cycle."
             )
         if "n_atoms" not in simulation:
             issues.append("Missing `simulation.n_atoms` for enabled AISim simulation.")
@@ -152,6 +153,15 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
                 "vibration_frequency_hz",
                 "amplitude_max_m",
                 "n_amplitude_points",
+            ]:
+                if key not in simulation:
+                    issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")
+        elif model == "multi_drop_cycle":
+            for key in [
+                "tau_pi_half_s",
+                "interferometer_time_s",
+                "n_drops",
+                "cycle_time_s",
             ]:
                 if key not in simulation:
                     issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")

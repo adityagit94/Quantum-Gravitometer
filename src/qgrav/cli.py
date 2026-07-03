@@ -9,13 +9,21 @@ logger = logging.getLogger(__name__)
 
 
 def _cmd_run(args: argparse.Namespace) -> None:
+    config_arg = args.config or args.config_positional
+    if not config_arg:
+        print(
+            "Error: a config file is required (`qgrav run CONFIG` or `qgrav run --config CONFIG`).",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+
     import matplotlib
 
     matplotlib.use("Agg")
     from qgrav.config import load_config, validate_config
     from qgrav.pipeline import run_pipeline
 
-    config_path = Path(args.config)
+    config_path = Path(config_arg)
     if args.dry_run:
         cfg, _ = load_config(config_path)
         validate_config(cfg)
@@ -210,19 +218,44 @@ def main() -> None:
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
+    # Also accept --verbose after the subcommand (`qgrav run ... --verbose`).
+    # SUPPRESS keeps an absent post-subcommand flag from overwriting the value
+    # the root parser already set.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        default=argparse.SUPPRESS,
+        help="Show full tracebacks on error",
+    )
+
     # --- run ---
-    run_p = sub.add_parser("run", help="Run pipeline from YAML config")
-    run_p.add_argument("--config", required=True, help="Path to YAML configuration file")
+    run_p = sub.add_parser("run", help="Run pipeline from YAML config", parents=[common])
+    run_p.add_argument(
+        "config_positional",
+        nargs="?",
+        default=None,
+        metavar="CONFIG",
+        help="Path to YAML configuration file (positional alternative to --config)",
+    )
+    run_p.add_argument(
+        "--config",
+        required=False,
+        help="Path to YAML configuration file (takes precedence over the positional form)",
+    )
     run_p.add_argument(
         "--dry-run", action="store_true", help="Validate config and print summary without running"
     )
 
     # --- gui ---
-    gui_p = sub.add_parser("gui", help="Launch the desktop GUI")
+    gui_p = sub.add_parser("gui", help="Launch the desktop GUI", parents=[common])
     gui_p.add_argument("--config", required=False, help="Optional config to pre-load in the GUI")
 
     # --- convert-ggp ---
-    conv_p = sub.add_parser("convert-ggp", help="Convert .ggp gravimetry data to CSV")
+    conv_p = sub.add_parser(
+        "convert-ggp", help="Convert .ggp gravimetry data to CSV", parents=[common]
+    )
     conv_p.add_argument(
         "--source", required=True, help="Path to .ggp file, directory, or .zip archive"
     )
@@ -233,7 +266,11 @@ def main() -> None:
     conv_p.add_argument("--metadata", required=False, help="Optional SG station metadata path")
 
     # --- validate-data ---
-    val_p = sub.add_parser("validate-data", help="Validate a gravimetry dataset and print summary")
+    val_p = sub.add_parser(
+        "validate-data",
+        help="Validate a gravimetry dataset and print summary",
+        parents=[common],
+    )
     val_p.add_argument("--source", required=True, help="Path to .ggp, .csv, or directory")
     val_p.add_argument(
         "--station", required=False, help="Station code (when source is a directory/zip)"
@@ -241,7 +278,7 @@ def main() -> None:
     val_p.add_argument("--metadata", required=False, help="Optional SG station metadata path")
 
     # --- info ---
-    sub.add_parser("info", help="Print version and environment information")
+    sub.add_parser("info", help="Print version and environment information", parents=[common])
 
     args = parser.parse_args()
     if args.verbose:

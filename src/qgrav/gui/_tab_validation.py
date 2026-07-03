@@ -315,6 +315,18 @@ class ValidationTabMixin:
         return {
             "output": {"runs_dir": "runs", "name": f"{row['suffix']}_reproduction"},
             "bench": {"type": "virtual"},
+            # The virtual bench feeds the classical interferometer stage that
+            # every pipeline run performs before the AISim study is attached.
+            "bench_virtual_ifo": {
+                "wavelength_m": 1.55e-6,
+                "sample_rate_hz": 2000,
+                "duration_s": 5.0,
+                "displacement_sines": [
+                    {"amplitude_m": 4.0e-9, "freq_hz": 3.0, "phase_rad": 0.0},
+                ],
+                "measurement_noise_std": 0.03,
+                "seed": 7,
+            },
             "stats": {"metrics_backend": "auto", "allan_data_type": "freq", "psd_method": "welch"},
             "simulation": sim,
         }

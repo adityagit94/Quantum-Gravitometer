@@ -139,6 +139,9 @@ disable_error_code = ["attr-defined", "union-attr", "arg-type", "assignment", "i
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# The suite is RuntimeWarning-clean (NaN guards in summary/corrections);
+# escalate to errors so silent numerical regressions cannot creep back in.
+filterwarnings = ["error::RuntimeWarning"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"'); used for the published-reference benchmark regressions that run many multi-drop simulations.",
     "benchmark: performance micro-benchmarks (require pytest-benchmark; run with '-m benchmark').",

@@ -57,6 +57,10 @@ def _allan_deviation(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute the overlapping Allan deviation of a g time-series.
 
+    Octave-spaced integration times; the estimator matches
+    :func:`qgrav.metrics.allan.allan_deviation_overlapping` (custom backend)
+    evaluated at the same taus.
+
     Parameters
     ----------
     g_values : 1-D array
@@ -78,15 +82,15 @@ def _allan_deviation(
         return np.array([cycle_time_s]), np.array([float(np.std(x))])
     taus: list[float] = []
     adevs: list[float] = []
+    csum = np.concatenate([[0.0], np.cumsum(x, dtype=np.float64)])
     m = 1
     while m <= n // 2 and len(taus) < max_levels:
-        # Group into blocks of size m, average each block
-        n_blocks = n // m
-        blocks = x[: n_blocks * m].reshape(n_blocks, m).mean(axis=1)
-        if len(blocks) < 2:
+        # Overlapping estimator (unit stride): all length-m window means, then
+        # σ²_A(m·τ₀) = 1/(2(N-2m+1)) Σ_j (ȳ_{j+m} - ȳ_j)²
+        window_means = (csum[m:] - csum[:-m]) / m
+        diffs = window_means[m:] - window_means[:-m]
+        if len(diffs) < 1:
             break
-        # Allan variance estimator: σ²_A(τ) = 1/(2(N-1)) Σ (y_{k+1} - y_k)²
-        diffs = np.diff(blocks)
         var_a = 0.5 * float(np.mean(diffs**2))
         taus.append(m * cycle_time_s)
         adevs.append(float(np.sqrt(var_a)))
@@ -289,8 +293,9 @@ def run_aisim_multi_drop_cycle(
     if correlated_vibration:
         from qgrav.physics.noise_models import generate_vibration_timeseries
 
-        # Need samples at t_i, t_i+T, t_i+2T for every drop.  Sample fast enough
-        # that T and 2T land near grid points; use 1 ms resolution or finer.
+        # Need samples at t_i, t_i+T, t_i+2T for every drop.  Sample at >=8
+        # points per T and >=4 per cycle (>=50 Hz floor); _z_at interpolates
+        # linearly between grid samples so arbitrary T stays exact.
         vib_sample_rate_hz = max(1.0 / cycle_time_s * 4.0, 1.0 / max(T, 1e-3) * 8.0, 50.0)
         vib_duration_s = (n - 1) * cycle_time_s + 2.0 * T + 1.0
         vib_ts = generate_vibration_timeseries(
@@ -303,9 +308,10 @@ def run_aisim_multi_drop_cycle(
         z_disp = vib_ts["displacement_m"]
 
         def _z_at(t):
-            idx = int(round(float(t) * vib_sample_rate_hz))
-            idx = max(0, min(len(z_disp) - 1, idx))
-            return float(z_disp[idx])
+            ft = float(t) * vib_sample_rate_hz
+            i0 = max(0, min(len(z_disp) - 2, int(np.floor(ft))))
+            frac = ft - i0
+            return float((1.0 - frac) * z_disp[i0] + frac * z_disp[i0 + 1])
 
         for i in range(n):
             t_i = i * float(cycle_time_s)

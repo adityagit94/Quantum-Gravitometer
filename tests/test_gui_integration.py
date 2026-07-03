@@ -173,6 +173,12 @@ def test_one_click_reproduction_builds_runnable_config(app):
     assert sim["model"] == "multi_drop_cycle"
     assert sim["n_atoms"] == 60 and sim["n_drops"] == 8
 
+    # The run path (_prepare_run_config) validates before running; the
+    # editor-loaded reproduction config must pass or 'Load & Run' dies.
+    from qgrav.config import validate_config
+
+    validate_config(cfg)
+
     # The engine must accept the GUI-built config and run it.
     from qgrav.sim_ai.aisim_adapter import run_simulation_from_config
 

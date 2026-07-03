@@ -8,7 +8,7 @@ import os
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from pathlib import Path as _PathForMPL
 from typing import Any
@@ -195,7 +195,7 @@ def _stats_cfg(cfg: dict[str, Any]) -> tuple[str, int, int, str, str, bool, str]
 
 def _write_run_metadata(path: Path, config: dict[str, Any], metrics: dict[str, Any]) -> None:
     metadata = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "config": _jsonable(config),
         "version": __version__,
         "metrics_keys": sorted(metrics.keys()),

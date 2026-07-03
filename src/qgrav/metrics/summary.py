@@ -25,7 +25,13 @@ def compute_error_statistics(y_true: np.ndarray, y_hat: np.ndarray) -> dict[str,
         else float("nan")
     )
 
-    corr = float(np.corrcoef(y_true, y_hat)[0, 1]) if len(y_true) > 1 else float("nan")
+    # Correlation is undefined for constant series (zero variance); return NaN
+    # directly instead of letting np.corrcoef emit a RuntimeWarning.
+    corr = (
+        float(np.corrcoef(y_true, y_hat)[0, 1])
+        if len(y_true) > 1 and np.std(y_true) > 0 and np.std(y_hat) > 0
+        else float("nan")
+    )
     return {
         "rmse": rmse,
         "mae": mae,

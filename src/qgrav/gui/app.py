@@ -351,7 +351,7 @@ class QGravApp(
                     if os.path.exists(p):
                         os.unlink(p)
             except Exception:
-                pass
+                logger.debug("Could not remove temp config %s", p, exc_info=True)
         self._temp_config_paths.clear()
 
     def _prepare_run_config(self) -> Path:

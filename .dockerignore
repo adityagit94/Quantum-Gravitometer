@@ -11,3 +11,18 @@ __pycache__
 build
 dist
 docs/research
+# Local research datasets (can exceed 100 MB) and other dev-only state —
+# keep them out of the build context so images stay small and builds fast.
+Datasets
+data/processed
+notebooks
+paper
+site
+.benchmarks
+.hypothesis
+.coverage
+.claude
+.idea
+.vscode
+.qgrav_mpl
+*.log

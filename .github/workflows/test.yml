@@ -62,5 +62,6 @@ jobs:
         # `-m "not slow"` deselects the published-reference simulation
         # regressions (which run nightly on the slow workflow).
         # Coverage measures non-vendor qgrav only (see [tool.coverage.run]).
-        # TODO: ratchet with --cov-fail-under once the number is stable.
-        run: pytest tests -q -m "not slow" --cov --cov-report=term --cov-report=xml
+        # Ratchet: the fast suite sits at ~81%; 78 leaves headroom for
+        # platform-dependent GUI/Tk coverage differences across the matrix.
+        run: pytest tests -q -m "not slow" --cov --cov-report=term --cov-report=xml --cov-fail-under=78

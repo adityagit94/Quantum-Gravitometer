@@ -20,7 +20,11 @@ RUN pip install --upgrade pip \
     && pip install . \
     && rm -rf /root/.cache/pip
 
-# Default workdir for mounted configs/runs.
+# Run as a non-root user; /work holds the mounted configs/runs.
+RUN useradd --create-home qgrav \
+    && mkdir -p /work \
+    && chown qgrav /work
+USER qgrav
 WORKDIR /work
 ENTRYPOINT ["qgrav"]
 CMD ["--help"]
