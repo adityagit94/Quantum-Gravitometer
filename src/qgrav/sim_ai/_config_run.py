@@ -154,5 +154,15 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             lock_to_midfringe=bool(sim_cfg.get("lock_to_midfringe", True)),
             gravity_propagation=bool(sim_cfg.get("gravity_propagation", False)),
             gravity_gradient_per_m=float(sim_cfg.get("gravity_gradient_per_m", 0.0)),
+            vibration_model=str(sim_cfg.get("vibration_model", "sinusoidal")),
+            seismic_model=str(sim_cfg.get("seismic_model", "nlnm")),
+            vibration_isolation_cutoff_hz=float(sim_cfg.get("vibration_isolation_cutoff_hz", 0.0)),
+            n_shots=int(sim_cfg.get("n_shots", 200)),
+            cycle_time_s=float(sim_cfg.get("cycle_time_s", 1.5)),
+            vibration_seed=(
+                None
+                if sim_cfg.get("vibration_seed") is None
+                else int(sim_cfg.get("vibration_seed"))
+            ),
         )
     raise ValueError(f"Unsupported AISim model: {model}")

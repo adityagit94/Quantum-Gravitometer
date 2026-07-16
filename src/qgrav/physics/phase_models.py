@@ -35,6 +35,50 @@ def vibration_phase_rad(
     return float(k_eff_rad_per_m) * (z0 - 2.0 * z1 + z2)
 
 
+def gravity_gradient_phase_rad(
+    *,
+    k_eff_rad_per_m: float,
+    gravity_gradient_per_m: float,
+    g_m_s2: float,
+    interferometer_time_s: float,
+    initial_position_m: float = 0.0,
+    initial_velocity_m_s: float = 0.0,
+    z_ref_m: float = 0.0,
+) -> float:
+    """Leading-order gravity-gradient phase for a three-pulse Mach-Zehnder AI.
+
+    For a linear gradient g(z) = g0 + gamma*(z - z_ref) (the convention used
+    by GravityFreePropagator) the perturbed free-fall trajectory gives, to
+    first order in gamma,
+
+        dphi = k_eff * gamma * T^2 * [ (z0 - z_ref) + v0*T - (7/12)*g0*T^2 ]
+
+    where z0 and v0 are the atom's vertical position and velocity at the
+    first pulse.  The (7/12) coefficient is the standard result for the
+    gradient sampled along the ballistic trajectory (Peters, Chung & Chu,
+    Metrologia 38, 25 (2001), Table 2).  The equivalent apparent-g shift is
+    dphi / (k_eff * T^2).
+
+    Note the sign: for gamma > 0 (g increasing with z) a dropped atom falls
+    into WEAKER gravity, so the (7/12) term reduces the measured phase.
+    Valid for |gamma| * T^2 << 1.
+    """
+    T = float(interferometer_time_s)
+    if T <= 0:
+        raise ValueError("interferometer_time_s must be positive")
+    gamma = float(gravity_gradient_per_m)
+    return (
+        float(k_eff_rad_per_m)
+        * gamma
+        * T**2
+        * (
+            (float(initial_position_m) - float(z_ref_m))
+            + float(initial_velocity_m_s) * T
+            - (7.0 / 12.0) * float(g_m_s2) * T**2
+        )
+    )
+
+
 def equivalent_gravity_error_m_s2(
     phase_rad: np.ndarray | float,
     *,

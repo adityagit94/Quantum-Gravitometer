@@ -214,6 +214,9 @@ def run_aisim_gravity_sweep(
         if gravity_propagation
         else "hybrid_aisim_plus_analytic_gravity_phase"
     )
+    _phase_series_label = (
+        "phase bias (rad, constant)" if gravity_propagation else "total phase (rad)"
+    )
     result = {
         "backend": "aisim",
         "model": "gravity_sweep",
@@ -227,7 +230,13 @@ def run_aisim_gravity_sweep(
         "interferometer_time_s": float(interferometer_time_s),
         "tau_pi_half_s": float(tau_pi_half_s),
         "gravity_values_m_s2": g_values,
+        # In gravity-propagation mode the gravity phase emerges inside the
+        # simulation and is never computed analytically, so total_phase_rad
+        # holds only the constant phase bias (flagged by
+        # total_phase_is_bias_only); it is the true analytic phase curve
+        # only in hybrid mode.
         "total_phase_rad": total_phase,
+        "total_phase_is_bias_only": bool(gravity_propagation),
         "output_port_2": port2,
         "output_port_3": port3,
         "differential_signal": diff,
@@ -290,7 +299,7 @@ def run_aisim_gravity_sweep(
                 "x_label": "gravity (m/s²)",
                 "y_label": "phase / differential signal",
                 "series": [
-                    {"key": "total_phase_rad", "label": "total phase (rad)", "kind": "line"},
+                    {"key": "total_phase_rad", "label": _phase_series_label, "kind": "line"},
                     {"key": "differential_signal", "label": "diff signal", "kind": "line"},
                 ],
             },
@@ -368,9 +377,20 @@ def run_aisim_vibration_sensitivity_sweep(
     k2_rad_per_m: float | None = None,
     gravity_propagation: bool = False,
     gravity_gradient_per_m: float = 0.0,
+    vibration_model: str = "sinusoidal",
+    seismic_model: str = "nlnm",
+    vibration_isolation_cutoff_hz: float = 0.0,
+    n_shots: int = 200,
+    cycle_time_s: float = 1.5,
+    vibration_seed: int | None = None,
 ) -> dict[str, Any]:
-    if n_amplitude_points < 5:
+    vibration_model = str(vibration_model).strip().lower()
+    if vibration_model not in ("sinusoidal", "time_domain"):
+        raise ValueError("vibration_model must be 'sinusoidal' or 'time_domain'.")
+    if vibration_model == "sinusoidal" and n_amplitude_points < 5:
         raise ValueError("n_amplitude_points must be at least 5.")
+    if vibration_model == "time_domain" and n_shots < 30:
+        raise ValueError("n_shots must be at least 30 for a meaningful noise estimate.")
     _, detected_atoms, _, detected_count, source_cfg = _create_detected_ensemble(
         n_atoms=n_atoms,
         seed=seed,
@@ -424,16 +444,51 @@ def run_aisim_vibration_sensitivity_sweep(
         tau_pi_half_s=float(tau_pi_half_s),
         interferometer_time_s=float(interferometer_time_s),
     )
-    amplitudes = vibration_amplitude_axis(
-        float(amplitude_min_m), float(amplitude_max_m), int(n_amplitude_points)
-    )
-    vib_phase = _vibration_phase_sinusoid(
-        amplitudes_m=amplitudes,
-        frequency_hz=vibration_frequency_hz,
-        interferometer_time_s=interferometer_time_s,
-        k_eff_rad_per_m=k_eff,
-        phase0_rad=vibration_phase0_rad,
-    )
+    if vibration_model == "sinusoidal":
+        amplitudes = vibration_amplitude_axis(
+            float(amplitude_min_m), float(amplitude_max_m), int(n_amplitude_points)
+        )
+        vib_phase = _vibration_phase_sinusoid(
+            amplitudes_m=amplitudes,
+            frequency_hz=vibration_frequency_hz,
+            interferometer_time_s=interferometer_time_s,
+            k_eff_rad_per_m=k_eff,
+            phase0_rad=vibration_phase0_rad,
+        )
+        vib_fs = float("nan")
+        vib_n_samples = 0
+    else:
+        # --- time_domain: mirror motion from a synthesized Peterson series ---
+        # One continuous displacement record spans all shots (same sampling
+        # recipe as the multi-drop campaign: >=8 samples per T, >=4 per
+        # cycle, >=50 Hz floor); each shot samples its three pulse times.
+        from qgrav.physics.noise_models import generate_vibration_timeseries
+
+        T = float(interferometer_time_s)
+        cycle = float(cycle_time_s)
+        vib_fs = max(4.0 / cycle, 8.0 / max(T, 1e-3), 50.0)
+        vib_duration = (int(n_shots) - 1) * cycle + 2.0 * T + 1.0
+        vib_ts = generate_vibration_timeseries(
+            duration_s=float(vib_duration),
+            sample_rate_hz=float(vib_fs),
+            seismic_model=str(seismic_model),
+            isolation_cutoff_hz=float(vibration_isolation_cutoff_hz),
+            seed=(int(vibration_seed) if vibration_seed is not None else int(seed) + 99_000),
+        )
+        z_disp = vib_ts["displacement_m"]
+        vib_n_samples = int(len(z_disp))
+
+        def _z_at(t: float) -> float:
+            ft = float(t) * vib_fs
+            i0 = max(0, min(len(z_disp) - 2, int(np.floor(ft))))
+            frac = ft - i0
+            return float((1.0 - frac) * z_disp[i0] + frac * z_disp[i0 + 1])
+
+        amplitudes = np.arange(int(n_shots), dtype=np.float64)  # shot index
+        vib_phase = np.zeros(int(n_shots), dtype=np.float64)
+        for i in range(int(n_shots)):
+            t_i = i * cycle
+            vib_phase[i] = k_eff * (_z_at(t_i) - 2.0 * _z_at(t_i + T) + _z_at(t_i + 2.0 * T))
     total_phase = base_phase + vib_phase
 
     # Calibrate the simulated-mode constant phase offset (see
@@ -485,12 +540,37 @@ def run_aisim_vibration_sensitivity_sweep(
         k_eff_rad_per_m=k_eff,
         interferometer_time_s=float(interferometer_time_s),
     )
-    if len(amplitudes) >= 2:
+    if vibration_model == "sinusoidal" and len(amplitudes) >= 2:
         slope = float(
             (equiv_g_error[-1] - equiv_g_error[0]) / max(amplitudes[-1] - amplitudes[0], 1e-30)
         )
     else:
         slope = float("nan")
+
+    # time_domain: cross-validate the realized per-shot phase noise against
+    # the frequency-domain Cheinet budget on the SAME effective PSD the
+    # generator used (Peterson model x isolation high-pass, on the rFFT grid
+    # of the synthesized record) — the end-to-end transfer-function check.
+    realized_phase_noise_rad = float("nan")
+    analytic_phase_noise_rad = float("nan")
+    if vibration_model == "time_domain":
+        from qgrav.physics._seismic_models import interpolate_psd
+        from qgrav.physics.sensitivity_function import integrate_vibration_noise
+
+        f_grid = np.fft.rfftfreq(vib_n_samples, d=1.0 / vib_fs)[1:]  # drop DC
+        psd_eff = interpolate_psd(f_grid, model=str(seismic_model))
+        fc = float(vibration_isolation_cutoff_hz)
+        if fc > 0.0:
+            psd_eff = psd_eff * (f_grid**4 / (f_grid**2 + fc**2) ** 2)
+        budget = integrate_vibration_noise(
+            psd_eff,
+            f_grid,
+            interferometer_time_s=float(interferometer_time_s),
+            pulse_duration_s=0.0,
+            k_eff_rad_per_m=k_eff,
+        )
+        realized_phase_noise_rad = float(np.std(vib_phase, ddof=1))
+        analytic_phase_noise_rad = float(budget["sigma_phi_rad"])
 
     from qgrav.physics.phase_models import shot_noise_sensitivity_m_s2_per_sqrt_hz
 
@@ -502,10 +582,62 @@ def run_aisim_vibration_sensitivity_sweep(
         cycle_time_s=1.0,
     )
 
+    if vibration_model == "sinusoidal":
+        _vs_study_type = "hybrid_aisim_plus_analytic_vibration_phase"
+        _mode_keys: dict[str, Any] = {
+            "vibration_frequency_hz": float(vibration_frequency_hz),
+            "vibration_phase0_rad": float(vibration_phase0_rad),
+            "vibration_amplitude_m": amplitudes,
+        }
+        _mode_rows: dict[str, Any] = {
+            "Vibration frequency (Hz)": float(vibration_frequency_hz),
+            "Max amplitude (m)": float(amplitudes[-1]),
+            "Equivalent gravity error per meter amplitude": slope,
+        }
+        _x_axis: dict[str, Any] = {
+            "x_key": "vibration_amplitude_m",
+            "x_scale": 1e9,
+            "x_label": "vibration amplitude (nm)",
+        }
+        _mode_config: dict[str, Any] = {"n_amplitude_points": int(n_amplitude_points)}
+    else:
+        _vs_study_type = "hybrid_aisim_plus_time_domain_seismic_vibration_phase"
+        _mode_keys = {
+            "shot_index": amplitudes,
+            "seismic_model": str(seismic_model),
+            "vibration_isolation_cutoff_hz": float(vibration_isolation_cutoff_hz),
+            "cycle_time_s": float(cycle_time_s),
+            "realized_phase_noise_rad": realized_phase_noise_rad,
+            "analytic_phase_noise_rad": analytic_phase_noise_rad,
+            "phase_noise_ratio": float(realized_phase_noise_rad / analytic_phase_noise_rad),
+            "realized_g_noise_m_s2": float(
+                realized_phase_noise_rad / (k_eff * float(interferometer_time_s) ** 2)
+            ),
+            "analytic_g_noise_m_s2": float(
+                analytic_phase_noise_rad / (k_eff * float(interferometer_time_s) ** 2)
+            ),
+        }
+        _mode_rows = {
+            "Seismic model": str(seismic_model).upper(),
+            "Shots": int(n_shots),
+            "Cycle time (s)": float(cycle_time_s),
+            "Realized phase noise (rad)": realized_phase_noise_rad,
+            "Cheinet budget phase noise (rad)": analytic_phase_noise_rad,
+            "Realized / budget ratio": float(realized_phase_noise_rad / analytic_phase_noise_rad),
+        }
+        _x_axis = {"x_key": "shot_index", "x_label": "shot index"}
+        _mode_config = {
+            "n_shots": int(n_shots),
+            "cycle_time_s": float(cycle_time_s),
+            "seismic_model": str(seismic_model),
+            "vibration_isolation_cutoff_hz": float(vibration_isolation_cutoff_hz),
+        }
+
     result = {
         "backend": "aisim",
         "model": "vibration_sensitivity_sweep",
-        "study_type": "hybrid_aisim_plus_analytic_vibration_phase",
+        "study_type": _vs_study_type,
+        "vibration_model": vibration_model,
         "n_atoms_total": int(n_atoms),
         "n_atoms_detected": detected_count,
         "detected_fraction": float(detected_count / float(n_atoms)),
@@ -513,9 +645,7 @@ def run_aisim_vibration_sensitivity_sweep(
         "interferometer_time_s": float(interferometer_time_s),
         "tau_pi_half_s": float(tau_pi_half_s),
         "gravity_ref_m_s2": float(gravity_ref_m_s2),
-        "vibration_frequency_hz": float(vibration_frequency_hz),
-        "vibration_phase0_rad": float(vibration_phase0_rad),
-        "vibration_amplitude_m": amplitudes,
+        **_mode_keys,
         "vibration_phase_rad": vib_phase,
         "equivalent_gravity_error_m_s2": equiv_g_error,
         "output_port_2": port2,
@@ -529,16 +659,14 @@ def run_aisim_vibration_sensitivity_sweep(
         "summary_rows": {
             "Backend": "aisim",
             "Model": "vibration_sensitivity_sweep",
-            "Study type": "hybrid_aisim_plus_analytic_vibration_phase",
+            "Study type": _vs_study_type,
             "Total atoms": int(n_atoms),
             "Detected atoms": detected_count,
             "Detected fraction": float(detected_count / float(n_atoms)),
             "k_eff (rad/m)": k_eff,
             "Interferometer time T (s)": float(interferometer_time_s),
-            "Vibration frequency (Hz)": float(vibration_frequency_hz),
-            "Max amplitude (m)": float(amplitudes[-1]),
+            **_mode_rows,
             "Max equivalent gravity error (m/s²)": float(np.max(np.abs(equiv_g_error))),
-            "Equivalent gravity error per meter amplitude": slope,
             "Sensitivity (m/s²/√Hz)": _sens_vs,
             "Sensitivity (µGal/√Hz)": _sens_vs * 1e8,
         },
@@ -546,9 +674,7 @@ def run_aisim_vibration_sensitivity_sweep(
             {
                 "name": "simulation_primary",
                 "title": "Vibration sensitivity sweep",
-                "x_key": "vibration_amplitude_m",
-                "x_scale": 1e9,
-                "x_label": "vibration amplitude (nm)",
+                **_x_axis,
                 "y_label": "equivalent gravity error / signal",
                 "series": [
                     {
@@ -566,9 +692,7 @@ def run_aisim_vibration_sensitivity_sweep(
             {
                 "name": "simulation_secondary",
                 "title": "Vibration-induced phase and output ports",
-                "x_key": "vibration_amplitude_m",
-                "x_scale": 1e9,
-                "x_label": "vibration amplitude (nm)",
+                **_x_axis,
                 "y_label": "phase / population",
                 "series": [
                     {
@@ -582,10 +706,30 @@ def run_aisim_vibration_sensitivity_sweep(
             },
         ],
         "config": {
-            "n_amplitude_points": int(n_amplitude_points),
+            **_mode_config,
             "lock_to_midfringe": bool(lock_to_midfringe),
         },
     }
+    if vibration_model == "sinusoidal":
+        _vs_phase_accumulation = (
+            "Hybrid model: AISim pulse contrast + analytic reference-mirror vibration phase"
+        )
+        _vs_scope = "hybrid_aisim_plus_reference_mirror_vibration_phase"
+        _vs_limitations = [
+            "Vibration coupling uses the standard three-pulse sensitivity-function approximation, not a separate external sensor model.",
+            "No active vibration compensation or tilt-coupling estimator is included yet.",
+        ]
+    else:
+        _vs_phase_accumulation = (
+            "Hybrid model: AISim pulse contrast + time-domain mirror displacement sampled "
+            "from a synthesized Peterson seismic series at the three pulse times"
+        )
+        _vs_scope = "hybrid_aisim_plus_time_domain_seismic_vibration_phase"
+        _vs_limitations = [
+            "Mirror motion is imprinted via the delta-pulse second difference k_eff*[z(0)-2z(T)+z(2T)]; finite pulse durations are not weighted inside pulses.",
+            "The Peterson NLNM/NHNM knot tables are simplified (~3 dB accuracy).",
+            "No active vibration compensation or tilt-coupling estimator is included yet.",
+        ]
     return _pack_result(
         result,
         source_cfg=source_cfg,
@@ -594,14 +738,11 @@ def run_aisim_vibration_sensitivity_sweep(
         physical_model={
             "atom_source": "AISim random ensemble + spherical detector",
             "pulse_sequence": "AISim SpatialSuperpositionTransitionPropagator three-pulse sequence",
-            "phase_accumulation": "Hybrid model: AISim pulse contrast + analytic reference-mirror vibration phase",
+            "phase_accumulation": _vs_phase_accumulation,
             "noise": "none beyond ensemble/beam inhomogeneity already present in AISim",
             "estimator": "output-port populations and normalized differential signal",
             "readout": "population in output ports 2 and 3",
         },
-        study_scope="hybrid_aisim_plus_reference_mirror_vibration_phase",
-        limitations=[
-            "Vibration coupling uses the standard three-pulse sensitivity-function approximation, not a separate external sensor model.",
-            "No active vibration compensation or tilt-coupling estimator is included yet.",
-        ],
+        study_scope=_vs_scope,
+        limitations=_vs_limitations,
     )

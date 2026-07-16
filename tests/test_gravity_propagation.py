@@ -58,34 +58,64 @@ class TestGravityPreservesXY:
 
 
 class TestGravityWithGradient:
-    """Test gravity gradient g(z) = g₀ + γ·(z − z_ref)."""
+    """Test gravity gradient g(z) = g₀ + γ·(z − z_ref).
 
-    def test_gravity_with_gradient(self):
-        """At z=0 with z_ref=0, gradient shouldn't change g from g₀."""
+    The propagator integrates the gradient trajectory to first order in γ:
+    z(dt) = z + v·dt − ½·gz·dt² − γ·v·dt³/6 + γ·gz·dt⁴/24 with
+    gz = g₀ + γ·(z − z_ref).  Even an atom starting at z = z_ref feels the
+    gradient during the step (it falls into a region of different g), so
+    the trajectory is NOT identical to the uniform-g one.
+    """
+
+    def test_gradient_correction_at_reference_height(self):
+        """At z=z_ref the O(γ) trajectory terms are γ·g₀·dt⁴/24 (position)
+        and γ·g₀·dt³/6 (velocity) relative to uniform g."""
+        gamma = 3.086e-6  # typical vertical gradient, 1/s²
+        g0 = 9.81
+        dt = 0.1
         atoms = _single_atom(z=0.0, vz=0.0)
-        prop_uniform = GravityFreePropagator(time_delta=0.1, g_m_s2=9.81)
+        prop_uniform = GravityFreePropagator(time_delta=dt, g_m_s2=g0)
         prop_gradient = GravityFreePropagator(
-            time_delta=0.1, g_m_s2=9.81, gravity_gradient_per_m=3.086e-6, z_ref_m=0.0
+            time_delta=dt, g_m_s2=g0, gravity_gradient_per_m=gamma, z_ref_m=0.0
         )
         r1 = prop_uniform.propagate(atoms)
         r2 = prop_gradient.propagate(atoms)
-        # At z=0, gradient term is zero → identical results
-        np.testing.assert_allclose(r1.position[0, 2], r2.position[0, 2], atol=1e-12)
-        np.testing.assert_allclose(r1.velocity[0, 2], r2.velocity[0, 2], atol=1e-12)
+        dz = float(r2.position[0, 2] - r1.position[0, 2])
+        dv = float(r2.velocity[0, 2] - r1.velocity[0, 2])
+        # rtol bounded by float64 cancellation: dz/dv are differences of
+        # ~5e-2-scale coordinates, so they carry ~1e-17 absolute noise.
+        np.testing.assert_allclose(dz, gamma * g0 * dt**4 / 24.0, rtol=1e-6)
+        np.testing.assert_allclose(dv, gamma * g0 * dt**3 / 6.0, rtol=1e-6)
 
     def test_gradient_changes_g_away_from_ref(self):
-        """At z=100m above z_ref=0, gradient adds γ·100 to g."""
+        """At z=100m above z_ref=0, gradient adds γ·100 to the local g."""
         gamma = 3.086e-6  # typical vertical gradient, 1/s²
         g0 = 9.81
         z0 = 100.0
+        dt = 0.1
         g_eff = g0 + gamma * z0  # 9.8100003086
         atoms = _single_atom(z=z0, vz=0.0)
         prop = GravityFreePropagator(
-            time_delta=0.1, g_m_s2=g0, gravity_gradient_per_m=gamma, z_ref_m=0.0
+            time_delta=dt, g_m_s2=g0, gravity_gradient_per_m=gamma, z_ref_m=0.0
         )
         result = prop.propagate(atoms)
-        expected_z = z0 - 0.5 * g_eff * 0.1**2
+        expected_z = z0 - 0.5 * g_eff * dt**2 + gamma * g_eff * dt**4 / 24.0
         np.testing.assert_allclose(result.position[0, 2], expected_z, atol=1e-12)
+
+    def test_gradient_two_half_steps_equal_one_full_step(self):
+        """The O(γ) integrator is step-size independent to O(γ²): splitting a
+        drift into two half-steps must not change the result (the old
+        piecewise-constant-g update failed this at the 1e-10 m level)."""
+        gamma = 3.086e-6
+        g0 = 9.81
+        dt = 0.2
+        atoms = _single_atom(z=0.0, vz=0.3)
+        full = GravityFreePropagator(time_delta=dt, g_m_s2=g0, gravity_gradient_per_m=gamma)
+        half = GravityFreePropagator(time_delta=dt / 2, g_m_s2=g0, gravity_gradient_per_m=gamma)
+        r_full = full.propagate(atoms)
+        r_half = half.propagate(half.propagate(atoms))
+        np.testing.assert_allclose(r_full.position[0, 2], r_half.position[0, 2], atol=1e-12)
+        np.testing.assert_allclose(r_full.velocity[0, 2], r_half.velocity[0, 2], atol=1e-12)
 
 
 class TestGravityTwoStepsEqualsOne:

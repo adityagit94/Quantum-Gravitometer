@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from .phase_models import equivalent_gravity_error_m_s2, gravity_phase_rad, vibration_phase_rad
+from .phase_models import (
+    equivalent_gravity_error_m_s2,
+    gravity_gradient_phase_rad,
+    gravity_phase_rad,
+    vibration_phase_rad,
+)
 
 
 def expected_gravity_phase_rad(
@@ -34,6 +39,27 @@ def expected_vibration_phase_rad(
         interferometer_time_s=interferometer_time_s,
         k_eff_rad_per_m=k_eff_rad_per_m,
         phase0_rad=phase0_rad,
+    )
+
+
+def expected_gravity_gradient_phase_rad(
+    *,
+    k_eff_rad_per_m: float,
+    gravity_gradient_per_m: float,
+    g_m_s2: float,
+    interferometer_time_s: float,
+    initial_position_m: float = 0.0,
+    initial_velocity_m_s: float = 0.0,
+    z_ref_m: float = 0.0,
+) -> float:
+    return gravity_gradient_phase_rad(
+        k_eff_rad_per_m=k_eff_rad_per_m,
+        gravity_gradient_per_m=gravity_gradient_per_m,
+        g_m_s2=g_m_s2,
+        interferometer_time_s=interferometer_time_s,
+        initial_position_m=initial_position_m,
+        initial_velocity_m_s=initial_velocity_m_s,
+        z_ref_m=z_ref_m,
     )
 
 

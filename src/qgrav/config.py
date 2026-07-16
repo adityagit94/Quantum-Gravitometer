@@ -146,14 +146,15 @@ def validate_config_structure(cfg: dict[str, Any]) -> list[str]:
                 if key not in simulation:
                     issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")
         elif model == "vibration_sensitivity_sweep":
-            for key in [
-                "tau_pi_half_s",
-                "interferometer_time_s",
-                "gravity_ref_m_s2",
-                "vibration_frequency_hz",
-                "amplitude_max_m",
-                "n_amplitude_points",
-            ]:
+            vibration_model = str(simulation.get("vibration_model", "sinusoidal")).lower()
+            if vibration_model not in ("sinusoidal", "time_domain"):
+                issues.append("`simulation.vibration_model` must be 'sinusoidal' or 'time_domain'.")
+            required = ["tau_pi_half_s", "interferometer_time_s", "gravity_ref_m_s2"]
+            if vibration_model != "time_domain":
+                # The sinusoidal amplitude axis needs its sweep parameters;
+                # time_domain synthesizes a Peterson series instead.
+                required += ["vibration_frequency_hz", "amplitude_max_m", "n_amplitude_points"]
+            for key in required:
                 if key not in simulation:
                     issues.append(f"Missing `simulation.{key}` for enabled AISim simulation.")
         elif model == "multi_drop_cycle":

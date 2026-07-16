@@ -1,5 +1,6 @@
 from .atom_source import AtomSourceConfig, source_summary_rows
 from .ground_truth import (
+    expected_gravity_gradient_phase_rad,
     expected_gravity_phase_rad,
     expected_population_fringe,
     expected_vibration_phase_rad,
@@ -7,6 +8,7 @@ from .ground_truth import (
 from .noise_models import add_bias, add_outlier_spikes, add_random_walk_drift, add_white_noise
 from .phase_models import (
     equivalent_gravity_error_m_s2,
+    gravity_gradient_phase_rad,
     gravity_phase_rad,
     normalized_differential_signal,
     sensitivity_ugal_per_sqrt_hz,
@@ -33,9 +35,11 @@ __all__ = [
     "add_white_noise",
     "clip_probabilities",
     "equivalent_gravity_error_m_s2",
+    "expected_gravity_gradient_phase_rad",
     "expected_gravity_phase_rad",
     "expected_population_fringe",
     "expected_vibration_phase_rad",
+    "gravity_gradient_phase_rad",
     "gravity_phase_rad",
     "gravity_sweep_axis",
     "normalized_differential_signal",

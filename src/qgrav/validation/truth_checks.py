@@ -206,7 +206,44 @@ def _check_multi_drop_cycle(result: dict[str, Any]) -> dict[str, Any]:
     return finalize_checks(checks)
 
 
+def _check_vibration_sweep_time_domain(result: dict[str, Any]) -> dict[str, Any]:
+    """Checks for the time-domain (Peterson series) vibration mode.
+
+    The key check is the end-to-end Cheinet validation: the realized
+    per-shot phase noise (std of the second-difference phases sampled from
+    the synthesized series) must match the frequency-domain budget
+    int S_a |H_a|^2 df computed on the same effective PSD.  The band
+    accommodates the statistical error of a std estimate over O(100)
+    correlated shots.
+    """
+    vib_phase = _as_array(result, "vibration_phase_rad")
+    realized = float(result.get("realized_phase_noise_rad", float("nan")))
+    analytic = float(result.get("analytic_phase_noise_rad", float("nan")))
+    ratio = realized / analytic if analytic > 0 else float("nan")
+    checks = [
+        build_check(
+            "finite_vibration_phase",
+            bool(np.all(np.isfinite(vib_phase))),
+        ),
+        build_check(
+            "nonzero_realized_noise",
+            bool(realized > 0.0),
+            observed=realized,
+            expected="> 0 rad",
+        ),
+        build_check(
+            "cheinet_budget_match",
+            bool(0.6 <= ratio <= 1.6),
+            observed=ratio,
+            expected="realized/budget sigma_phi ratio in [0.6, 1.6]",
+        ),
+    ]
+    return finalize_checks(checks)
+
+
 def _check_vibration_sweep(result: dict[str, Any]) -> dict[str, Any]:
+    if str(result.get("vibration_model", "sinusoidal")).lower() == "time_domain":
+        return _check_vibration_sweep_time_domain(result)
     amps = _as_array(result, "vibration_amplitude_m")
     vib_phase = _as_array(result, "vibration_phase_rad")
     expected = expected_vibration_phase_rad(

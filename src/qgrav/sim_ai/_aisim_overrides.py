@@ -45,10 +45,25 @@ from qgrav.vendor.aisim.prop import (
 class GravityFreePropagator(Propagator):
     """Free propagation under uniform gravity with an optional linear gradient.
 
-    Atoms follow exact ballistic trajectories::
+    For uniform gravity (``gravity_gradient_per_m == 0``) atoms follow exact
+    ballistic trajectories::
 
         z(t+dt) = z + v_z*dt - 0.5*g*dt**2
         v_z(t+dt) = v_z - g*dt
+
+    With a linear gradient ``g(z) = g0 + gamma*(z - z_ref)`` the trajectory is
+    integrated to first order in ``gamma`` (relative error O((gamma*dt^2)^2),
+    ~1e-13 for the free-air gradient over a 0.3 s drift)::
+
+        gz = g0 + gamma*(z - z_ref)              # local g at segment start
+        z(t+dt)   = z + v_z*dt - 0.5*gz*dt^2 - gamma*v_z*dt^3/6 + gamma*gz*dt^4/24
+        v_z(t+dt) = v_z - gz*dt - 0.5*gamma*v_z*dt^2 + gamma*gz*dt^3/6
+
+    The O(gamma) terms matter: without them (piecewise-constant g per drift
+    segment) a three-pulse Mach-Zehnder recovers only 1/4 of the textbook
+    (7/12)*k_eff*gamma*g*T^4 gradient phase; with them the emergent phase
+    matches the closed form (see qgrav.physics.phase_models.
+    gravity_gradient_phase_rad and tests/test_gravity_gradient_emergent.py).
 
     The quantum state is unchanged (identity matrix) — a uniform gravitational
     potential adds only a global phase, it does not mix internal states.
@@ -88,12 +103,23 @@ class GravityFreePropagator(Propagator):
         """
         atoms = copy.deepcopy(atoms)
         dt = self.time_delta
+        gamma = self.gravity_gradient_per_m
         g_local = self._local_g(atoms.position[:, 2])
-        # Exact ballistic kinematics
-        atoms.position[:, 2] += atoms.velocity[:, 2] * dt - 0.5 * g_local * dt**2
+        vz = atoms.velocity[:, 2].copy()
+        # Ballistic kinematics: exact for uniform g; first order in gamma for
+        # a linear gradient (the dt^3/dt^4 terms track the atom sampling a
+        # changing local g during the drift — see class docstring).
+        atoms.position[:, 2] += (
+            vz * dt
+            - 0.5 * g_local * dt**2
+            - gamma * vz * dt**3 / 6.0
+            + gamma * g_local * dt**4 / 24.0
+        )
         atoms.position[:, 0] += atoms.velocity[:, 0] * dt
         atoms.position[:, 1] += atoms.velocity[:, 1] * dt
-        atoms.velocity[:, 2] -= g_local * dt
+        atoms.velocity[:, 2] -= (
+            g_local * dt + 0.5 * gamma * vz * dt**2 - gamma * g_local * dt**3 / 6.0
+        )
         atoms.time += dt
         return atoms
 
