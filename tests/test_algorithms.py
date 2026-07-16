@@ -31,3 +31,33 @@ def test_improved_beats_baseline_on_drifty_data():
     rmse_i = float(np.sqrt(np.mean((x_i - x_true) ** 2)))
 
     assert rmse_i <= 0.9 * rmse_b
+
+
+def test_improved_output_length_matches_input_for_even_and_odd_windows():
+    rng = np.random.default_rng(3)
+    n = 400
+    t = np.arange(n) / 100.0
+    I = 0.2 + np.cos(2 * np.pi * 3.0 * t) + rng.normal(0.0, 0.01, n)
+    Q = 0.2 + np.sin(2 * np.pi * 3.0 * t) + rng.normal(0.0, 0.01, n)
+
+    for window in (1, 2, 20, 21):
+        out = estimate_displacement_improved(I, Q, wavelength_m=1.55e-6, phase_smooth_window=window)
+        assert out["phase_hat_smooth"].shape == (n,), f"window={window}"
+        assert out["x_hat"].shape == (n,), f"window={window}"
+
+
+def test_ewma_matches_reference_recursion():
+    from qgrav.algorithms.improved import _ewma
+
+    rng = np.random.default_rng(11)
+    x = rng.normal(0.2, 1.0, 5000)
+    alpha = 0.01
+
+    y_ref = np.empty_like(x)
+    y_ref[0] = x[0]
+    for i in range(1, len(x)):
+        y_ref[i] = alpha * x[i] + (1.0 - alpha) * y_ref[i - 1]
+
+    y = _ewma(x, alpha)
+    assert y.shape == x.shape
+    np.testing.assert_allclose(y, y_ref, rtol=1e-12, atol=0.0)

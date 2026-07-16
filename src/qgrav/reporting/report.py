@@ -1,10 +1,58 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 from jinja2 import Environment, FileSystemLoader
+
+# report.html is the shareable artifact of a run, so credential-like values
+# are masked before embedding; the verbatim config survives in
+# config_used.yaml inside the run folder for reproducibility.
+_SENSITIVE_KEY_RE = re.compile(
+    r"(?i)(password|passwd|secret|token|api_?key|access_key|private_key|credential)"
+)
+_YAML_KV_RE = re.compile(
+    r"^(?P<head>\s*(?:-\s*)?(?P<key>[\"']?[\w.\-]+[\"']?)\s*:\s*)(?P<value>\S.*)$"
+)
+_URL_USERINFO_RE = re.compile(r"(?i)\b([a-z][a-z0-9+.\-]*://)([^/\s@:]+):([^/\s@]+)@")
+_URL_QUERY_SECRET_RE = re.compile(
+    r"(?i)([?&](?:token|api_?key|key|secret|password|sig|signature|auth)=)[^&\s\"']+"
+)
+
+
+def _redact_url_credentials(text: str) -> str:
+    text = _URL_USERINFO_RE.sub(r"\1[redacted]@", text)
+    return _URL_QUERY_SECRET_RE.sub(r"\1[redacted]", text)
+
+
+def _redact_config_text(config_text: str) -> str:
+    lines = []
+    for line in config_text.splitlines():
+        match = _YAML_KV_RE.match(line)
+        if match and _SENSITIVE_KEY_RE.search(match.group("key")):
+            line = match.group("head") + "'[redacted]'"
+        lines.append(_redact_url_credentials(line))
+    return "\n".join(lines)
+
+
+def _redact_metrics(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: (
+                "[redacted]"
+                if isinstance(key, str) and _SENSITIVE_KEY_RE.search(key)
+                else _redact_metrics(item)
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact_metrics(item) for item in value]
+    if isinstance(value, str):
+        return _redact_url_credentials(value)
+    return value
+
 
 _TEMPLATE = """<!doctype html>
 <html>
@@ -231,6 +279,9 @@ _TEMPLATE = """<!doctype html>
   <ul>{% for note in metrics.notes %}<li>{{ note }}</li>{% endfor %}</ul>
 
   <h2>Config snapshot</h2>
+  <p class="muted">Credential-like values (passwords, tokens, keys) are masked in this
+  report; the verbatim config is preserved in <code>config_used.yaml</code> inside the
+  run folder.</p>
   <pre>{{ config_text }}</pre>
 
   <h2>Metrics JSON</h2>
@@ -250,11 +301,12 @@ def build_html_report(
 ) -> Path:
     env = Environment(loader=FileSystemLoader(str(run_dir)), autoescape=True)
     template = env.from_string(_TEMPLATE)
+    safe_metrics = _redact_metrics(metrics)
     html = template.render(
         run_dir=str(run_dir),
-        config_text=config_text,
-        metrics=metrics,
-        metrics_json=json.dumps(metrics, indent=2),
+        config_text=_redact_config_text(config_text),
+        metrics=safe_metrics,
+        metrics_json=json.dumps(safe_metrics, indent=2),
         plots={
             "displacement_png": plot_paths["displacement"],
             "psd_png": plot_paths["psd"],

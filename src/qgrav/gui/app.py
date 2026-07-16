@@ -154,6 +154,7 @@ class QGravApp(
         self._compare_listbox: tk.Listbox | None = None
         self._compare_run_dirs: list[Path] = []
         self._run_in_progress = False
+        self._preview_in_progress = False
         self._last_temp_config_path: Path | None = None
         self._temp_config_paths: list[Path] = []
         self._project_root: Path = find_project_root(Path(__file__))
@@ -409,6 +410,10 @@ class QGravApp(
                 self._append_log(self.validation_results, str(payload))
                 self.validation_status_var.set("Done.")
                 self._set_validation_busy(False)
+                continue
+            if kind == "preview":
+                # Data Browser station preview (separate from pipeline runs).
+                self._handle_station_preview_result(payload)
                 continue
             drained = True
             if kind == "success":

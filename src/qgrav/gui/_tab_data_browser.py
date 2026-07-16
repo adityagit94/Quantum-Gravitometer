@@ -7,6 +7,7 @@ Moved verbatim out of ``app.py`` (v1.4 modularisation).
 from __future__ import annotations
 
 import logging
+import threading
 import tkinter as tk
 from tkinter import END, LEFT, VERTICAL, X, filedialog, messagebox, ttk
 from typing import Any
@@ -20,6 +21,31 @@ from qgrav.datasets import list_stations_in_source
 from qgrav.metrics import allan_deviation_overlapping, compute_psd
 
 logger = logging.getLogger(__name__)
+
+
+def _compute_station_preview(source: str, station: str) -> dict[str, Any]:
+    """Load a station and compute its preview statistics.
+
+    Tk-free on purpose: this runs on a worker thread (large stations take
+    seconds to load and analyze), so it must never touch widgets.
+    """
+    data = load_real_gravity(
+        source_path=source, station_code=station, segment_strategy="longest_contiguous"
+    )
+    t = np.asarray(data["t"], dtype=np.float64)
+    x = np.asarray(data["gravity_residual"], dtype=np.float64)
+    fs = float(data["sample_rate_hz"])
+    span = t[-1] - t[0] if len(t) > 1 else 1.0
+    taus = np.logspace(np.log10(1.0 / fs), np.log10(max(2.0 / fs, 0.25 * span)), 20)
+    adev = allan_deviation_overlapping(x, fs, taus, backend="auto", data_type="freq")
+    psd = compute_psd(
+        x,
+        fs,
+        method="welch",
+        nperseg=min(max(8, len(x) // 4), len(x)),
+        noverlap=max(1, min(len(x) // 8, len(x) // 4 - 1)),
+    )
+    return {"data": data, "adev": adev, "psd": psd}
 
 
 class DataBrowserTabMixin:
@@ -36,6 +62,8 @@ class DataBrowserTabMixin:
     # Declared so the type matches QGravApp.__init__ (None until a station
     # preview loads).
     _browser_data: dict[str, Any] | None
+    _preview_in_progress: bool
+    _preview_button: ttk.Button
 
     def _build_data_browser_tab(self, parent: ttk.Frame) -> None:
         parent.rowconfigure(0, weight=1)
@@ -117,9 +145,10 @@ class DataBrowserTabMixin:
         self.station_info.configure(yscrollcommand=station_info_scroll.set)
         controls = ttk.Frame(info_box)
         controls.grid(row=1, column=0, sticky="ew", pady=(8, 0))
-        ttk.Button(controls, text="Preview selected", command=self.preview_selected_station).pack(
-            side=LEFT, padx=4
+        self._preview_button = ttk.Button(
+            controls, text="Preview selected", command=self.preview_selected_station
         )
+        self._preview_button.pack(side=LEFT, padx=4)
         ttk.Button(
             controls, text="Create config", command=self.create_real_gravity_config_from_selection
         ).pack(side=LEFT, padx=4)
@@ -199,26 +228,17 @@ class DataBrowserTabMixin:
             f"Station: {code}\nLongitude: {item['values'][0]}\nLatitude: {item['values'][1]}\n",
         )
 
-    def _build_station_preview_figure(self, data: dict[str, Any]) -> Figure:
+    def _build_station_preview_figure(self, preview: dict[str, Any]) -> Figure:
+        data = preview["data"]
+        adev = preview["adev"]
+        psd = preview["psd"]
         fig = Figure(figsize=(9.6, 6.4), dpi=110, constrained_layout=True)
         axes = fig.subplots(2, 2)
         for ax in axes.flat:
             ax.tick_params(labelsize=8)
         t_full = np.asarray(data["t_full"], dtype=np.float64)
         x_full = np.asarray(data["gravity_residual_full"], dtype=np.float64)
-        t = np.asarray(data["t"], dtype=np.float64)
         x = np.asarray(data["gravity_residual"], dtype=np.float64)
-        fs = float(data["sample_rate_hz"])
-        span = t[-1] - t[0] if len(t) > 1 else 1.0
-        taus = np.logspace(np.log10(1.0 / fs), np.log10(max(2.0 / fs, 0.25 * span)), 20)
-        adev = allan_deviation_overlapping(x, fs, taus, backend="auto", data_type="freq")
-        psd = compute_psd(
-            x,
-            fs,
-            method="welch",
-            nperseg=min(max(8, len(x) // 4), len(x)),
-            noverlap=max(1, min(len(x) // 8, len(x) // 4 - 1)),
-        )
 
         ax = axes[0, 0]
         ax.plot(t_full / 86400.0, x_full, linewidth=0.8)
@@ -246,15 +266,41 @@ class DataBrowserTabMixin:
         if not source or not station:
             messagebox.showerror("qgrav", "Select a dataset source and a station first.")
             return
-        try:
-            data = load_real_gravity(
-                source_path=source, station_code=station, segment_strategy="longest_contiguous"
-            )
-        except Exception as exc:
-            messagebox.showerror("qgrav", str(exc))
+        if self._preview_in_progress:
+            messagebox.showinfo("qgrav", "A station preview is already loading.")
             return
+        # Load + analyze on a worker thread (large stations take seconds and
+        # would freeze the UI); results come back through the shared queue,
+        # same pattern as pipeline runs.
+        self._preview_in_progress = True
+        self._preview_button.configure(state="disabled")
+        self.station_info.delete("1.0", END)
+        self.station_info.insert("1.0", f"Loading station {station} ...\n")
+        threading.Thread(
+            target=self._station_preview_worker, args=(source, station), daemon=True
+        ).start()
+
+    def _station_preview_worker(self, source: str, station: str) -> None:
+        try:
+            preview = _compute_station_preview(source, station)
+            self._queue.put(("preview", {"ok": True, "preview": preview}))
+        except Exception as exc:
+            logger.exception("Station preview failed")
+            self._queue.put(("preview", {"ok": False, "error": str(exc)}))
+
+    def _handle_station_preview_result(self, payload: dict[str, Any]) -> None:
+        """Tk-thread continuation of a station preview (called from _poll_queue)."""
+        self._preview_in_progress = False
+        self._preview_button.configure(state="normal")
+        if not payload.get("ok"):
+            self.station_info.delete("1.0", END)
+            self.station_info.insert("1.0", "Station preview failed.\n")
+            messagebox.showerror("qgrav", str(payload.get("error")))
+            return
+        preview = payload["preview"]
+        data = preview["data"]
         self._browser_data = data
-        fig = self._build_station_preview_figure(data)
+        fig = self._build_station_preview_figure(preview)
         self._render_figure(
             fig,
             canvas_attr="_browser_canvas",
