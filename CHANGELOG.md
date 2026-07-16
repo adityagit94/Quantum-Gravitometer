@@ -2,6 +2,70 @@
 
 ## Unreleased
 
+## v1.6.0 (2026-07-16) - Emergent gradient physics & time-domain vibration validation
+
+Emergent gravity-gradient physics, time-domain vibration validation, and a
+round of correctness/robustness hardening. **490 tests (fast + slow), 0
+regressions; coverage 82 %.**
+
+### Physics
+
+- **Emergent gravity-gradient phase.** `GravityFreePropagator` now integrates
+  a linear gradient trajectory to first order in γ (previously the gradient
+  was piecewise-constant per drift segment, which recovers only 1/4 of the
+  true gradient phase). The emergent Mach-Zehnder phase now reproduces the
+  Peters/Chung/Chu closed form `k_eff·γ·T²·[(z₀−z_ref) + v₀T − (7/12)gT²]`
+  (Metrologia 38, 25 (2001)) to ~0.1 %, cross-validated by a fringe-scan
+  calibration pair in `tests/test_gravity_gradient_emergent.py`, and the
+  integrator is step-size independent to O(γ²). New closed form
+  `gravity_gradient_phase_rad` in `qgrav.physics.phase_models` with a
+  `ground_truth` wrapper.
+- **Time-domain mirror motion** (`vibration_model: "time_domain"`, the switch
+  reserved by PROJECT_SPEC). The vibration sweep can drive the pulse sequence
+  with a synthesized Peterson NLNM/NHNM displacement record (one continuous
+  series spans all shots, same recipe as the multi-drop campaign). The
+  realized per-shot phase noise is truth-checked on every run against the
+  frequency-domain Cheinet budget `∫S_a·|H_a|²df` computed on the same
+  effective PSD (observed ratio 0.92–1.13 across seeds) — an end-to-end
+  numerical validation of the vibration transfer function.
+
+### Fixed
+
+- `algorithms.improved`: even `phase_smooth_window` values no longer produce
+  an off-by-one output length (n+1 samples); odd windows are bit-identical to
+  before.
+- Fully-simulated gravity sweeps: the `total_phase_rad` result key (which
+  holds only the constant phase bias in that mode) is now flagged by a new
+  `total_phase_is_bias_only` key, and the report plot legend says
+  "phase bias (rad, constant)" instead of the misleading "total phase (rad)".
+- HTML reports now mask credential-like values (passwords, tokens, keys, URL
+  userinfo and secret query parameters) in the embedded config snapshot and
+  metrics JSON; the verbatim config still lives in `config_used.yaml` inside
+  the run folder.
+- GUI Data Browser: station previews now load and analyze on a worker thread
+  (same queue pattern as pipeline runs) instead of freezing the Tk thread on
+  large stations; the Preview button is disabled while loading.
+
+### Changed
+
+- `algorithms.improved._ewma` is vectorized via `scipy.signal.lfilter`
+  (bit-identical output, ~100× faster on multi-million-sample captures).
+- Vendor integrity guard hardened: a newline-normalized sha256 manifest now
+  pins every vendored file (AISim **and** allantools, previously uncovered),
+  with the one sanctioned `atoms.py` assert→ValueError patch documented and
+  pinned as-is.
+
+### Docs
+
+- README rewritten; ROADMAP and PROJECT_SPEC updated to record capabilities
+  that had already shipped (sub-pulse integration, emergent projection noise,
+  drop-to-drop seismic correlation, servo anti-windup) and the new gradient /
+  time-domain physics; stale sections fixed in AISIM_GRAVIMETER_STUDIES,
+  PHYSICS_REVIEW_PACKET (§5 code excerpt and test table), SCIENTIFIC_HARDENING,
+  V1_PHYSICS_UPGRADE, COMPLETE_GUIDE, GUIDE, ARCHITECTURE, and the docs
+  landing page.
+- Bumped `version`/`__version__`/`CITATION.cff` to 1.6.0.
+
 ## v1.5.2 (2026-06-17) - PyPI-ready docs
 
 Documentation/packaging patch; no code or physics changes. Carries the polished
