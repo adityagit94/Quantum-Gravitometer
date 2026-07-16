@@ -461,7 +461,7 @@ Caveats to acknowledge:
 
 - The simulation is **semiclassical**: atoms have classical trajectories and quantum internal states. The internal-state evolution is exact under the rotating-wave approximation; the external-degree-of-freedom is purely classical.
 - The simulated mode and the hybrid mode differ by ~atol 0.15 on populations because of finite-τ Rabi rotations. The simulated mode is more physically accurate; the hybrid mode is exactly the analytical formula.
-- Drop-to-drop correlations (e.g. long-term seismic drift, laser-frequency drift, magnetic-field drift) are not modelled. Each drop in `run_aisim_multi_drop_cycle` is statistically independent.
+- Drop-to-drop correlations (e.g. long-term seismic drift, laser-frequency drift, magnetic-field drift) are not modelled. Each drop in `run_aisim_multi_drop_cycle` is statistically independent. *(Since lifted: v1.1's `correlated_vibration: true` samples every drop from one continuous Peterson seismic series, correlating drops through the common ground motion; laser-frequency and magnetic-field drifts remain unmodelled.)*
 - The servo is I-only without anti-windup or non-linear corrections.
 - AC Stark and wavefront contributions are correctly *coupled* into the Raman propagator but the visibility-reduction effect on a real ensemble depends sensitively on cloud size, beam radius, T, and τ. Calibrate to your hardware before quoting numbers.
 

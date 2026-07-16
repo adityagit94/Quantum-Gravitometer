@@ -92,10 +92,25 @@ Completed in v1.0:
 - Promoted `gravity_sweep` and `vibration_sensitivity_sweep` from HYBRID to optionally FULLY_SIMULATED (`gravity_propagation: true`).
 - Added `multi_drop_cycle` for end-to-end gravimeter-campaign simulation.
 
+Completed since:
+- Drop-to-drop seismic-drift correlations in `multi_drop_cycle` (v1.1,
+  `correlated_vibration: true` — one continuous Peterson series spans the
+  campaign and each drop samples its three pulse times from it).
+- Anti-windup on the fringe-lock servo (v1.1, `servo_pid_step` with an
+  integrator clamp; the plain `servo_integrator_step` remains as the simple
+  reference).
+- Time-domain mirror motion in `vibration_sensitivity_sweep`
+  (`vibration_model: "time_domain"`): per-shot phases sampled from a
+  `generate_vibration_timeseries` displacement record, with the realized
+  phase noise truth-checked against the integrated Cheinet budget on the
+  same effective PSD.
+- Emergent gravity-gradient physics: `GravityFreePropagator` integrates the
+  linear gradient to first order in γ and the emergent Mach-Zehnder phase
+  matches the Peters/Chung/Chu (7/12)·γ·g·T⁴ closed form to ~0.1 %
+  (`tests/test_gravity_gradient_emergent.py`).
+
 Remaining future work:
 - Real photodiode data ingestion (separate from the synthetic virtual interferometer).
-- Replace the analytical sinusoidal mirror motion in `vibration_sensitivity_sweep` with a time-domain mirror displacement fed from `generate_vibration_timeseries` (a `vibration_model="time_domain"` switch is left for a follow-up release).
-- Drop-to-drop seismic-drift correlations in `multi_drop_cycle` (currently each drop is statistically independent).
-- Anti-windup and non-linear extensions to the `servo_integrator_step` integrator.
+- Non-linear servo extensions beyond the clamped PID.
 
 Keep metrics + reporting identical to preserve comparability.

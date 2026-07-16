@@ -212,7 +212,10 @@ What is different:
 
 ### 6.2 Vibration sensitivity sweep, fully simulated (`gravity_propagation: true`)
 
-Same logic as above: the AISim pulse sequence is run with `GravityFreePropagator` and a chirped `Wavevectors`. The sinusoidal mirror motion is still added analytically as a phase scan on the final beamsplitter (a future upgrade could replace this with a real mirror-displacement model fed from `generate_vibration_timeseries`).
+Same logic as above: the AISim pulse sequence is run with `GravityFreePropagator` and a chirped `Wavevectors`. The mirror motion is added as a phase scan on the final beamsplitter, in one of two modes selected by `vibration_model`:
+
+- `"sinusoidal"` (default) — the classic amplitude-axis sweep: a sinusoidal mirror displacement of increasing amplitude, phase per point from the analytic second difference.
+- `"time_domain"` — a synthesized Peterson NLNM/NHNM displacement record drives the sequence: each of `n_shots` shots samples `z(t_i), z(t_i+T), z(t_i+2T)` from one continuous series (the same recipe the multi-drop campaign uses), and the realized per-shot phase noise is truth-checked against the frequency-domain Cheinet budget `∫S_a·|H_a|²df` computed on the same effective PSD — an end-to-end numerical validation of the transfer function (observed ratio 0.92–1.13 across seeds).
 
 ### 6.3 Multi-drop measurement cycle (`multi_drop_cycle`)
 
@@ -257,17 +260,19 @@ Why it matters:
 - Allan deviation is the standard sensitivity figure of merit for atom gravimeters; here it can now be computed end-to-end from a microscopic ensemble simulation, with realistic detection noise and (optionally) a closed-loop servo.
 - The servo demonstrates that an integrator loop can lock the operating point and that the resulting g-estimate trajectory is unbiased (truth check: `|mean(g) − g_true| < 1e-5`).
 
-What it does **not** yet do:
+Later releases lifted the original limitations:
 
-- Drop-to-drop correlations (e.g. seismic drift) are not modelled. Each drop is independent.
-- The servo is a simple integrator without anti-windup or non-linear corrections.
-- Visibility is assumed unity for the P₃ → g inversion; a calibration scan could refine this.
+- Drop-to-drop seismic correlation shipped in v1.1 (`correlated_vibration: true`): one continuous Peterson NLNM/NHNM series spans the campaign and every drop samples its three pulse times from it.
+- A PID servo with anti-windup (integrator clamp) is available via `servo_type: pid` alongside the simple integrator.
+- `fit_visibility: true` fits the fringe contrast from a calibration scan and uses it in the P₃ → g inversion instead of assuming unity.
+
+Still open: non-linear servo extensions beyond the clamped PID.
 
 ### 6.4 Time-domain vibration noise (`generate_vibration_timeseries`)
 
 Not a top-level study model - a building block. Given a duration, sample rate, and Peterson model name (NLNM or NHNM), this generator produces a realistic acceleration time-series whose PSD matches the chosen model, with an optional second-order high-pass isolation filter `H²(f) = f⁴/(f² + f_c²)²`. Velocity and displacement time-series are derived by frequency-domain integration.
 
-The intended use is to feed long acceleration/displacement traces into a future "real-mirror" vibration MZ that consumes `z(0), z(T), z(2T)` from the time-series instead of an analytical sinusoid. A `vibration_model="time_domain"` switch on the vibration sweep is left for a follow-up release.
+This generator now feeds two consumers: the multi-drop campaign's correlated seismic vibration (`correlated_vibration: true`, v1.1) and the vibration sweep's `vibration_model: "time_domain"` mode (see §6.2), where the MZ sequence consumes `z(0), z(T), z(2T)` from the synthesized series instead of an analytical sinusoid and the realized phase noise is truth-checked against the integrated Cheinet budget.
 
 ### 6.5 AC Stark / light shift (`single_photon_detuning_hz`)
 

@@ -186,7 +186,9 @@ simulation:
   # ... existing AISim keys ...
 ```
 
-Internally this swaps `FreePropagator` for a `GravityFreePropagator`, chirps the Raman laser to track gravity, and uses the patched integrated-phase formula. The gravity phase comes out of the simulation rather than from a closed-form formula. See `docs/V1_PHYSICS_UPGRADE.md` for the full derivation.
+Internally this swaps `FreePropagator` for a `GravityFreePropagator`, chirps the Raman laser to track gravity, and uses the integrated-phase propagators. The gravity phase comes out of the simulation rather than from a closed-form formula. See `docs/V1_PHYSICS_UPGRADE.md` for the full derivation.
+
+With `gravity_gradient_per_m` set, the gradient is emergent physics too: the propagator integrates the gradient trajectory to first order in γ, and the resulting Mach-Zehnder phase shift matches the textbook Peters/Chung/Chu closed form `k_eff·γ·T²·[(z₀−z_ref) + v₀T − (7/12)gT²]` to ~0.1 % (regression-locked in `tests/test_gravity_gradient_emergent.py`).
 
 The HTML report's study-scope panel will turn from amber (HYBRID) to green (FULLY_SIMULATED) and the truth checks will switch from "exact match to analytic phase" to "visibility > 0.3 and FULLY_SIMULATED scope".
 
@@ -226,6 +228,12 @@ ts = generate_vibration_timeseries(
 )
 # ts["accel_m_s2"], ts["velocity_m_s"], ts["displacement_m"]
 ```
+
+The same generator drives two study-level features: the multi-drop campaign's
+correlated seismic vibration (`correlated_vibration: true`) and the vibration
+sweep's time-domain mode (`vibration_model: "time_domain"`), where the realized
+per-shot phase noise is truth-checked against the integrated Cheinet budget on
+every run — proving the transfer function end-to-end.
 
 ### 3.4 Advanced systematics
 

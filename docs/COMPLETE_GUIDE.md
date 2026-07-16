@@ -899,7 +899,7 @@ Phase_vibration = k_eff × [z(0) - 2×z(T) + z(2T)]
 
 This is a second-difference operation - the same operation a digital accelerometer performs. It makes the interferometer sensitive to mirror acceleration, not position or velocity.
 
-**Key parameters:**
+**Key parameters (sinusoidal mode, the default):**
 
 | Parameter | Meaning | Typical Value |
 |-----------|---------|---------------|
@@ -907,6 +907,25 @@ This is a second-difference operation - the same operation a digital acceleromet
 | `amplitude_max_m` | Maximum mirror displacement | `5.0e-8` (50 nm) |
 | `n_amplitude_points` | Points in the amplitude sweep | 41 |
 | `gravity_ref_m_s2` | Background gravity value | `9.81` |
+
+**Time-domain mode (`vibration_model: "time_domain"`):** instead of a
+sinusoidal amplitude axis, the mirror follows a synthesized Peterson NLNM/NHNM
+seismic displacement record. One continuous series spans all shots; each shot
+samples its three pulse times `z(t_i), z(t_i+T), z(t_i+2T)` from it. The run
+reports the realized per-shot phase noise next to the frequency-domain Cheinet
+budget `∫S_a·|H_a|²df` computed on the same effective PSD, and a truth check
+(`cheinet_budget_match`) asserts the two agree — an end-to-end numerical
+validation of the vibration transfer function. The sinusoidal sweep parameters
+are not needed in this mode.
+
+| Parameter | Meaning | Typical Value |
+|-----------|---------|---------------|
+| `vibration_model` | `"sinusoidal"` (default) or `"time_domain"` | `"time_domain"` |
+| `seismic_model` | Peterson model: `"nlnm"` or `"nhnm"` | `"nhnm"` |
+| `n_shots` | Number of shots sampled from the series (≥ 30) | `200` |
+| `cycle_time_s` | Time between shot starts | `1.0`–`1.5` |
+| `vibration_isolation_cutoff_hz` | 2nd-order high-pass isolation cutoff (0 = off) | `1.0` |
+| `vibration_seed` | Seed for the synthesized series (defaults from `seed`) | `7` |
 
 ### Study Model 5: Multi-Drop Cycle (`multi_drop_cycle`)
 

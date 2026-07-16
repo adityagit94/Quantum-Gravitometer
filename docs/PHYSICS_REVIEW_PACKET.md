@@ -248,44 +248,51 @@ The simulated and hybrid fringe rates match to 0.2%. A constant ~2.5 rad offset 
 
 ---
 
-## 5. Patch A - `GravityFreePropagator` (new class)
+## 5. Extension A - `GravityFreePropagator` (subclass)
 
-### 5.1 Code (verbatim)
+### 5.1 Code (class docstring elided; otherwise verbatim)
 
-`src/qgrav/vendor/aisim/prop.py` (insertion after the upstream `FreePropagator`):
+`src/qgrav/sim_ai/_aisim_overrides.py` (a subclass of the upstream
+`Propagator`; since Phase 12 the vendored AISim tree carries no physics
+patches — all qgrav extensions live as subclasses in this module):
 
 ```python
 class GravityFreePropagator(Propagator):
-    """[LOCAL PATCH] Free propagation under uniform gravity with optional gradient.
-
-    Atoms follow exact ballistic trajectories:
-       z(t+dt) = z + v_z·dt − ½g·dt²,
-       v_z(t+dt) = v_z − g·dt.
-    The quantum state is unchanged (identity matrix).
-    """
-    def __init__(self, time_delta, g_m_s2=9.81,
-                 gravity_gradient_per_m=0.0, z_ref_m=0.0):
+    def __init__(self, time_delta, g_m_s2=9.81, gravity_gradient_per_m=0.0, z_ref_m=0.0):
         super().__init__(time_delta)
         self.g_m_s2 = float(g_m_s2)
         self.gravity_gradient_per_m = float(gravity_gradient_per_m)
         self.z_ref_m = float(z_ref_m)
 
     def _local_g(self, z):
-        """g(z) = g₀ + γ·(z − z_ref)"""
+        """Local g including linear gradient: g(z) = g0 + gamma*(z - z_ref)."""
         return self.g_m_s2 + self.gravity_gradient_per_m * (z - self.z_ref_m)
 
     def _prop_matrix(self, atoms):
+        """Identity matrix — no light-matter interaction during free fall."""
         n_levels = atoms.state_kets[0].shape[0]
         return np.repeat([np.eye(n_levels)], repeats=len(atoms), axis=0)
 
     def propagate(self, atoms):
         atoms = copy.deepcopy(atoms)
         dt = self.time_delta
+        gamma = self.gravity_gradient_per_m
         g_local = self._local_g(atoms.position[:, 2])
-        atoms.position[:, 2] += atoms.velocity[:, 2] * dt - 0.5 * g_local * dt**2
+        vz = atoms.velocity[:, 2].copy()
+        # Ballistic kinematics: exact for uniform g; first order in gamma for
+        # a linear gradient (the dt^3/dt^4 terms track the atom sampling a
+        # changing local g during the drift — see class docstring).
+        atoms.position[:, 2] += (
+            vz * dt
+            - 0.5 * g_local * dt**2
+            - gamma * vz * dt**3 / 6.0
+            + gamma * g_local * dt**4 / 24.0
+        )
         atoms.position[:, 0] += atoms.velocity[:, 0] * dt
         atoms.position[:, 1] += atoms.velocity[:, 1] * dt
-        atoms.velocity[:, 2] -= g_local * dt
+        atoms.velocity[:, 2] -= (
+            g_local * dt + 0.5 * gamma * vz * dt**2 - gamma * g_local * dt**3 / 6.0
+        )
         atoms.time += dt
         return atoms
 ```
@@ -293,25 +300,34 @@ class GravityFreePropagator(Propagator):
 ### 5.2 Physical content
 
 - Sign convention: `g_m_s2 > 0` is downward. An atom released at rest accelerates to `v_z = −g · t` (becoming more negative).
-- Linear gradient: `g(z) = g₀ + γ·(z − z_ref)`. For γ > 0, gravity *increases* with altitude relative to `z_ref` - which is non-physical for the Earth (real free-air gradient is −3.086 × 10⁻⁶ s⁻². Users supply the sign they want.
+- Linear gradient: `g(z) = g₀ + γ·(z − z_ref)`. For γ > 0, gravity *increases* with altitude relative to `z_ref` - which is non-physical for the Earth (real free-air gradient is −3.086 × 10⁻⁶ s⁻²). Users supply the sign they want.
+- The gradient trajectory is integrated to **first order in γ** (relative error O((γ·dt²)²), ~10⁻¹³ for the free-air gradient over a 0.3 s drift). The O(γ) dt³/dt⁴ terms matter: a piecewise-constant-g update recovers only 1/4 of the textbook gradient phase, whereas this integrator makes the emergent Mach-Zehnder phase reproduce the Peters/Chung/Chu closed form `k_eff·γ·T²·[(z₀−z_ref) + v₀T − (7/12)gT²]` to ~0.1 % (`tests/test_gravity_gradient_emergent.py`), and it is step-size independent to O(γ²).
 - Quantum matrix is the identity, so internal states are unchanged. This is the *exact* result for free fall in absence of laser interaction (a uniform gravitational potential adds a global phase to each internal state but doesn't mix them).
 
 ### 5.3 Tests
 
-`tests/test_gravity_propagation.py` (10 cases):
+`tests/test_gravity_propagation.py` (11 cases):
 
 | Test | What it checks |
 |------|---------------|
 | `test_gravity_position_update` | `vz=0, dt=0.1s, g=9.81 → z = −0.04905m, vz = −0.981m/s` |
 | `test_gravity_with_initial_velocity` | `vz=1.0, dt=0.1 → z = 1.0·0.1 − ½·9.81·0.01` |
 | `test_gravity_preserves_xy` | x,y drift untouched by g |
-| `test_gravity_with_gradient` | At z=z_ref, gradient term is zero |
-| `test_gradient_changes_g_away_from_ref` | At z=100m above z_ref, g_eff = g₀ + γ·100 |
+| `test_gradient_correction_at_reference_height` | At z=z_ref the O(γ) terms are γ·g₀·dt⁴/24 (position) and γ·g₀·dt³/6 (velocity) |
+| `test_gradient_changes_g_away_from_ref` | At z=100m above z_ref, local g = g₀ + γ·100 (plus the O(γ) trajectory term) |
 | `test_gravity_two_steps_equals_one` | Two dt/2 steps = one dt step (uniform g: exact) |
+| `test_gradient_two_half_steps_equal_one_full_step` | Step-size independence to O(γ²) with the gradient on |
 | `test_gravity_state_unchanged` | `state_kets` identical before/after |
 | `test_gravity_superposition_state_unchanged` | Superposition preserved |
 | `test_time_updated` | `atoms.time += dt` |
 | `test_original_not_mutated` | `propagate()` returns a copy |
+
+The emergent-phase cross-validation lives in
+`tests/test_gravity_gradient_emergent.py`: two fringe-scan calibrations at
+`g = g_chirp` (gradient on vs off, so the pulse-timing artefact cancels in the
+difference) measure the emergent gradient phase, which matches the closed form
+to 0.12 % and sits within the expected factor 7/6 of the report-level
+systematics estimate `γ·(h + ½gT²)`.
 
 All 10 pass.
 

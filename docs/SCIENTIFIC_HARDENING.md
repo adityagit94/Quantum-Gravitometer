@@ -82,7 +82,7 @@ That honesty improves the quality of the project instead of weakening it.
 `metrics.allan.allan_minimum()` locates the optimal averaging time (tau at minimum ADEV). Both pipeline paths report this in `metrics.json`.
 
 ### Systematic effects
-`physics.systematics` provides order-of-magnitude estimates of the gravity gradient shift and the Coriolis effect. These are explicitly documented as NOT included in the AISim simulation and appear in the HTML report as a separate table.
+`physics.systematics` provides order-of-magnitude estimates of the gravity gradient shift and the Coriolis effect, which appear in the HTML report as a separate table and are never fed back into the simulation. The gravity gradient itself, however, CAN be simulated as emergent physics: setting `gravity_gradient_per_m` in a fully-simulated study makes `GravityFreePropagator` integrate the gradient trajectory (first order in γ), and the emergent Mach-Zehnder phase reproduces the Peters/Chung/Chu closed form `k_eff·γ·T²·[(z₀−z_ref) + v₀T − (7/12)gT²]` to ~0.1 % (`tests/test_gravity_gradient_emergent.py`). The Coriolis effect remains estimate-only.
 
 ### Published references
 `validation.published_references` contains a registry of benchmark experimental values (Freier 2016, Menoret 2018, SG noise floor, MZ visibility) with a `compare_to_reference()` helper for tolerance-based comparison.

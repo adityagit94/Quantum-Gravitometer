@@ -26,7 +26,7 @@ Single source of truth for physical constants, interferometer models, and noise 
   - `run_aisim_rabi_scan`
   - `run_aisim_mach_zehnder_phase_scan`
   - `run_aisim_gravity_sweep` (hybrid OR fully simulated via `gravity_propagation` **v1.0**)
-  - `run_aisim_vibration_sensitivity_sweep` (hybrid OR fully simulated **v1.0**)
+  - `run_aisim_vibration_sensitivity_sweep` (hybrid OR fully simulated **v1.0**; sinusoidal or time-domain Peterson mirror motion via `vibration_model`)
   - `run_aisim_multi_drop_cycle` **v1.0** - N independent drops with optional detection noise, servo, Allan deviation
   - `_run_mach_zehnder_sequence_with_gravity` **v1.0** - emergent-gravity MZ
   - `_calibrate_gravity_phase_offset` **v1.0** - per-sweep pulse-timing offset calibration

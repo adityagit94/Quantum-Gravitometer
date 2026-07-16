@@ -40,6 +40,10 @@ everything else.
 - **Emergent floors:** the finite-τ phase converges to the Bertoldi 2019 closed
   form (≤2×10⁻³ relative), and the multi-drop quantum-projection-noise floor
   matches σ_g = 1/(√N_det·k_eff·T²) to ~0.2 %.
+- **Emergent gravity gradient:** the simulated Mach-Zehnder gradient phase
+  reproduces the Peters/Chung/Chu (7/12)·γ·g·T⁴ closed form to ~0.1 %.
+- **Transfer function proven end-to-end:** the time-domain vibration mode's
+  realized phase noise matches the integrated Cheinet budget on the same PSD.
 - **Real data:** IGETS superconducting-gravimeter ingest for the analysis chain.
 
 See the repository `README.md` and `CHANGELOG.md` for installation and the full
