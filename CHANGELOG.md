@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## v1.6.1 (2026-07-16) - PyPI description & citation metadata
+
+Documentation/packaging patch; no code or physics changes.
+
+- **README pitch rendering fix.** The opening paragraph's continuation line
+  began with `- `, which markdown renderers (PyPI project page, GitHub front
+  page) turned into a stray bullet. Rewrapped with a mid-line em dash. PyPI
+  release descriptions are immutable, so this ships as a patch release to
+  refresh the project page (same pattern as v1.5.1/v1.5.2).
+- **CITATION.cff** now carries the v1.6.0 Zenodo version DOI
+  (10.5281/zenodo.21389653); the concept DOI (10.5281/zenodo.20618573)
+  remains the primary citation and the README badge on purpose - it always
+  resolves to the latest archived version.
+- Bumped `version`/`__version__`/`CITATION.cff` to 1.6.1.
+
 ## v1.6.0 (2026-07-16) - Emergent gradient physics & time-domain vibration validation
 
 Emergent gravity-gradient physics, time-domain vibration validation, and a

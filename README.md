@@ -11,8 +11,8 @@
 **qgrav** is a complete quantum-gravimeter laboratory in software: it simulates
 a Mach-Zehnder atom-interferometer gravimeter from first principles, runs
 realistic multi-drop measurement campaigns, ingests real precision-gravity
-data, and writes every result into a reproducible, self-documenting run folder
-- all driven from a single YAML config, on a laptop, with no hardware.
+data, and writes every result into a reproducible, self-documenting run
+folder — all driven from a single YAML config, on a laptop, with no hardware.
 
 **Author:** Aditya Prakash | **License:** GPL-3.0 | **Python:** ≥ 3.11 |
 **Docs:** <https://adityagit94.github.io/Quantum-Gravitometer/>
