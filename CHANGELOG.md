@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+Run-quality fixes from the fellowship completion-report audit. **495 tests
+(fast suite), 0 regressions.**
+
+### Added
+
+- **`servo_settle_drops`** (multi-drop cycle): declares the servo-acquisition
+  segment, which is excluded from the summary statistics and the Allan
+  deviation while the full per-drop series is still returned. Wired through
+  the YAML dispatcher; the shipped demo uses 30 drops. Previously the demo's
+  whole-series Allan deviation was dominated by the acquisition transient.
+- **Multi-drop run plots**: the study now declares `plot_specs`, so every run
+  renders per-drop gravity estimates (µGal) and the Allan deviation of `g`
+  with a `tau^-1/2` white-noise guide. Plot-spec renderers accept optional
+  `xscale`/`yscale: log`.
+- **`PREDICTION_BASIS`** on each validation setup module: `"independent"`
+  (Freier 2016, Hu 2013 - bottom-up per-effect noise budgets) versus
+  `"anchored"` (Ménoret 2018, Xu 2022, Wu 2019 - budget derived from the
+  published value, so the regression checks pipeline consistency, not noise
+  physics). The GUI Validation tab shows a `basis` column and explains the
+  distinction.
+- **`phase_bias_wrapped_rad`** (vibration study): operating point wrapped to
+  (-pi, pi] alongside the raw multi-million-radian bias.
+- **`detection_noise_equivalent_atoms`**: clarifying alias for
+  `n_detected_effective` (which is `1/sigma_P^2`, not a detected-atom count);
+  the old key remains for compatibility.
+
+### Fixed
+
+- **Demo estimator benchmark**: `example_aisim_multi_drop.yaml` was missing
+  the tuned `algorithms` block, so every demo report showed a spurious
+  `-31.5%` RMSE "improvement"; it now reports the benchmark's +42%.
+- **Dead `servo_ki` in the demo config**: the integrator servo reads
+  `servo_gain`; the config now sets it, and the dispatcher warns when servo
+  keys that do not apply to the selected servo type are present.
+- **Strict-JSON metrics**: non-finite floats are written as `null` so
+  `metrics.json` no longer emits bare `NaN` tokens that non-Python JSON
+  parsers reject.
+- **Real-gravity plot units**: y-axis labels now carry the dataset units
+  parsed from the GGP/CSV header (pipeline and GUI plot paths).
+
 ## v1.6.1 (2026-07-16) - PyPI description & citation metadata
 
 Documentation/packaging patch; no code or physics changes.
