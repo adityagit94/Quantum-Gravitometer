@@ -35,6 +35,10 @@ WU_2019_TARGETS: dict[str, float] = {
 }
 
 
+# Anchored to the published sensitivity (see freier_2016_setup.PREDICTION_BASIS).
+PREDICTION_BASIS = "anchored"
+
+
 def total_per_shot_g_noise_m_s2() -> float:
     return WU_2019_TARGETS["short_term_noise_m_s2_per_sqrt_hz"] / math.sqrt(
         WU_2019_PARAMS["cycle_time_s"]

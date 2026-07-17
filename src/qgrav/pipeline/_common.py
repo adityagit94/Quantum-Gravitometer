@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import time
 import uuid
@@ -77,7 +78,7 @@ def _jsonable(obj: Any) -> Any:
     if isinstance(obj, list | tuple):
         return [_jsonable(v) for v in obj]
     if isinstance(obj, np.ndarray):
-        return obj.tolist()
+        return [_jsonable(v) for v in obj.tolist()]
     # Check datetime64/timedelta64 BEFORE generic np.integer/np.floating,
     # because np.timedelta64 inherits from np.signedinteger in NumPy 2.x.
     if isinstance(obj, np.datetime64):
@@ -86,9 +87,14 @@ def _jsonable(obj: Any) -> Any:
         # Preserve sub-second precision as float seconds
         return float(obj / np.timedelta64(1, "s")) if not np.isnat(obj) else None
     if isinstance(obj, np.floating | np.integer | np.bool_):
-        return obj.item()
+        return _jsonable(obj.item())
     if isinstance(obj, np.str_ | np.bytes_):
         return str(obj)
+    # Strict JSON has no NaN/Infinity: Python's json module would emit them
+    # anyway and produce a file that non-Python consumers (JavaScript, jq)
+    # reject.  Store null instead so metrics.json stays universally parseable.
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
     return obj
 
 

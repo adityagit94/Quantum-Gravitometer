@@ -653,6 +653,10 @@ def run_aisim_vibration_sensitivity_sweep(
         "differential_signal": diff,
         "normalized_differential_signal": norm_diff,
         "phase_bias_rad": float(phase_bias_rad),
+        # The raw bias above includes the full (unwrapped) k_eff*g*T^2 term and
+        # can reach millions of radians; the wrapped value in (-pi, pi] is the
+        # operating point actually seen by the fringe.
+        "phase_bias_wrapped_rad": float(np.angle(np.exp(1j * float(phase_bias_rad)))),
         "equivalent_gravity_error_per_m": slope,
         "shot_noise_sensitivity_m_s2_per_sqrt_hz": _sens_vs,
         "shot_noise_sensitivity_ugal_per_sqrt_hz": _sens_vs * 1e8,

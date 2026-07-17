@@ -55,6 +55,13 @@ MENORET_2018_TARGETS: dict[str, float] = {
 }
 
 
+# The per-shot budget is backed out from the published campaign ASD, so the
+# "prediction" is anchored to the published value: the regression validates
+# pipeline consistency (units, inversion, cycle-time scaling), not the noise
+# physics (see freier_2016_setup.PREDICTION_BASIS for the definition).
+PREDICTION_BASIS = "anchored"
+
+
 def total_per_shot_g_noise_m_s2() -> float:
     """Per-shot σ_g backed out from the AS-OPERATED Larzac campaign ASD."""
     target = MENORET_2018_NOISE_BUDGET["campaign_g_noise_target_m_s2_per_sqrt_hz"]

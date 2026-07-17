@@ -147,12 +147,15 @@ def _make_real_gravity_plots(
     adev: dict[str, Any],
     have_simulation: bool,
 ) -> dict[str, Any]:
+    # Units come from the dataset header (parsed by the loader) when present.
+    units = str(metrics.get("series_units") or "dataset units")
+
     # Gravity series
     fig = Figure(figsize=(10, 4.6))
     ax = fig.add_subplot(111)
     ax.plot(t_full / 86400.0, x_full, linewidth=0.8)
     ax.set_xlabel("days from record start")
-    ax.set_ylabel("gravity residual")
+    ax.set_ylabel(f"gravity residual ({units})")
     ax.set_title("Gravity residual time series")
     raw_path = paths.plots_dir / "gravity_series.png"
     fig.tight_layout()
@@ -162,7 +165,7 @@ def _make_real_gravity_plots(
     fig = Figure(figsize=(10, 4.6))
     ax = fig.add_subplot(111)
     ax.hist(x, bins=50, alpha=0.85)
-    ax.set_xlabel("gravity residual")
+    ax.set_xlabel(f"gravity residual ({units})")
     ax.set_ylabel("count")
     ax.set_title("Gravity residual histogram (analysis segment)")
     hist_path = paths.plots_dir / "gravity_hist.png"
@@ -176,7 +179,7 @@ def _make_real_gravity_plots(
     if len(psd["f_hz"]) > 1:
         ax.loglog(psd["f_hz"][1:], psd["psd"][1:])
     ax.set_xlabel("frequency (Hz)")
-    ax.set_ylabel("PSD")
+    ax.set_ylabel(f"PSD (({units})$^2$/Hz)")
     ax.set_title("Gravity residual PSD")
     psd_path = paths.plots_dir / "gravity_psd.png"
     fig.tight_layout()
@@ -187,7 +190,7 @@ def _make_real_gravity_plots(
     ax = fig.add_subplot(111)
     ax.loglog(np.asarray(adev["taus_s"]), np.asarray(adev["adev"]))
     ax.set_xlabel("tau (s)")
-    ax.set_ylabel("Allan deviation")
+    ax.set_ylabel(f"Allan deviation ({units})")
     ax.set_title("Gravity residual Allan deviation")
     allan_path = paths.plots_dir / "gravity_allan.png"
     fig.tight_layout()

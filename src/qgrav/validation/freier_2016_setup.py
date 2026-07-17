@@ -77,6 +77,14 @@ FREIER_2016_TARGETS: dict[str, float] = {
 }
 
 
+# How the sensitivity prediction is obtained: "independent" = built bottom-up
+# from the paper's documented per-effect noise budget (the prediction is not
+# forced to match the published headline value); "anchored" = the budget is
+# derived from the published sensitivity itself, so the regression validates
+# pipeline consistency rather than the noise physics.
+PREDICTION_BASIS = "independent"
+
+
 def total_per_shot_g_noise_m_s2() -> float:
     """Quadrature sum of the documented per-shot g-noise contributions (m/s^2)."""
     b = FREIER_2016_NOISE_BUDGET

@@ -44,6 +44,10 @@ def _plot_series_from_spec(spec: dict[str, Any], data: Any, out_path: Path) -> P
             ax.plot(x * x_scale, y, linestyle="--", linewidth=1.3, label=label)
         else:
             ax.plot(x * x_scale, y, linewidth=1.3, label=label)
+    if str(spec.get("xscale", "linear")) == "log":
+        ax.set_xscale("log")
+    if str(spec.get("yscale", "linear")) == "log":
+        ax.set_yscale("log")
     ax.set_xlabel(str(spec.get("x_label", spec["x_key"])))
     ax.set_ylabel(str(spec.get("y_label", "value")))
     ax.set_title(str(spec.get("title", "Simulation plot")))

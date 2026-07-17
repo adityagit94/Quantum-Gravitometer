@@ -104,7 +104,10 @@ class ValidationTabMixin:
             repro_box,
             text="Each row builds a ready-to-run multi_drop_cycle config from that paper's documented "
             "parameters and noise budget. 'Predicted' is qgrav's analytic short-term ASD; 'Published' "
-            "is the paper's reported value. Select a row, then load it into the editor and press Run.",
+            "is the paper's reported value. 'basis' says how the prediction is obtained: 'independent' "
+            "= built bottom-up from the paper's per-effect noise budget; 'anchored' = derived from the "
+            "published value itself, so that row checks pipeline consistency rather than noise physics. "
+            "Select a row, then load it into the editor and press Run.",
             wraplength=720,
             foreground="#5b6880",
         ).grid(row=0, column=0, sticky="ew", padx=6, pady=(2, 6))
@@ -114,7 +117,7 @@ class ValidationTabMixin:
         repro_tree_frame.columnconfigure(0, weight=1)
         self.repro_tree = ttk.Treeview(
             repro_tree_frame,
-            columns=("published", "predicted", "ratio", "status"),
+            columns=("published", "predicted", "ratio", "basis", "status"),
             show="tree headings",
             height=6,
         )
@@ -122,11 +125,13 @@ class ValidationTabMixin:
         self.repro_tree.heading("published", text="Published ASD")
         self.repro_tree.heading("predicted", text="Predicted ASD")
         self.repro_tree.heading("ratio", text="ratio")
+        self.repro_tree.heading("basis", text="basis")
         self.repro_tree.heading("status", text="within band")
         self.repro_tree.column("#0", width=230, stretch=True)
         self.repro_tree.column("published", width=110, anchor="e")
         self.repro_tree.column("predicted", width=110, anchor="e")
         self.repro_tree.column("ratio", width=60, anchor="center")
+        self.repro_tree.column("basis", width=95, anchor="center")
         self.repro_tree.column("status", width=90, anchor="center")
         self.repro_tree.grid(row=0, column=0, sticky="ew")
 
@@ -269,6 +274,7 @@ class ValidationTabMixin:
                     ratio=ratio,
                     tol=tol,
                     within=(1.0 / tol) <= ratio <= tol,
+                    basis=str(getattr(mod, "PREDICTION_BASIS", "—")),
                 )
             except Exception as exc:  # pragma: no cover - defensive
                 entry["error"] = str(exc)
@@ -285,7 +291,7 @@ class ValidationTabMixin:
                     END,
                     iid=row["suffix"],
                     text=f"{row['label']} (unavailable)",
-                    values=("—", "—", "—", "—"),
+                    values=("—", "—", "—", "—", "—"),
                 )
                 continue
             self.repro_tree.insert(
@@ -297,6 +303,7 @@ class ValidationTabMixin:
                     f"{row['published']:.2e}",
                     f"{row['predicted']:.2e}",
                     f"{row['ratio']:.2f}×",
+                    row.get("basis", "—"),
                     "yes" if row["within"] else "no",
                 ),
             )

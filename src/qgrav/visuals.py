@@ -101,6 +101,10 @@ def _plot_sim_from_spec(ax, arrays: dict[str, np.ndarray], spec: dict[str, Any])
             ax.plot(x * x_scale, y, linestyle="--", linewidth=1.3, label=label)
         else:
             ax.plot(x * x_scale, y, linewidth=1.3, label=label)
+    if str(spec.get("xscale", "linear")) == "log":
+        ax.set_xscale("log")
+    if str(spec.get("yscale", "linear")) == "log":
+        ax.set_yscale("log")
     ax.set_xlabel(str(spec.get("x_label", spec["x_key"])))
     ax.set_ylabel(str(spec.get("y_label", "value")))
     ax.set_title(str(spec.get("title", "AISim simulation")))
@@ -128,6 +132,7 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
         x = arrays["gravity_residual"]
         taus = arrays["allan_taus"]
         adev = arrays["allan_series"]
+        units = str(metrics.get("series_units") or "dataset units")
 
         if kind == "dashboard":
             axes = fig.subplots(2, 2)
@@ -138,12 +143,12 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
             ax.plot(t_full / 86400.0, x_full, linewidth=0.8)
             ax.set_title("Gravity series")
             ax.set_xlabel("days from start")
-            ax.set_ylabel("residual")
+            ax.set_ylabel(f"residual ({units})")
 
             ax = axes[0, 1]
             ax.hist(x, bins=50, alpha=0.85)
             ax.set_title("Histogram")
-            ax.set_xlabel("residual")
+            ax.set_xlabel(f"residual ({units})")
 
             ax = axes[1, 0]
             _plot_psd(ax, x, fs, "series", psd_method, nperseg, noverlap)
@@ -162,24 +167,24 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
         if kind == "gravity_series":
             ax.plot(t_full / 86400.0, x_full, linewidth=0.8)
             ax.set_xlabel("days from start")
-            ax.set_ylabel("gravity residual")
+            ax.set_ylabel(f"gravity residual ({units})")
             ax.set_title(f"Gravity residual series ({metrics.get('station_code', 'station')})")
         elif kind == "histogram":
             ax.hist(x, bins=50, alpha=0.85)
-            ax.set_xlabel("gravity residual")
+            ax.set_xlabel(f"gravity residual ({units})")
             ax.set_ylabel("count")
             ax.set_title("Gravity residual histogram")
         elif kind == "psd":
             _plot_psd(ax, x, fs, "series", psd_method, nperseg, noverlap)
             ax.set_xlabel("frequency (Hz)")
-            ax.set_ylabel("PSD")
+            ax.set_ylabel(f"PSD (({units})$^2$/Hz)")
             ax.set_title("Power spectral density")
             ax.legend()
         elif kind == "allan":
             ax.loglog(taus, adev)
             _annotate_noise_type(ax, taus, adev)
             ax.set_xlabel("tau (s)")
-            ax.set_ylabel("Allan deviation")
+            ax.set_ylabel(f"Allan deviation ({units})")
             ax.set_title(f"Allan deviation ({metrics.get('allan_backend_used', 'unknown')})")
         elif kind == "raw_vs_corrected":
             t_seg = arrays["t"]
@@ -187,7 +192,7 @@ def build_run_figure(bundle: dict[str, Any], kind: str) -> Figure:
             ax.plot(t_seg / 86400.0, raw_seg, linewidth=0.6, alpha=0.7, label="raw")
             ax.plot(t_seg / 86400.0, x, linewidth=0.6, alpha=0.9, label="corrected")
             ax.set_xlabel("days from start")
-            ax.set_ylabel("gravity residual")
+            ax.set_ylabel(f"gravity residual ({units})")
             ax.set_title("Raw vs corrected gravity residual")
             ax.legend()
         elif isinstance(sim_specs, list) and any(

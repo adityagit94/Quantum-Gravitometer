@@ -35,6 +35,11 @@ bench_virtual_ifo:
   amplitude_drift_std_per_s: 0.01
   seed: 7
 
+algorithms:
+  improved:
+    offset_tracking_alpha: 0.003
+    phase_smooth_window: 21
+
 stats:
   metrics_backend: auto
   allan_data_type: freq
@@ -69,4 +74,6 @@ simulation:
   # --- fringe-lock servo ---
   servo_enabled: true
   servo_type: integrator
-  servo_ki: 0.3
+  servo_gain: 0.5              # integrator servo uses servo_gain (servo_ki is PID-only)
+  servo_settle_drops: 30       # acquisition segment excluded from stats / Allan deviation
+                               # (the demo servo takes ~27 drops to lock from a cold start)

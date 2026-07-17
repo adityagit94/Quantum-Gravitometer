@@ -55,6 +55,11 @@ HU_2013_TARGETS: dict[str, float] = {
 }
 
 
+# Prediction built bottom-up from the documented per-effect noise budget
+# (see freier_2016_setup.PREDICTION_BASIS for the definition).
+PREDICTION_BASIS = "independent"
+
+
 def total_per_shot_g_noise_m_s2() -> float:
     """Quadrature sum of the per-shot g-noise contributions (m/s²)."""
     b = HU_2013_NOISE_BUDGET

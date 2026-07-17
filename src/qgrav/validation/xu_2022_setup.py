@@ -37,6 +37,12 @@ XU_2022_TARGETS: dict[str, float] = {
 }
 
 
+# Anchored to the published sensitivity (see freier_2016_setup.PREDICTION_BASIS).
+# NOTE: Xu 2022 does publish a full per-effect systematic budget, so promoting
+# this setup to an independent bottom-up prediction is a known improvement path.
+PREDICTION_BASIS = "anchored"
+
+
 def total_per_shot_g_noise_m_s2() -> float:
     """Per-shot σ_g from the 24 µGal/√Hz Allan plateau divided by sqrt(T_cycle)."""
     return XU_2022_TARGETS["short_term_noise_m_s2_per_sqrt_hz"] / math.sqrt(

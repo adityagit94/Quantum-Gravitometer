@@ -95,6 +95,18 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             raman_substeps=int(sim_cfg.get("raman_substeps", 1)),
         )
     if model == "multi_drop_cycle":
+        # Warn when servo keys that do not apply to the selected servo type
+        # are present in the config: they would otherwise be silently ignored.
+        servo_type_cfg = str(sim_cfg.get("servo_type", "integrator")).strip().lower()
+        if servo_type_cfg == "integrator":
+            ignored = [k for k in ("servo_kp", "servo_ki", "servo_kd") if k in sim_cfg]
+            if ignored:
+                logger.warning(
+                    "servo_type 'integrator' uses servo_gain; ignoring PID keys: %s",
+                    ", ".join(ignored),
+                )
+        elif servo_type_cfg == "pid" and "servo_gain" in sim_cfg:
+            logger.warning("servo_type 'pid' uses servo_kp/servo_ki/servo_kd; ignoring servo_gain")
         return run_aisim_multi_drop_cycle(
             **common,
             tau_pi_half_s=float(sim_cfg.get("tau_pi_half_s", 23e-6)),
@@ -132,6 +144,7 @@ def run_simulation_from_config(sim_cfg: dict[str, Any]) -> dict[str, Any] | None
             servo_kp=float(sim_cfg.get("servo_kp", 0.5)),
             servo_ki=float(sim_cfg.get("servo_ki", 0.1)),
             servo_kd=float(sim_cfg.get("servo_kd", 0.0)),
+            servo_settle_drops=int(sim_cfg.get("servo_settle_drops", 0)),
             raman_substeps=int(sim_cfg.get("raman_substeps", 1)),
             projection_noise=bool(sim_cfg.get("projection_noise", False)),
         )

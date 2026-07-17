@@ -134,6 +134,7 @@ def run_aisim_multi_drop_cycle(
     servo_kp: float = 0.5,
     servo_ki: float = 0.1,
     servo_kd: float = 0.0,
+    servo_settle_drops: int = 0,
     raman_substeps: int = 1,
     projection_noise: bool = False,
 ) -> dict[str, Any]:
@@ -197,12 +198,20 @@ def run_aisim_multi_drop_cycle(
     servo_type : str
         ``"integrator"`` (default, pure-I, uses ``servo_gain``) or ``"pid"``
         (uses ``servo_kp``/``servo_ki``/``servo_kd`` with anti-windup).
+    servo_settle_drops : int
+        Number of initial drops treated as servo acquisition and excluded
+        from the summary statistics (``mean_g_m_s2``, ``std_g_m_s2``) and
+        the Allan deviation.  The full per-drop series (including the
+        settle segment) is still returned in ``g_estimates_m_s2`` /
+        ``timestamps_s``.  Default 0 (no exclusion) preserves the
+        historical behaviour.
 
     Returns
     -------
     dict with keys including ``g_estimates_m_s2``, ``timestamps_s``,
     ``mean_g_m_s2``, ``std_g_m_s2``, ``allan_taus_s``, ``allan_dev_m_s2``,
-    plus the usual metadata.
+    plus the usual metadata.  When ``servo_settle_drops`` > 0 the summary
+    statistics and Allan arrays describe the locked segment only.
     """
     from qgrav.physics.noise_models import add_detection_noise
     from qgrav.physics.readout_models import (
@@ -445,10 +454,21 @@ def run_aisim_multi_drop_cycle(
                     gain=float(servo_gain),
                 )
 
-    # Statistics
-    mean_g = float(np.mean(g_estimates))
-    std_g = float(np.std(g_estimates))
-    taus, adev = _allan_deviation(g_estimates, float(cycle_time_s))
+    # Statistics.  When a servo-acquisition segment is declared, summary
+    # statistics and the Allan deviation describe the locked segment only;
+    # the full series is still returned for plotting and inspection.
+    settle = max(0, min(int(servo_settle_drops), n - 1))
+    g_locked = g_estimates[settle:]
+    mean_g = float(np.mean(g_locked))
+    std_g = float(np.std(g_locked))
+    taus, adev = _allan_deviation(g_locked, float(cycle_time_s))
+
+    # Derived series in µGal for the standard run plots.
+    g_deviation_ugal = (g_estimates - float(gravity_true_m_s2)) * 1e8
+    allan_dev_ugal = adev * 1e8
+    white_noise_guide_ugal = (
+        allan_dev_ugal[0] * np.sqrt(taus[0] / taus) if len(taus) else allan_dev_ugal
+    )
 
     # Determine study scope based on whether we use fully-simulated MZ
     if gravity_propagation:
@@ -456,6 +476,13 @@ def run_aisim_multi_drop_cycle(
     else:
         study_scope = "hybrid_aisim_plus_closed_form_multi_drop_cycle"
     category, description = _classify_study_scope(study_scope)
+
+    primary_title = "Multi-drop campaign: per-drop gravity estimates"
+    if settle:
+        primary_title += f" (first {settle} drops = servo acquisition)"
+    allan_title = "Allan deviation of g"
+    if settle:
+        allan_title += " (locked segment)"
 
     return {
         "backend": "aisim",
@@ -469,13 +496,20 @@ def run_aisim_multi_drop_cycle(
         "detection_noise_enabled": bool(detection_noise_enabled),
         "projection_noise": bool(projection_noise),
         "n_detected_per_drop": int(n_detected_per_drop),
+        # NOTE: ``n_detected_effective`` is 1/sigma_P^2 -- the equivalent atom
+        # number representing the *technical* detection noise, NOT a count of
+        # detected atoms.  ``detection_noise_equivalent_atoms`` is the same
+        # value under an unambiguous name; the old key is kept for
+        # backwards compatibility with existing consumers.
         "n_detected_effective": int(n_detected_effective),
+        "detection_noise_equivalent_atoms": int(n_detected_effective),
         "detection_sigma_p": (None if detection_sigma_p is None else float(detection_sigma_p)),
         "raman_phase_noise_rad": float(raman_phase_noise_rad),
         "correlated_vibration": bool(correlated_vibration),
         "visibility_estimate": float(visibility_estimate),
         "servo_enabled": bool(servo_enabled),
         "servo_type": str(servo_type),
+        "servo_settle_drops": int(settle),
         "g_estimates_m_s2": g_estimates,
         "timestamps_s": timestamps,
         "port_3_raw": p3_raw,
@@ -486,6 +520,42 @@ def run_aisim_multi_drop_cycle(
         "mean_minus_true_m_s2": mean_g - float(gravity_true_m_s2),
         "allan_taus_s": taus,
         "allan_dev_m_s2": adev,
+        "g_deviation_ugal": g_deviation_ugal,
+        "allan_dev_ugal": allan_dev_ugal,
+        "allan_white_noise_guide_ugal": white_noise_guide_ugal,
+        "plot_specs": [
+            {
+                "name": "simulation_primary",
+                "title": primary_title,
+                "x_key": "timestamps_s",
+                "x_label": "time in campaign (s)",
+                "y_label": "g - g_true (µGal)",
+                "series": [
+                    {
+                        "key": "g_deviation_ugal",
+                        "label": "per-drop estimate",
+                        "kind": "line_markers",
+                    },
+                ],
+            },
+            {
+                "name": "simulation_secondary",
+                "title": allan_title,
+                "x_key": "allan_taus_s",
+                "x_label": "averaging time tau (s)",
+                "y_label": "Allan deviation (µGal)",
+                "xscale": "log",
+                "yscale": "log",
+                "series": [
+                    {"key": "allan_dev_ugal", "label": "campaign", "kind": "line_markers"},
+                    {
+                        "key": "allan_white_noise_guide_ugal",
+                        "label": "white-noise tau^-1/2 guide",
+                        "kind": "dashed",
+                    },
+                ],
+            },
+        ],
         "interferometer_time_s": float(interferometer_time_s),
         "tau_pi_half_s": float(tau_pi_half_s),
         "k_eff_rad_per_m": k_eff,
